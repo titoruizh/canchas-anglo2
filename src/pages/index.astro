@@ -233,6 +233,129 @@ const error = null
       .empresa-linkapsis { background: #e8f5e8; color: #388e3c; }
       .empresa-llayllay { background: #f3e5f5; color: #7b1fa2; }
       
+      .info-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        background: #3498db;
+        color: white;
+        border-radius: 50%;
+        font-size: 0.8rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+      }
+      
+      .info-icon:hover {
+        background: #2980b9;
+        transform: scale(1.1);
+      }
+      
+      .info-icon.disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        opacity: 0.5;
+      }
+      
+      .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+      }
+      
+      .modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      
+      .modal-content {
+        background: white;
+        border-radius: 12px;
+        padding: 2rem;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        position: relative;
+      }
+      
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #e1e8ed;
+      }
+      
+      .modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      .close-btn {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+        color: #666;
+        padding: 0.5rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+      }
+      
+      .close-btn:hover {
+        background: #f1f2f6;
+        color: #333;
+      }
+      
+      .observacion-item {
+        background: #f8f9fa;
+        border-left: 4px solid #e74c3c;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+      }
+      
+      .observacion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.5rem;
+      }
+      
+      .observacion-empresa {
+        font-weight: 600;
+        color: #e74c3c;
+      }
+      
+      .observacion-fecha {
+        font-size: 0.85rem;
+        color: #666;
+      }
+      
+      .observacion-tipo {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        text-transform: capitalize;
+      }
+      
+      .observacion-texto {
+        color: #2c3e50;
+        line-height: 1.5;
+        margin-top: 0.5rem;
+      }
+      
       #empresa-selector {
         font-size: 1.2rem;
         font-weight: 600;
@@ -322,6 +445,7 @@ const error = null
               <th>Empresa Actual</th>
               <th>Creada Por</th>
               <th>Fecha Creación</th>
+              <th>Observaciones</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -329,6 +453,19 @@ const error = null
             <!-- Las canchas se cargarán dinámicamente -->
           </tbody>
         </table>
+      </div>
+
+      <!-- Modal para mostrar observaciones -->
+      <div id="observaciones-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">Observaciones de Rechazos</h3>
+            <button class="close-btn">×</button>
+          </div>
+          <div id="observaciones-content">
+            <!-- Las observaciones se cargarán aquí -->
+          </div>
+        </div>
       </div>
     </div>
 
@@ -349,9 +486,21 @@ const error = null
         try {
           await cargarEmpresas()
           await cargarCanchas()
+          
+          // Configurar event listeners del modal
+          configurarModalEventListeners()
         } catch (error) {
           console.error('Error al inicializar:', error)
           mostrarMensaje('Error al cargar datos iniciales', 'error')
+        }
+      }
+
+      // Configurar event listeners del modal
+      function configurarModalEventListeners() {
+        // Botón de cerrar modal
+        const closeBtn = document.querySelector('.close-btn')
+        if (closeBtn) {
+          closeBtn.addEventListener('click', cerrarModal)
         }
       }
 
@@ -469,13 +618,46 @@ const error = null
             <td>${cancha.creada_por}</td>
             <td>${new Date(cancha.created_at).toLocaleDateString('es-ES')}</td>
             <td>
+              <button class="info-icon" data-cancha-id="${cancha.id}">
+                i
+              </button>
+            </td>
+            <td>
               <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
               </div>
             </td>
           </tr>
         `).join('')
         
+        // Actualizar estado de los iconos de observaciones
+        actualizarIconosObservaciones()
+        // Configurar event listeners para los iconos
+        configurarEventListenersObservaciones()
         actualizarAcciones()
+      }
+
+      // Configurar event listeners para iconos de observaciones
+      function configurarEventListenersObservaciones() {
+        const iconos = document.querySelectorAll('.info-icon')
+        iconos.forEach(icono => {
+          // Remover listener anterior si existe
+          icono.removeEventListener('click', handleIconClick)
+          // Agregar nuevo listener
+          icono.addEventListener('click', handleIconClick)
+        })
+      }
+
+      // Handler para click en icono
+      function handleIconClick(event) {
+        const icono = event.target
+        if (icono.classList.contains('disabled')) {
+          return // No hacer nada si está deshabilitado
+        }
+        
+        const canchaId = parseInt(icono.dataset.canchaId)
+        if (canchaId) {
+          mostrarObservaciones(canchaId)
+        }
       }
 
       // Actualizar botones de acción según empresa seleccionada
@@ -608,6 +790,104 @@ const error = null
           div.remove()
         }, 5000)
       }
+
+      // Funciones para manejar observaciones
+      async function actualizarIconosObservaciones() {
+        const iconos = document.querySelectorAll('.info-icon')
+        
+        for (const icono of iconos) {
+          const canchaId = icono.dataset.canchaId
+          
+          // Encontrar la fila de la tabla para obtener el estado
+          const fila = icono.closest('tr')
+          const estadoElement = fila.querySelector('.estado-badge')
+          const estadoActual = estadoElement ? estadoElement.textContent.trim() : ''
+          
+          try {
+            const response = await fetch(`/api/canchas/${canchaId}/observaciones`)
+            const observaciones = await response.json()
+            
+            if (observaciones.length > 0) {
+              icono.classList.remove('disabled')
+              // Solo poner rojo si está en estado "Rechazada"
+              if (estadoActual === 'Rechazada') {
+                icono.style.background = '#e74c3c' // Rojo para rechazadas con observaciones
+              } else {
+                icono.style.background = '#3498db' // Azul para otras con observaciones
+              }
+            } else {
+              icono.classList.add('disabled')
+              icono.style.background = '#bdc3c7' // Gris para sin observaciones
+            }
+          } catch (error) {
+            console.error('Error al verificar observaciones:', error)
+            icono.classList.add('disabled')
+            icono.style.background = '#bdc3c7'
+          }
+        }
+      }
+
+      async function mostrarObservaciones(canchaId) {
+        console.log('Intentando mostrar observaciones para cancha:', canchaId)
+        
+        try {
+          const response = await fetch(`/api/canchas/${canchaId}/observaciones`)
+          console.log('Response status:', response.status)
+          
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+          }
+          
+          const observaciones = await response.json()
+          console.log('Observaciones recibidas:', observaciones)
+          
+          const modal = document.getElementById('observaciones-modal')
+          const content = document.getElementById('observaciones-content')
+          
+          if (!modal || !content) {
+            console.error('Modal o content no encontrado')
+            mostrarMensaje('Error: Modal no encontrado', 'error')
+            return
+          }
+          
+          if (observaciones.length === 0) {
+            content.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No hay observaciones de rechazos para esta cancha.</p>'
+          } else {
+            content.innerHTML = observaciones.map(obs => `
+              <div class="observacion-item">
+                <div class="observacion-header">
+                  <span class="observacion-empresa">Rechazada por: ${obs.empresa_validadora?.nombre || 'Empresa desconocida'}</span>
+                  <span class="observacion-fecha">${new Date(obs.created_at).toLocaleDateString('es-ES')} ${new Date(obs.created_at).toLocaleTimeString('es-ES')}</span>
+                </div>
+                <div class="observacion-tipo">Tipo: ${obs.tipo_validacion?.replace('_', ' ') || 'No especificado'}</div>
+                <div class="observacion-texto">
+                  <strong>Observaciones:</strong><br>
+                  ${obs.observaciones || 'Sin observaciones específicas'}
+                </div>
+              </div>
+            `).join('')
+          }
+          
+          console.log('Mostrando modal')
+          modal.classList.add('show')
+        } catch (error) {
+          console.error('Error detallado al cargar observaciones:', error)
+          mostrarMensaje(`Error al cargar observaciones: ${error.message}`, 'error')
+        }
+      }
+
+      function cerrarModal() {
+        const modal = document.getElementById('observaciones-modal')
+        modal.classList.remove('show')
+      }
+
+      // Cerrar modal al hacer click fuera
+      window.addEventListener('click', (e) => {
+        const modal = document.getElementById('observaciones-modal')
+        if (e.target === modal) {
+          cerrarModal()
+        }
+      })
 
       // Inicializar la aplicación
       inicializar()

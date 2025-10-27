@@ -258,4 +258,20 @@ export class CanchaService {
     if (error) throw error
     return data || []
   }
+
+  // Obtener observaciones de validaciones/rechazos de una cancha
+  static async obtenerObservacionesCancha(canchaId: number) {
+    const { data, error } = await supabase
+      .from('validaciones')
+      .select(`
+        *,
+        empresa_validadora:empresas!empresa_validadora_id(nombre)
+      `)
+      .eq('cancha_id', canchaId)
+      .eq('resultado', 'rechazada')
+      .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data || []
+  }
 }
