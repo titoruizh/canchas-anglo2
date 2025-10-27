@@ -704,48 +704,139 @@ const error = null
       }
       
       .historial-observaciones h4 {
-        margin: 0 0 0.5rem 0;
-        font-size: 1rem;
+        margin: 0 0 1rem 0;
+        font-size: 1.1rem;
         color: #2c3e50;
+        text-align: center;
+        border-bottom: 2px solid #3498db;
+        padding-bottom: 0.5rem;
       }
       
       .historial-content {
-        max-height: 200px;
+        max-height: 300px;
         overflow-y: auto;
+        padding-right: 0.5rem;
+      }
+      
+      .historial-timeline {
+        position: relative;
+        padding-left: 2rem;
+      }
+      
+      .historial-timeline::before {
+        content: '';
+        position: absolute;
+        left: 1rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, #3498db, #2ecc71);
       }
       
       .observacion-item {
+        position: relative;
         background: white;
-        padding: 0.75rem;
-        margin-bottom: 0.5rem;
-        border-radius: 6px;
-        border: 1px solid #e0e0e0;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        border: 2px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+      }
+      
+      .observacion-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        border-color: #3498db;
+      }
+      
+      .observacion-item::before {
+        content: '';
+        position: absolute;
+        left: -2.75rem;
+        top: 1rem;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: white;
+        border: 3px solid #3498db;
+        z-index: 1;
+      }
+      
+      .observacion-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
       }
       
       .observacion-empresa {
-        font-weight: 600;
-        color: #3498db;
+        font-weight: 700;
+        font-size: 1rem;
+        color: #2c3e50;
+        background: #3498db;
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
         font-size: 0.9rem;
       }
       
       .observacion-fecha {
         font-size: 0.8rem;
-        color: #666;
-        margin-bottom: 0.25rem;
+        color: #7f8c8d;
+        font-weight: 500;
+      }
+      
+      .observacion-contenido {
+        margin-top: 0.5rem;
       }
       
       .observacion-texto {
         color: #2c3e50;
-        margin: 0.25rem 0;
+        margin: 0.5rem 0;
+        line-height: 1.5;
+        font-style: italic;
+        background: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 6px;
+        border-left: 3px solid #3498db;
       }
       
       .observacion-mediciones {
-        background: #f0f8ff;
-        padding: 0.5rem;
-        border-radius: 4px;
-        margin-top: 0.5rem;
-        font-size: 0.9rem;
+        background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);
+        padding: 0.75rem;
+        border-radius: 6px;
+        margin-top: 0.75rem;
+        border: 1px solid #bee5eb;
       }
+      
+      .medicion-titulo {
+        font-weight: 600;
+        color: #155724;
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+      }
+      
+      .medicion-titulo::before {
+        content: '📏';
+        margin-right: 0.5rem;
+      }
+      
+      .medicion-valor {
+        font-size: 1rem;
+        color: #0c5460;
+        font-weight: 700;
+        font-family: 'Courier New', monospace;
+      }
+      
+      .empresa-besalco::before { background-color: #e74c3c; }
+      .empresa-linkapsis::before { background-color: #f39c12; }
+      .empresa-llayllay::before { background-color: #27ae60; }
+      .empresa-angloamerican::before { background-color: #3498db; }
       
       .hidden {
         display: none;
@@ -1709,41 +1800,63 @@ const error = null
           const content = historialElement.querySelector('.historial-content')
           
           if (validaciones.length === 0) {
-            content.innerHTML = '<p style="color: #666; font-style: italic;">No hay observaciones previas</p>'
+            content.innerHTML = '<p style="color: #666; font-style: italic; text-align: center; padding: 2rem;">No hay observaciones previas</p>'
           } else {
-            content.innerHTML = validaciones.map(val => {
-              let medicionesHtml = ''
-              if (val.mediciones) {
-                if (val.mediciones.espesores) {
-                  // Mediciones de Linkapsis (formato anterior)
-                  medicionesHtml = `
-                    <div class="observacion-mediciones">
-                      <strong>Mediciones:</strong> ${val.mediciones.espesores.join(', ')} ${val.mediciones.unidad}
-                      ${val.mediciones.promedio ? `(Promedio: ${val.mediciones.promedio} ${val.mediciones.unidad})` : ''}
+            content.innerHTML = `
+              <div class="historial-timeline">
+                ${validaciones.map(val => {
+                  let medicionesHtml = ''
+                  
+                  if (val.mediciones) {
+                    if (val.mediciones.espesores) {
+                      // Mediciones de Linkapsis (formato anterior)
+                      medicionesHtml = `
+                        <div class="observacion-mediciones">
+                          <div class="medicion-titulo">📏 Mediciones de Espesor</div>
+                          <div class="medicion-valor">${val.mediciones.espesores.join(', ')} ${val.mediciones.unidad}</div>
+                          ${val.mediciones.promedio ? `<div style="font-size: 0.8rem; color: #666; margin-top: 0.25rem;">Promedio: ${val.mediciones.promedio} ${val.mediciones.unidad}</div>` : ''}
+                        </div>`
+                    } else if (val.mediciones.espesor) {
+                      // Nueva medición de Linkapsis
+                      medicionesHtml = `
+                        <div class="observacion-mediciones">
+                          <div class="medicion-titulo">📏 Medición de Espesor</div>
+                          <div class="medicion-valor">${val.mediciones.espesor} ${val.mediciones.unidad}</div>
+                        </div>`
+                    } else if (val.mediciones.densidad) {
+                      // Mediciones de LlayLlay
+                      medicionesHtml = `
+                        <div class="observacion-mediciones">
+                          <div class="medicion-titulo">⚖️ Medición de Densidad</div>
+                          <div class="medicion-valor">${val.mediciones.densidad} ${val.mediciones.unidad}</div>
+                        </div>`
+                    }
+                  }
+                  
+                  const empresaNombre = val.empresa_validadora?.nombre || 'Empresa desconocida'
+                  const empresaClass = empresaNombre.toLowerCase().replace(/\s+/g, '')
+                  
+                  return `
+                    <div class="observacion-item empresa-${empresaClass}">
+                      <div class="observacion-header">
+                        <div class="observacion-empresa">${empresaNombre}</div>
+                        <div class="observacion-fecha">${new Date(val.created_at).toLocaleDateString('es-ES', {
+                          weekday: 'short',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}</div>
+                      </div>
+                      <div class="observacion-contenido">
+                        <div class="observacion-texto">"${val.observaciones || 'Sin observaciones específicas'}"</div>
+                        ${medicionesHtml}
+                      </div>
                     </div>`
-                } else if (val.mediciones.espesor) {
-                  // Nueva medición de Linkapsis
-                  medicionesHtml = `
-                    <div class="observacion-mediciones">
-                      <strong>Espesor:</strong> ${val.mediciones.espesor} ${val.mediciones.unidad}
-                    </div>`
-                } else if (val.mediciones.densidad) {
-                  // Mediciones de LlayLlay
-                  medicionesHtml = `
-                    <div class="observacion-mediciones">
-                      <strong>Densidad:</strong> ${val.mediciones.densidad} ${val.mediciones.unidad}
-                    </div>`
-                }
-              }
-              
-              return `
-                <div class="observacion-item">
-                  <div class="observacion-empresa">${val.empresa_validadora?.nombre || 'Empresa desconocida'}</div>
-                  <div class="observacion-fecha">${new Date(val.created_at).toLocaleDateString('es-ES')}</div>
-                  <div class="observacion-texto">${val.observaciones || 'Sin observaciones'}</div>
-                  ${medicionesHtml}
-                </div>`
-            }).join('')
+                }).join('')}
+              </div>
+            `
           }
         } catch (error) {
           console.error('Error al cargar historial:', error)
