@@ -1,0 +1,616 @@
+---
+
+---
+
+---
+// La página se carga con datos iniciales vacíos
+// Los datos se cargan dinámicamente desde el cliente
+const canchas = []
+const empresas = []
+const error = null
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema de Gestión de Canchas - AngloAmerican</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+      }
+      
+      .header {
+        background: linear-gradient(135deg, #2c3e50, #3498db);
+        color: white;
+        padding: 2rem 0;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      
+      .header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      .header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+      }
+      
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+      }
+      
+      .controls {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+      }
+      
+      .control-group {
+        margin-bottom: 1.5rem;
+      }
+      
+      .control-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      select, input, button {
+        padding: 0.75rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+      
+      select:focus, input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+      
+      button {
+        background: #3498db;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        margin-right: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+      
+      button:hover {
+        background: #2980b9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+      }
+      
+      button:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+      
+      .btn-success {
+        background: #27ae60;
+      }
+      
+      .btn-success:hover {
+        background: #229954;
+      }
+      
+      .btn-danger {
+        background: #e74c3c;
+      }
+      
+      .btn-danger:hover {
+        background: #c0392b;
+      }
+      
+      .btn-warning {
+        background: #f39c12;
+      }
+      
+      .btn-warning:hover {
+        background: #e67e22;
+      }
+      
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+      }
+      
+      .table-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        overflow: hidden;
+      }
+      
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      th, td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid #e1e8ed;
+      }
+      
+      th {
+        background: #f8f9fa;
+        font-weight: 600;
+        color: #2c3e50;
+      }
+      
+      tr:hover {
+        background: #f8f9fa;
+      }
+      
+      .estado {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: center;
+        white-space: nowrap;
+      }
+      
+      .estado-creada { background: #e3f2fd; color: #1976d2; }
+      .estado-en-proceso { background: #fff3e0; color: #f57c00; }
+      .estado-finalizada { background: #e8f5e8; color: #388e3c; }
+      .estado-validada { background: #e8f5e8; color: #2e7d32; }
+      .estado-rechazada { background: #ffebee; color: #d32f2f; }
+      .estado-cerrada { background: #f3e5f5; color: #7b1fa2; }
+      
+      .actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+      }
+      
+      .actions button {
+        padding: 0.5rem 1rem;
+        font-size: 0.85rem;
+        margin: 0;
+      }
+      
+      .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #666;
+      }
+      
+      .error {
+        background: #ffebee;
+        color: #c62828;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #c62828;
+      }
+      
+      .success {
+        background: #e8f5e8;
+        color: #2e7d32;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #2e7d32;
+      }
+      
+      .empresa-actual {
+        font-weight: 600;
+        padding: 0.3rem 0.6rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+      }
+      
+      .empresa-angloamerican { background: #e3f2fd; color: #1976d2; }
+      .empresa-besalco { background: #fff3e0; color: #f57c00; }
+      .empresa-linkapsis { background: #e8f5e8; color: #388e3c; }
+      .empresa-llayllay { background: #f3e5f5; color: #7b1fa2; }
+      
+      #empresa-selector {
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 1rem;
+        background: #f8f9fa;
+        border: 2px solid #3498db;
+      }
+      
+      .hidden {
+        display: none;
+      }
+      
+      @media (max-width: 768px) {
+        .form-row {
+          grid-template-columns: 1fr;
+        }
+        
+        .container {
+          padding: 1rem;
+        }
+        
+        .header h1 {
+          font-size: 2rem;
+        }
+        
+        table {
+          font-size: 0.9rem;
+        }
+        
+        th, td {
+          padding: 0.5rem;
+        }
+        
+        .actions {
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">
+      <h1>🏗️ Sistema de Gestión de Canchas</h1>
+      <p>Control de flujo de trabajo - AngloAmerican, Besalco, Linkapsis, LlayLlay</p>
+    </div>
+
+    <div class="container">
+      <div id="mensaje-container"></div>
+
+      <div class="controls">
+        <div class="control-group">
+          <label for="empresa-selector">Seleccionar Empresa:</label>
+          <select id="empresa-selector">
+            <option value="">-- Selecciona tu empresa --</option>
+            <!-- Las empresas se cargarán dinámicamente -->
+          </select>
+        </div>
+
+        <!-- Formulario para crear nueva cancha (solo AngloAmerican) -->
+        <div id="form-crear-cancha" class="control-group hidden">
+          <h3>Crear Nueva Cancha</h3>
+          <div class="form-row">
+            <div>
+              <label for="muro">Muro:</label>
+              <input type="text" id="muro" placeholder="ej: MP, MS, MT" required>
+            </div>
+            <div>
+              <label for="sector">Sector:</label>
+              <input type="text" id="sector" placeholder="ej: S1, S2, S5" required>
+            </div>
+            <div>
+              <label for="nombre-detalle">Nombre:</label>
+              <input type="text" id="nombre-detalle" placeholder="ej: TALUD, BERMA, PISTA" required>
+            </div>
+            <div>
+              <button id="btn-crear-cancha" type="button">Crear Cancha</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre de Cancha</th>
+              <th>Estado Actual</th>
+              <th>Empresa Actual</th>
+              <th>Creada Por</th>
+              <th>Fecha Creación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="canchas-tbody">
+            <!-- Las canchas se cargarán dinámicamente -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <script type="module">
+      // Variables globales
+      let empresaSeleccionada = null
+      let cargando = false
+
+      // Elementos del DOM
+      const empresaSelector = document.getElementById('empresa-selector')
+      const formCrearCancha = document.getElementById('form-crear-cancha')
+      const btnCrearCancha = document.getElementById('btn-crear-cancha')
+      const canchasTBody = document.getElementById('canchas-tbody')
+      const mensajeContainer = document.getElementById('mensaje-container')
+
+      // Cargar datos iniciales
+      async function inicializar() {
+        try {
+          await cargarEmpresas()
+          await cargarCanchas()
+        } catch (error) {
+          console.error('Error al inicializar:', error)
+          mostrarMensaje('Error al cargar datos iniciales', 'error')
+        }
+      }
+
+      // Cargar empresas
+      async function cargarEmpresas() {
+        try {
+          const response = await fetch('/api/empresas')
+          const empresas = await response.json()
+          
+          empresas.forEach(empresa => {
+            const option = document.createElement('option')
+            option.value = empresa.id
+            option.textContent = empresa.nombre
+            empresaSelector.appendChild(option)
+          })
+        } catch (error) {
+          throw new Error('Error al cargar empresas: ' + error.message)
+        }
+      }
+
+      // Mostrar/ocultar formulario según empresa
+      empresaSelector.addEventListener('change', (e) => {
+        empresaSeleccionada = parseInt(e.target.value)
+        
+        if (empresaSeleccionada === 1) { // AngloAmerican
+          formCrearCancha.classList.remove('hidden')
+        } else {
+          formCrearCancha.classList.add('hidden')
+        }
+        
+        actualizarAcciones()
+      })
+
+      // Crear nueva cancha
+      btnCrearCancha.addEventListener('click', async () => {
+        if (cargando) return
+        
+        const muro = document.getElementById('muro').value.trim()
+        const sector = document.getElementById('sector').value.trim()
+        const nombreDetalle = document.getElementById('nombre-detalle').value.trim()
+        
+        if (!muro || !sector || !nombreDetalle) {
+          alert('Por favor completa todos los campos')
+          return
+        }
+        
+        try {
+          cargando = true
+          btnCrearCancha.textContent = 'Creando...'
+          btnCrearCancha.disabled = true
+          
+          const response = await fetch('/api/canchas', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ muro, sector, nombreDetalle })
+          })
+          
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || 'Error al crear cancha')
+          }
+          
+          // Limpiar formulario
+          document.getElementById('muro').value = ''
+          document.getElementById('sector').value = ''
+          document.getElementById('nombre-detalle').value = ''
+          
+          // Recargar tabla
+          await cargarCanchas()
+          
+          mostrarMensaje('Cancha creada exitosamente', 'success')
+          
+        } catch (error) {
+          console.error('Error al crear cancha:', error)
+          mostrarMensaje('Error al crear la cancha: ' + error.message, 'error')
+        } finally {
+          cargando = false
+          btnCrearCancha.textContent = 'Crear Cancha'
+          btnCrearCancha.disabled = false
+        }
+      })
+
+      // Función para cargar canchas
+      async function cargarCanchas() {
+        try {
+          const response = await fetch('/api/canchas')
+          if (!response.ok) {
+            throw new Error('Error al cargar canchas')
+          }
+          const canchas = await response.json()
+          renderizarCanchas(canchas)
+        } catch (error) {
+          console.error('Error al cargar canchas:', error)
+          mostrarMensaje('Error al cargar las canchas', 'error')
+        }
+      }
+
+      // Renderizar tabla de canchas
+      function renderizarCanchas(canchas) {
+        canchasTBody.innerHTML = canchas.map(cancha => `
+          <tr data-cancha-id="${cancha.id}">
+            <td><strong>${cancha.nombre}</strong></td>
+            <td>
+              <span class="estado estado-${cancha.estado_actual.toLowerCase().replace(/\s+/g, '-')}">
+                ${cancha.estado_actual}
+              </span>
+            </td>
+            <td>
+              <span class="empresa-actual empresa-${cancha.empresa_actual.toLowerCase().replace(/\s+/g, '-')}">
+                ${cancha.empresa_actual}
+              </span>
+            </td>
+            <td>${cancha.creada_por}</td>
+            <td>${new Date(cancha.created_at).toLocaleDateString('es-ES')}</td>
+            <td>
+              <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
+              </div>
+            </td>
+          </tr>
+        `).join('')
+        
+        actualizarAcciones()
+      }
+
+      // Actualizar botones de acción según empresa seleccionada
+      function actualizarAcciones() {
+        const actionsDivs = document.querySelectorAll('.actions')
+        
+        actionsDivs.forEach(div => {
+          const canchaId = div.dataset.canchaId
+          const estado = div.dataset.estado
+          const empresaActual = div.dataset.empresa
+          
+          div.innerHTML = generarBotonesAccion(canchaId, estado, empresaActual)
+        })
+        
+        // Agregar event listeners a los botones
+        agregarEventListeners()
+      }
+
+      // Generar botones según empresa y estado
+      function generarBotonesAccion(canchaId, estado, empresaActual) {
+        if (!empresaSeleccionada) return '<span style="color:#666;">Selecciona tu empresa</span>'
+        
+        const botones = []
+        
+        // AngloAmerican
+        if (empresaSeleccionada === 1) {
+          if (estado === 'Creada') {
+            botones.push(`<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">Enviar a Besalco</button>`)
+          } else if (estado === 'Validada' && empresaActual === 'AngloAmerican') {
+            botones.push(`<button class="btn-accion btn-success" data-accion="cerrar" data-cancha-id="${canchaId}">Cerrar Cancha</button>`)
+          }
+        }
+        
+        // Besalco
+        else if (empresaSeleccionada === 2) {
+          if ((estado === 'En Proceso' || estado === 'Rechazada') && empresaActual === 'Besalco') {
+            botones.push(`<button class="btn-accion btn-success" data-accion="finalizar-trabajo" data-cancha-id="${canchaId}">Finalizar Trabajo</button>`)
+            botones.push(`<button class="btn-accion btn-danger" data-accion="rechazar-besalco" data-cancha-id="${canchaId}">Rechazar</button>`)
+          }
+        }
+        
+        // Linkapsis
+        else if (empresaSeleccionada === 3) {
+          if (estado === 'Finalizada' && empresaActual === 'Linkapsis') {
+            botones.push(`<button class="btn-accion btn-success" data-accion="validar-linkapsis" data-cancha-id="${canchaId}">Validar Espesores</button>`)
+            botones.push(`<button class="btn-accion btn-danger" data-accion="rechazar-linkapsis" data-cancha-id="${canchaId}">Rechazar</button>`)
+          }
+        }
+        
+        // LlayLlay
+        else if (empresaSeleccionada === 4) {
+          if (estado === 'Validada' && empresaActual === 'LlayLlay') {
+            botones.push(`<button class="btn-accion btn-success" data-accion="validar-llayllay" data-cancha-id="${canchaId}">Validar Densidad</button>`)
+            botones.push(`<button class="btn-accion btn-danger" data-accion="rechazar-llayllay" data-cancha-id="${canchaId}">Rechazar</button>`)
+          }
+        }
+        
+        return botones.length > 0 ? botones.join('') : '<span style="color:#666;">Sin acciones disponibles</span>'
+      }
+
+      // Agregar event listeners a botones de acción
+      function agregarEventListeners() {
+        document.querySelectorAll('.btn-accion').forEach(btn => {
+          btn.addEventListener('click', manejarAccion)
+        })
+      }
+
+      // Manejar acciones de botones
+      async function manejarAccion(e) {
+        if (cargando) return
+        
+        const accion = e.target.dataset.accion
+        const canchaId = parseInt(e.target.dataset.canchaId)
+        
+        // Confirmar acción de cierre
+        if (accion === 'cerrar') {
+          if (!confirm('¿Confirmas el cierre de esta cancha?')) {
+            return
+          }
+        }
+        
+        // Pedir observaciones para rechazos
+        let observaciones = null
+        if (accion.includes('rechazar')) {
+          const empresaNombre = accion === 'rechazar-besalco' ? 'Besalco' : 
+                               accion === 'rechazar-linkapsis' ? 'Linkapsis' : 'LlayLlay'
+          observaciones = prompt(`Observaciones del rechazo por ${empresaNombre}:`)
+          if (observaciones === null) return // Usuario canceló
+        }
+        
+        try {
+          cargando = true
+          const textoOriginal = e.target.textContent
+          e.target.disabled = true
+          e.target.textContent = 'Procesando...'
+          
+          const response = await fetch(`/api/canchas/${canchaId}/action`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ accion, observaciones })
+          })
+          
+          if (!response.ok) {
+            const error = await response.json()
+            throw new Error(error.message || 'Error al ejecutar acción')
+          }
+          
+          await cargarCanchas()
+          mostrarMensaje('Acción realizada exitosamente', 'success')
+          
+        } catch (error) {
+          console.error('Error en acción:', error)
+          mostrarMensaje('Error: ' + error.message, 'error')
+        } finally {
+          cargando = false
+        }
+      }
+
+      // Mostrar mensajes
+      function mostrarMensaje(mensaje, tipo) {
+        const div = document.createElement('div')
+        div.className = tipo
+        div.innerHTML = `<strong>${tipo === 'success' ? 'Éxito:' : 'Error:'}</strong> ${mensaje}`
+        
+        mensajeContainer.appendChild(div)
+        
+        setTimeout(() => {
+          div.remove()
+        }, 5000)
+      }
+
+      // Inicializar la aplicación
+      inicializar()
+    </script>
+  </body>
+</html>
