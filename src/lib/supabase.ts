@@ -224,17 +224,6 @@ export class CanchaService {
           observaciones
         })
     }
-
-    // Registrar validación
-    await supabase
-      .from('validaciones')
-      .insert({
-        cancha_id: canchaId,
-        empresa_validadora_id: 3, // Linkapsis
-        tipo_validacion: 'espesores',
-        resultado: validar ? 'validada' : 'rechazada',
-        observaciones
-      })
   }
 
   // Validar por LlayLlay
@@ -318,6 +307,21 @@ export class CanchaService {
       .eq('cancha_id', canchaId)
       .eq('resultado', 'rechazada')
       .order('created_at', { ascending: false })
+    
+    if (error) throw error
+    return data || []
+  }
+
+  // Obtener historial de validaciones de una cancha
+  static async obtenerValidacionesCancha(canchaId: number): Promise<any[]> {
+    const { data, error } = await supabase
+      .from('validaciones')
+      .select(`
+        *,
+        empresa_validadora:empresas!empresa_validadora_id(nombre)
+      `)
+      .eq('cancha_id', canchaId)
+      .order('created_at', { ascending: true })
     
     if (error) throw error
     return data || []

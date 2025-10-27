@@ -694,6 +694,59 @@ const error = null
         border: 2px solid #3498db;
       }
       
+      /* Estilos para historial de observaciones */
+      .historial-observaciones {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border-left: 4px solid #3498db;
+      }
+      
+      .historial-observaciones h4 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1rem;
+        color: #2c3e50;
+      }
+      
+      .historial-content {
+        max-height: 200px;
+        overflow-y: auto;
+      }
+      
+      .observacion-item {
+        background: white;
+        padding: 0.75rem;
+        margin-bottom: 0.5rem;
+        border-radius: 6px;
+        border: 1px solid #e0e0e0;
+      }
+      
+      .observacion-empresa {
+        font-weight: 600;
+        color: #3498db;
+        font-size: 0.9rem;
+      }
+      
+      .observacion-fecha {
+        font-size: 0.8rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+      }
+      
+      .observacion-texto {
+        color: #2c3e50;
+        margin: 0.25rem 0;
+      }
+      
+      .observacion-mediciones {
+        background: #f0f8ff;
+        padding: 0.5rem;
+        border-radius: 4px;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+      }
+      
       .hidden {
         display: none;
       }
@@ -868,19 +921,24 @@ const error = null
             <h3 class="modal-title">Validación de Espesores - Linkapsis</h3>
             <button class="close-btn">×</button>
           </div>
+          
+          <!-- Historial de observaciones anteriores -->
+          <div id="historial-linkapsis" class="historial-observaciones">
+            <h4>Observaciones del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
           <form id="form-validacion-linkapsis">
             <div class="form-group">
               <label for="linkapsis-observaciones">Observaciones:</label>
               <textarea id="linkapsis-observaciones" placeholder="Ingresa observaciones sobre la validación..." required></textarea>
             </div>
             <div class="form-group">
-              <label for="linkapsis-espesores">Mediciones de Espesores (mm):</label>
-              <div class="mediciones-group">
-                <input type="number" id="linkapsis-espesor1" placeholder="Punto 1" min="0" step="0.1" required>
-                <input type="number" id="linkapsis-espesor2" placeholder="Punto 2" min="0" step="0.1" required>
-                <input type="number" id="linkapsis-espesor3" placeholder="Punto 3" min="0" step="0.1" required>
-              </div>
-              <small>Ingresa al menos 3 mediciones en diferentes puntos</small>
+              <label for="linkapsis-espesor">Medición de Espesor (metros):</label>
+              <input type="number" id="linkapsis-espesor" placeholder="Ej: 0.03" min="0" step="0.001" required>
+              <small>Ingresa la medición en metros (ej: 0.03)</small>
             </div>
             <div class="form-actions">
               <button type="button" class="btn-cancel">Cancelar</button>
@@ -898,6 +956,15 @@ const error = null
             <h3 class="modal-title">Validación de Densidad - LlayLlay</h3>
             <button class="close-btn">×</button>
           </div>
+          
+          <!-- Historial de observaciones anteriores -->
+          <div id="historial-llayllay" class="historial-observaciones">
+            <h4>Observaciones del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
           <form id="form-validacion-llayllay">
             <div class="form-group">
               <label for="llayllay-observaciones">Observaciones:</label>
@@ -923,6 +990,15 @@ const error = null
             <h3 class="modal-title">Validación de Trabajo - Besalco</h3>
             <button class="close-btn">×</button>
           </div>
+          
+          <!-- Historial de observaciones anteriores -->
+          <div id="historial-besalco" class="historial-observaciones">
+            <h4>Observaciones del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
           <form id="form-validacion-besalco">
             <div class="form-group">
               <label for="besalco-observaciones">Observaciones del Trabajo:</label>
@@ -934,6 +1010,29 @@ const error = null
               <button type="button" class="btn-rechazar">Rechazar Trabajo</button>
             </div>
           </form>
+        </div>
+      </div>
+      
+      <!-- Modal para cerrar cancha (AngloAmerican) -->
+      <div id="cerrar-cancha-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">Cerrar Cancha - AngloAmerican</h3>
+            <button class="close-btn">×</button>
+          </div>
+          
+          <!-- Historial completo de observaciones -->
+          <div id="historial-cierre" class="historial-observaciones">
+            <h4>Historial Completo del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial completo...</p>
+            </div>
+          </div>
+          
+          <div class="form-actions" style="justify-content: center; gap: 1rem; padding-top: 1rem;">
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="button" class="btn-finalizar" id="confirmar-cierre">Cerrar Cancha Definitivamente</button>
+          </div>
         </div>
       </div>
     </div>
@@ -1388,7 +1487,7 @@ const error = null
           if (estado === 'Creada') {
             botones.push(`<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">Enviar a Besalco</button>`)
           } else if (estado === 'Validada' && empresaActual === 'AngloAmerican') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="cerrar" data-cancha-id="${canchaId}">Cerrar Cancha</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">Cerrar Cancha</button>`)
           }
         }
         
@@ -1402,14 +1501,14 @@ const error = null
         // Linkapsis
         else if (empresaId === 3) {
           if (estado === 'Finalizada' && empresaActual === 'Linkapsis') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-linkapsis" data-cancha-id="${canchaId}">Validar Espesores</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-linkapsis" data-cancha-id="${canchaId}">Gestionar Cancha</button>`)
           }
         }
         
         // LlayLlay
         else if (empresaId === 4) {
           if (estado === 'Validada' && empresaActual === 'LlayLlay') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-llayllay" data-cancha-id="${canchaId}">Validar Densidad</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-llayllay" data-cancha-id="${canchaId}">Gestionar Cancha</button>`)
           }
         }
         
@@ -1439,6 +1538,9 @@ const error = null
           return
         } else if (accion === 'abrir-modal-llayllay') {
           abrirModalLlayLlay(canchaId)
+          return
+        } else if (accion === 'abrir-modal-cierre') {
+          abrirModalCierre(canchaId)
           return
         }
         
@@ -1594,6 +1696,63 @@ const error = null
       // === FUNCIONES DE MODALES DE VALIDACIÓN ===
       let canchaIdActual = null
 
+      // Función para cargar historial de observaciones de una cancha
+      async function cargarHistorialObservaciones(canchaId, historialElementId) {
+        try {
+          const response = await fetch(`/api/canchas/${canchaId}/validaciones`)
+          if (!response.ok) {
+            throw new Error('Error al cargar historial')
+          }
+          
+          const validaciones = await response.json()
+          const historialElement = document.getElementById(historialElementId)
+          const content = historialElement.querySelector('.historial-content')
+          
+          if (validaciones.length === 0) {
+            content.innerHTML = '<p style="color: #666; font-style: italic;">No hay observaciones previas</p>'
+          } else {
+            content.innerHTML = validaciones.map(val => {
+              let medicionesHtml = ''
+              if (val.mediciones) {
+                if (val.mediciones.espesores) {
+                  // Mediciones de Linkapsis (formato anterior)
+                  medicionesHtml = `
+                    <div class="observacion-mediciones">
+                      <strong>Mediciones:</strong> ${val.mediciones.espesores.join(', ')} ${val.mediciones.unidad}
+                      ${val.mediciones.promedio ? `(Promedio: ${val.mediciones.promedio} ${val.mediciones.unidad})` : ''}
+                    </div>`
+                } else if (val.mediciones.espesor) {
+                  // Nueva medición de Linkapsis
+                  medicionesHtml = `
+                    <div class="observacion-mediciones">
+                      <strong>Espesor:</strong> ${val.mediciones.espesor} ${val.mediciones.unidad}
+                    </div>`
+                } else if (val.mediciones.densidad) {
+                  // Mediciones de LlayLlay
+                  medicionesHtml = `
+                    <div class="observacion-mediciones">
+                      <strong>Densidad:</strong> ${val.mediciones.densidad} ${val.mediciones.unidad}
+                    </div>`
+                }
+              }
+              
+              return `
+                <div class="observacion-item">
+                  <div class="observacion-empresa">${val.empresa_validadora?.nombre || 'Empresa desconocida'}</div>
+                  <div class="observacion-fecha">${new Date(val.created_at).toLocaleDateString('es-ES')}</div>
+                  <div class="observacion-texto">${val.observaciones || 'Sin observaciones'}</div>
+                  ${medicionesHtml}
+                </div>`
+            }).join('')
+          }
+        } catch (error) {
+          console.error('Error al cargar historial:', error)
+          const historialElement = document.getElementById(historialElementId)
+          const content = historialElement.querySelector('.historial-content')
+          content.innerHTML = '<p style="color: #e74c3c;">Error al cargar historial</p>'
+        }
+      }
+
       function abrirModalBesalco(canchaId) {
         canchaIdActual = canchaId
         const modal = document.getElementById('validacion-besalco-modal')
@@ -1601,6 +1760,9 @@ const error = null
         
         // Limpiar formulario
         form.reset()
+        
+        // Cargar historial de observaciones
+        cargarHistorialObservaciones(canchaId, 'historial-besalco')
         
         // Mostrar modal
         modal.classList.add('show')
@@ -1614,6 +1776,9 @@ const error = null
         // Limpiar formulario
         form.reset()
         
+        // Cargar historial de observaciones (incluye observaciones de Besalco)
+        cargarHistorialObservaciones(canchaId, 'historial-linkapsis')
+        
         // Mostrar modal
         modal.classList.add('show')
       }
@@ -1625,6 +1790,20 @@ const error = null
         
         // Limpiar formulario
         form.reset()
+        
+        // Cargar historial de observaciones (incluye Besalco y Linkapsis)
+        cargarHistorialObservaciones(canchaId, 'historial-llayllay')
+        
+        // Mostrar modal
+        modal.classList.add('show')
+      }
+
+      function abrirModalCierre(canchaId) {
+        canchaIdActual = canchaId
+        const modal = document.getElementById('cerrar-cancha-modal')
+        
+        // Cargar historial completo para revisión final
+        cargarHistorialObservaciones(canchaId, 'historial-cierre')
         
         // Mostrar modal
         modal.classList.add('show')
@@ -1693,6 +1872,17 @@ const error = null
             btnRechazar.addEventListener('click', procesarRechazoLlayLlay)
           }
         }
+        
+        // Botón de cierre definitivo
+        const btnConfirmarCierre = document.getElementById('confirmar-cierre')
+        if (btnConfirmarCierre) {
+          btnConfirmarCierre.addEventListener('click', async () => {
+            if (confirm('¿Estás seguro de que deseas cerrar esta cancha definitivamente?')) {
+              await ejecutarAccion('cerrar_cancha', canchaIdActual, null)
+              cerrarTodosLosModales()
+            }
+          })
+        }
       }
 
       // === FUNCIONES DE PROCESAMIENTO DE VALIDACIONES ===
@@ -1725,20 +1915,16 @@ const error = null
         e.preventDefault()
         
         const observaciones = document.getElementById('linkapsis-observaciones').value.trim()
-        const espesor1 = parseFloat(document.getElementById('linkapsis-espesor1').value)
-        const espesor2 = parseFloat(document.getElementById('linkapsis-espesor2').value)
-        const espesor3 = parseFloat(document.getElementById('linkapsis-espesor3').value)
+        const espesor = parseFloat(document.getElementById('linkapsis-espesor').value)
         
-        if (!observaciones || !espesor1 || !espesor2 || !espesor3) {
-          mostrarMensaje('Por favor completa todas las mediciones y observaciones', 'error')
+        if (!observaciones || !espesor) {
+          mostrarMensaje('Por favor completa las observaciones y la medición de espesor', 'error')
           return
         }
         
         const mediciones = {
-          espesores: [espesor1, espesor2, espesor3],
-          unidad: 'mm',
-          puntos_medicion: 3,
-          promedio: ((espesor1 + espesor2 + espesor3) / 3).toFixed(1)
+          espesor: espesor,
+          unidad: 'metros'
         }
         
         await ejecutarAccion('validar_linkapsis', canchaIdActual, observaciones, mediciones)
@@ -1748,12 +1934,23 @@ const error = null
         e.preventDefault()
         
         const observaciones = document.getElementById('linkapsis-observaciones').value.trim()
+        const espesor = parseFloat(document.getElementById('linkapsis-espesor').value)
+        
         if (!observaciones) {
           mostrarMensaje('Por favor ingresa observaciones del rechazo', 'error')
           return
         }
         
-        await ejecutarAccion('rechazar_linkapsis', canchaIdActual, observaciones)
+        // Incluir mediciones aunque sea rechazo
+        let mediciones = null
+        if (espesor) {
+          mediciones = {
+            espesor: espesor,
+            unidad: 'metros'
+          }
+        }
+        
+        await ejecutarAccion('rechazar_linkapsis', canchaIdActual, observaciones, mediciones)
       }
 
       async function procesarValidacionLlayLlay(e) {
@@ -1779,12 +1976,23 @@ const error = null
         e.preventDefault()
         
         const observaciones = document.getElementById('llayllay-observaciones').value.trim()
+        const densidad = parseFloat(document.getElementById('llayllay-densidad').value)
+        
         if (!observaciones) {
           mostrarMensaje('Por favor ingresa observaciones del rechazo', 'error')
           return
         }
         
-        await ejecutarAccion('rechazar_llay_llay', canchaIdActual, observaciones)
+        // Incluir mediciones aunque sea rechazo
+        let mediciones = null
+        if (densidad) {
+          mediciones = {
+            densidad: densidad,
+            unidad: 'g/cm³'
+          }
+        }
+        
+        await ejecutarAccion('rechazar_llay_llay', canchaIdActual, observaciones, mediciones)
       }
 
       // Función unificada para ejecutar acciones
