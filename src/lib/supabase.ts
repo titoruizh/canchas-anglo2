@@ -326,4 +326,23 @@ export class CanchaService {
     if (error) throw error
     return data || []
   }
+
+  // Borrar cancha y todas sus validaciones relacionadas
+  static async borrarCancha(canchaId: number): Promise<void> {
+    // Primero eliminar todas las validaciones relacionadas
+    const { error: errorValidaciones } = await supabase
+      .from('validaciones')
+      .delete()
+      .eq('cancha_id', canchaId)
+    
+    if (errorValidaciones) throw errorValidaciones
+
+    // Luego eliminar la cancha
+    const { error: errorCancha } = await supabase
+      .from('canchas')
+      .delete()
+      .eq('id', canchaId)
+    
+    if (errorCancha) throw errorCancha
+  }
 }

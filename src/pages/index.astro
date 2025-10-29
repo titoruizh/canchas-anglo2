@@ -979,7 +979,6 @@ const error = null
                 <th>Nombre de Cancha</th>
                 <th>Estado Actual</th>
                 <th>Empresa Actual</th>
-                <th>Creada Por</th>
                 <th>Fecha Creación</th>
                 <th>Observaciones</th>
                 <th>Acciones</th>
@@ -1123,6 +1122,42 @@ const error = null
           <div class="form-actions" style="justify-content: center; gap: 1rem; padding-top: 1rem;">
             <button type="button" class="btn-cancel">Cancelar</button>
             <button type="button" class="btn-finalizar" id="confirmar-cierre">Cerrar Cancha Definitivamente</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Modal para borrar cancha (AngloAmerican) -->
+      <div id="borrar-cancha-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title" style="color: #e74c3c;">⚠️ Borrar Cancha Definitivamente</h3>
+            <button class="close-btn">×</button>
+          </div>
+          
+          <div style="padding: 1rem; background: #fef5e7; border: 2px solid #f39c12; border-radius: 8px; margin: 1rem 0;">
+            <h4 style="color: #d68910; margin: 0 0 0.5rem 0;">⚠️ ADVERTENCIA</h4>
+            <p style="margin: 0; color: #8e6e01;">
+              Esta acción <strong>NO SE PUEDE DESHACER</strong>. Se eliminará la cancha y todas sus validaciones asociadas de forma permanente.
+            </p>
+          </div>
+          
+          <div id="historial-borrado" class="historial-observaciones">
+            <h4>Historial que se Eliminará:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label for="confirmacion-borrado" style="color: #e74c3c; font-weight: 700;">
+              Para confirmar, escribe exactamente: <code style="background: #f8f9fa; padding: 0.25rem;">borrar-cancha</code>
+            </label>
+            <input type="text" id="confirmacion-borrado" placeholder="Escribe 'borrar-cancha' para confirmar" style="border: 2px solid #e74c3c;">
+          </div>
+          
+          <div class="form-actions" style="justify-content: center; gap: 1rem; padding-top: 1rem;">
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="button" class="btn-danger" id="confirmar-borrado" disabled>BORRAR CANCHA DEFINITIVAMENTE</button>
           </div>
         </div>
       </div>
@@ -1494,7 +1529,7 @@ const error = null
       function renderizarCanchas(canchas) {
         canchasTBody.innerHTML = canchas.map(cancha => `
           <tr data-cancha-id="${cancha.id}">
-            <td><strong>${cancha.nombre}</strong></td>
+            <td><strong>${cancha.nombre.toUpperCase()}</strong></td>
             <td>
               <span class="estado estado-${cancha.estado_actual.toLowerCase().replace(/\s+/g, '-')}">
                 ${cancha.estado_actual}
@@ -1505,7 +1540,6 @@ const error = null
                 ${cancha.empresa_actual}
               </span>
             </td>
-            <td>${cancha.creada_por}</td>
             <td>${new Date(cancha.created_at).toLocaleDateString('es-ES')}</td>
             <td>
               <button class="info-icon" data-cancha-id="${cancha.id}">
@@ -1577,8 +1611,11 @@ const error = null
         if (empresaId === 1) {
           if (estado === 'Creada') {
             botones.push(`<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">Enviar a Besalco</button>`)
+            botones.push(`<button class="btn-accion btn-danger" data-accion="abrir-modal-borrar" data-cancha-id="${canchaId}">Borrar Cancha</button>`)
           } else if (estado === 'Validada' && empresaActual === 'AngloAmerican') {
             botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">Cerrar Cancha</button>`)
+          } else if (estado === 'Cerrada') {
+            botones.push(`<button class="btn-accion btn-danger" data-accion="abrir-modal-borrar" data-cancha-id="${canchaId}">Borrar Cancha</button>`)
           }
         }
         
@@ -1632,6 +1669,9 @@ const error = null
           return
         } else if (accion === 'abrir-modal-cierre') {
           abrirModalCierre(canchaId)
+          return
+        } else if (accion === 'abrir-modal-borrar') {
+          abrirModalBorrar(canchaId)
           return
         }
         
@@ -1922,6 +1962,23 @@ const error = null
         modal.classList.add('show')
       }
 
+      function abrirModalBorrar(canchaId) {
+        canchaIdActual = canchaId
+        const modal = document.getElementById('borrar-cancha-modal')
+        const inputConfirmacion = document.getElementById('confirmacion-borrado')
+        const btnConfirmar = document.getElementById('confirmar-borrado')
+        
+        // Limpiar input y deshabilitar botón
+        inputConfirmacion.value = ''
+        btnConfirmar.disabled = true
+        
+        // Cargar historial que se eliminará
+        cargarHistorialObservaciones(canchaId, 'historial-borrado')
+        
+        // Mostrar modal
+        modal.classList.add('show')
+      }
+
       function cerrarTodosLosModales() {
         document.querySelectorAll('.modal').forEach(modal => {
           modal.classList.remove('show')
@@ -1994,6 +2051,21 @@ const error = null
               await ejecutarAccion('cerrar_cancha', canchaIdActual, null)
               cerrarTodosLosModales()
             }
+          })
+        }
+        
+        // Input de confirmación de borrado
+        const inputConfirmacion = document.getElementById('confirmacion-borrado')
+        const btnConfirmarBorrado = document.getElementById('confirmar-borrado')
+        
+        if (inputConfirmacion && btnConfirmarBorrado) {
+          inputConfirmacion.addEventListener('input', () => {
+            btnConfirmarBorrado.disabled = inputConfirmacion.value.trim() !== 'borrar-cancha'
+          })
+          
+          btnConfirmarBorrado.addEventListener('click', async () => {
+            await ejecutarAccion('borrar_cancha', canchaIdActual, null)
+            cerrarTodosLosModales()
           })
         }
       }

@@ -47,6 +47,9 @@ export const POST: APIRoute = async ({ params, request }) => {
       case 'cerrar_cancha':
         await CanchaService.cerrarCancha(canchaId)
         break
+      case 'borrar_cancha':
+        await CanchaService.borrarCancha(canchaId)
+        break
       default:
         console.log('API Debug - Acción no reconocida:', accion)
         return new Response(JSON.stringify({ message: 'Acción no válida: ' + accion }), {
