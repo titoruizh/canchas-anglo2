@@ -132,6 +132,34 @@
         align-items: end;
       }
       
+      .form-row input, .form-row select {
+        padding: 0.75rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 8px;
+        font-size: 1rem;
+        background: white;
+        transition: border-color 0.3s ease;
+      }
+      
+      .form-row input:focus, .form-row select:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+      }
+      
+      .form-row select:disabled {
+        background: #f8f9fa;
+        color: #6c757d;
+        cursor: not-allowed;
+      }
+      
+      .form-row label {
+        font-weight: 600;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        display: block;
+      }
+      
       .table-container {
         background: white;
         border-radius: 12px;
@@ -880,11 +908,18 @@
             <div class="form-row">
               <div>
                 <label for="muro">Muro:</label>
-                <input type="text" id="muro" placeholder="ej: MP, MS, MT" required>
+                <select id="muro" required>
+                  <option value="">Selecciona un muro</option>
+                  <option value="MP">MP</option>
+                  <option value="ME">ME</option>
+                  <option value="MO">MO</option>
+                </select>
               </div>
               <div>
                 <label for="sector">Sector:</label>
-                <input type="text" id="sector" placeholder="ej: S1, S2, S5" required>
+                <select id="sector" required disabled>
+                  <option value="">Primero selecciona un muro</option>
+                </select>
               </div>
               <div>
                 <label for="nombre-detalle">Nombre:</label>
@@ -1186,6 +1221,52 @@
         } else {
           console.log('No se encontró btnCrearCancha')
         }
+        
+        // Configurar selectores dinámicos de Muro y Sector
+        configurarSelectoresMuroSector()
+      }
+
+      // Configurar selectores dinámicos de Muro y Sector
+      function configurarSelectoresMuroSector() {
+        const selectMuro = document.getElementById('muro')
+        const selectSector = document.getElementById('sector')
+        
+        if (!selectMuro || !selectSector) return
+        
+        selectMuro.addEventListener('change', function() {
+          const muroSeleccionado = this.value
+          
+          // Limpiar opciones del sector
+          selectSector.innerHTML = ''
+          
+          if (!muroSeleccionado) {
+            selectSector.disabled = true
+            selectSector.innerHTML = '<option value="">Primero selecciona un muro</option>'
+            return
+          }
+          
+          selectSector.disabled = false
+          selectSector.innerHTML = '<option value="">Selecciona un sector</option>'
+          
+          // Agregar opciones según el muro seleccionado
+          if (muroSeleccionado === 'MP') {
+            // MP: S1 hasta S7
+            for (let i = 1; i <= 7; i++) {
+              const option = document.createElement('option')
+              option.value = `S${i}`
+              option.textContent = `S${i}`
+              selectSector.appendChild(option)
+            }
+          } else if (muroSeleccionado === 'ME' || muroSeleccionado === 'MO') {
+            // ME y MO: S1 hasta S3
+            for (let i = 1; i <= 3; i++) {
+              const option = document.createElement('option')
+              option.value = `S${i}`
+              option.textContent = `S${i}`
+              selectSector.appendChild(option)
+            }
+          }
+        })
       }
 
       // Configurar event listeners del modal
@@ -1534,12 +1615,12 @@
         if (empresaId === 1) {
           if (estado === 'Creada') {
             botones.push(`<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">Enviar a Besalco</button>`)
-            botones.push(`<button class="btn-accion btn-danger" data-accion="abrir-modal-borrar" data-cancha-id="${canchaId}">Borrar Cancha</button>`)
           } else if (estado === 'En Proceso' && empresaActual === 'AngloAmerican') {
             botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">Cerrar Cancha</button>`)
-          } else if (estado === 'Cerrada') {
-            botones.push(`<button class="btn-accion btn-danger" data-accion="abrir-modal-borrar" data-cancha-id="${canchaId}">Borrar Cancha</button>`)
           }
+          
+          // AngloAmerican siempre puede borrar cualquier cancha (administrador)
+          botones.push(`<button class="btn-accion btn-danger" data-accion="abrir-modal-borrar" data-cancha-id="${canchaId}">Borrar Cancha</button>`)
         }
         
         // Besalco
