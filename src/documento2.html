@@ -1,0 +1,105 @@
+    <div class="header">
+        <div class="logo">AngloAmerican - Sistema de Gestión de Canchas</div>
+        <div class="informe-number">INFORME N° {{NUMERO_INFORME}}</div>
+        <div>Fecha: {{FECHA_HOY}}</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Información General</div>
+        <div class="data-row">
+            <div class="data-label">Ubicación:</div>
+            <div class="data-value">{{UBICACION}}</div>
+        </div>
+        <div class="data-row">
+            <div class="data-label">Empresa:</div>
+            <div class="data-value">{{EMPRESA}}</div>
+        </div>
+        <div class="data-row">
+            <div class="data-label">Estado:</div>
+            <div class="data-value">{{ESTADO}}</div>
+        </div>
+        <div class="data-row">
+            <div class="data-label">Fecha de Validación:</div>
+            <div class="data-value">{{FECHA_VALIDACION}}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Tipos de Trabajo</div>
+        <div class="trabajo-tipos">
+            <div class="trabajo-item">
+                <span class="checkbox">{{MANTENIMIENTO}}</span>
+                <span>Mantenimiento</span>
+            </div>
+            <div class="trabajo-item">
+                <span class="checkbox">{{CERTIFICACION}}</span>
+                <span>Certificación</span>
+            </div>
+            <div class="trabajo-item">
+                <span class="checkbox">{{EVALUACION}}</span>
+                <span>Evaluación</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Mediciones</div>
+        <div class="data-row">
+            <div class="data-label">Densidad:</div>
+            <div class="data-value">{{DENSIDAD}}</div>
+        </div>
+        <div class="data-row">
+            <div class="data-label">Fibra Sintética:</div>
+            <div class="data-value">{{FIBRA_SINTETICA}}</div>
+        </div>
+        <div class="data-row">
+            <div class="data-label">Shock Pad:</div>
+            <div class="data-value">{{SHOCK_PAD}}</div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Coordenadas de Medición</div>
+        <div class="coordinates-grid">
+            <div class="coordinate-item">
+                <strong>Punto 1</strong><br>
+                X: {{X1}}<br>
+                Y: {{Y1}}
+            </div>
+            <div class="coordinate-item">
+                <strong>Punto 2</strong><br>
+                X: {{X2}}<br>
+                Y: {{Y2}}
+            </div>
+            <div class="coordinate-item">
+                <strong>Punto 3</strong><br>
+                X: {{X3}}<br>
+                Y: {{Y3}}
+            </div>
+            <div class="coordinate-item">
+                <strong>Punto 4</strong><br>
+                X: {{X4}}<br>
+                Y: {{Y4}}
+            </div>
+            <div class="coordinate-item">
+                <strong>Punto 5</strong><br>
+                X: {{X5}}<br>
+                Y: {{Y5}}
+            </div>
+            <div class="coordinate-item">
+                <strong>Punto 6</strong><br>
+                X: {{X6}}<br>
+                Y: {{Y6}}
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Observaciones</div>
+        <div class="data-value">{{OBSERVACIONES}}</div>
+    </div>
+
+    <div class="footer">
+        <p>Documento generado automáticamente por el Sistema de Gestión de Canchas AngloAmerican</p>
+        <p>Usuario: {{USUARIO}} | Fecha de generación: {{FECHA_HOY}}</p>
+    </div>
