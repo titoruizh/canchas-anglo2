@@ -2076,6 +2076,11 @@
           }
           
           todasLasCanchas = await response.json()
+          console.log('🗂️ Datos de canchas cargados:', todasLasCanchas)
+          if (todasLasCanchas.length > 0) {
+            console.log('🔍 Primer cancha ejemplo:', todasLasCanchas[0])
+            console.log('🏷️ Campos disponibles:', Object.keys(todasLasCanchas[0]))
+          }
           aplicarFiltros()
         } catch (error) {
           console.error('Error al cargar canchas:', error)
@@ -2105,7 +2110,7 @@
             </td>
             <td>${new Date(cancha.created_at).toLocaleDateString('es-ES')}</td>
             <td>
-              <button class="btn-mapa" data-cancha-id="${cancha.id}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem;" title="Ver en mapa">🗺️</button>
+              <button class="btn-mapa" data-cancha-id="${cancha.id}" data-cancha-nombre="${cancha.nombre}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem;" title="Ver en mapa">🗺️</button>
             </td>
             <td>
               <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
@@ -2117,6 +2122,21 @@
             </td>
           </tr>
         `).join('')
+        
+        // Agregar event listeners para botones del mapa inmediatamente después de renderizar
+        setTimeout(() => {
+          console.log('🔧 Agregando event listeners para botones del mapa...')
+          document.querySelectorAll('.btn-mapa').forEach((btn, index) => {
+            console.log(`🔧 Configurando botón ${index}:`, btn.dataset)
+            btn.addEventListener('click', (e) => {
+              const canchaId = e.target.dataset.canchaId
+              const canchaName = e.target.dataset.canchaNombre
+              console.log('🗺️ Botón de mapa clickeado:', { canchaId, canchaName })
+              console.log('🔍 Datasets disponibles:', e.target.dataset)
+              abrirMapaModal(canchaId, canchaName)
+            })
+          })
+        }, 100) // Pequeño delay para asegurar que el DOM esté actualizado
         
         actualizarAcciones()
       }
@@ -2259,13 +2279,8 @@
           btn.addEventListener('click', manejarAccion)
         })
         
-        // Event listeners para botones del mapa
-        document.querySelectorAll('.btn-mapa').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            const canchaId = e.target.dataset.canchaId
-            abrirMapaModal(canchaId)
-          })
-        })
+        // Los event listeners para botones del mapa se agregan en renderizarCanchas()
+        console.log('� Event listeners de acciones agregados')
       }
 
       // Manejar acciones de botones
@@ -2887,14 +2902,20 @@
       }
 
       // Funciones para el Modal del Mapa
-      function abrirMapaModal(canchaId) {
+      function abrirMapaModal(canchaId, canchaName) {
+        console.log('🚀 abrirMapaModal llamado con:', { canchaId, canchaName })
+        
         const modal = document.getElementById('mapModal')
         const mapContainer = document.getElementById('mapContainer')
         const canchaIdSpan = document.getElementById('mapCanchaId')
         const closeBtn = document.getElementById('mapCloseBtn')
         
-        // Mostrar ID de la cancha en el título
-        canchaIdSpan.textContent = canchaId
+        // Extraer el muro del nombre de la cancha (primera parte antes del primer _)
+        const muro = canchaName ? canchaName.split('_')[0] : null
+        console.log(`🗺️ Abriendo mapa para cancha ${canchaId} (${canchaName}) - Muro detectado: ${muro}`)
+        
+        // Mostrar ID y nombre de la cancha en el título
+        canchaIdSpan.textContent = `${canchaId} (${canchaName || 'Sin nombre'})`
         
         // Agregar event listener al botón de cerrar
         closeBtn.addEventListener('click', cerrarMapaModal)
@@ -2908,10 +2929,13 @@
         // Mostrar indicador de carga
         mapContainer.innerHTML = '<div class="map-loading">Cargando mapa...</div>'
         
-        // Cargar el mapa en un iframe
+        // Cargar el mapa en un iframe con el filtro de muro
         setTimeout(() => {
           const iframe = document.createElement('iframe')
-          iframe.src = '/mapbox-window'
+          // Pasar el muro como parámetro en la URL si existe
+          const mapUrl = muro ? `/mapbox-window?muro=${encodeURIComponent(muro)}` : '/mapbox-window'
+          console.log('🌐 URL del mapa:', mapUrl)
+          iframe.src = mapUrl
           iframe.style.width = '100%'
           iframe.style.height = '100%'
           iframe.style.border = 'none'

@@ -1,5 +1,10 @@
 ---
 import MiningMap from '../components/MiningMap.astro'
+
+// Obtener el parámetro 'muro' de la URL
+const url = Astro.url
+const muro = url.searchParams.get('muro')
+console.log('🔧 Parámetro muro recibido:', muro)
 ---
 
 <!doctype html>
@@ -14,7 +19,7 @@ import MiningMap from '../components/MiningMap.astro'
   <body>
     <!-- Render the MiningMap component -->
     <main>
-      <MiningMap />
+      <MiningMap muroFilter={muro} />
     </main>
   </body>
 </html>

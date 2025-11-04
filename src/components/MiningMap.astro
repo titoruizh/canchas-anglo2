@@ -1,5 +1,13 @@
 ---
 // Componente principal del mapa de minería - Restaurado con funcionalidad completa
+
+// Props del componente
+interface Props {
+  muroFilter?: string
+}
+
+const { muroFilter } = Astro.props
+console.log('🏗️ MiningMap iniciado con muroFilter:', muroFilter)
 ---
 
 <style>
@@ -109,7 +117,7 @@
   }
 </style>
 
-<div class="map-container">
+<div class="map-container" data-muro-filter={muroFilter || ''}>
   <div id="map"></div>
   
   <div class="map-controls">
@@ -376,11 +384,11 @@
         let mapLocked = false;
         let currentLockedBounds = null;
 
-        muroFilterSelect.addEventListener('change', (e) => {
-          const filter = e.target.value;
-          console.log('🎯 Filtro de muro seleccionado:', filter);
+        // Función para aplicar filtro de muro
+        function applyMuroFilter(filter) {
+          console.log('🎯 Aplicando filtro de muro:', filter);
           
-          if (filter !== 'todos') {
+          if (filter && filter !== 'todos') {
             // Mostrar capas de polígonos y aplicar filtro
             map.setLayoutProperty('polygons-stroke', 'visibility', 'visible');
             map.setFilter('polygons-stroke', ['==', ['get', 'tipo'], filter]);
@@ -426,7 +434,29 @@
             });
             console.log('🔓 Mapa desbloqueado - Volviendo a vista general');
           }
-        });
+        }
+
+        // Aplicar filtro automático si se recibió como prop
+        const mapContainer = document.querySelector('.map-container');
+        const autoMuroFilter = mapContainer?.getAttribute('data-muro-filter') || '';
+        if (autoMuroFilter && autoMuroFilter !== '') {
+          console.log('🤖 Aplicando filtro automático de muro:', autoMuroFilter);
+          // Ocultar el selector de filtro ya que es automático
+          const controlPanel = muroFilterSelect.closest('.control-panel');
+          if (controlPanel) {
+            (controlPanel as HTMLElement).style.display = 'none';
+          }
+          // Aplicar el filtro automáticamente
+          setTimeout(() => {
+            applyMuroFilter(autoMuroFilter);
+          }, 1000); // Esperar un poco para que el mapa esté listo
+        } else {
+          // Configurar el event listener para el filtro manual
+          muroFilterSelect.addEventListener('change', (e) => {
+            const filter = (e.target as HTMLSelectElement).value;
+            applyMuroFilter(filter);
+          });
+        }
 
         console.log('🎮 Controles de filtro configurados');
       }
