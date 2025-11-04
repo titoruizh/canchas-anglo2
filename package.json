@@ -11,6 +11,8 @@
   "dependencies": {
     "@astrojs/node": "^9.5.0",
     "@supabase/supabase-js": "^2.76.1",
-    "astro": "^5.15.1"
+    "astro": "^5.15.1",
+    "mapbox-gl": "^3.8.0",
+    "proj4": "^2.12.1"
   }
 }

@@ -1064,6 +1064,148 @@
           flex-direction: column;
         }
       }
+      
+      /* Estilos para el Modal del Mapa */
+      .map-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(4px);
+      }
+      
+      .map-modal.show {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-out;
+      }
+      
+      .map-modal-content {
+        background: white;
+        border-radius: 16px;
+        width: 95%;
+        height: 90%;
+        max-width: 1200px;
+        max-height: 800px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: slideIn 0.3s ease-out;
+      }
+      
+      .map-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 16px 16px 0 0;
+      }
+      
+      .map-modal-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+      }
+      
+      .map-close-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        padding: 0.5rem 0.8rem;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+        line-height: 1;
+      }
+      
+      .map-close-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        transform: scale(1.1);
+      }
+      
+      .map-container {
+        flex: 1;
+        position: relative;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 500px;
+      }
+      
+      .map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        border-radius: 0 0 16px 16px;
+      }
+      
+      .map-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        font-size: 1.1rem;
+      }
+      
+      .map-loading::before {
+        content: '';
+        width: 40px;
+        height: 40px;
+        border: 4px solid #e1e8ed;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9) translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      /* Responsive para el modal del mapa */
+      @media (max-width: 768px) {
+        .map-modal-content {
+          width: 98%;
+          height: 95%;
+          margin: 1%;
+        }
+        
+        .map-modal-header {
+          padding: 1rem 1.5rem;
+        }
+        
+        .map-modal-title {
+          font-size: 1.2rem;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1184,6 +1326,7 @@
                 <th>Estado Actual</th>
                 <th>Empresa Actual</th>
                 <th>Fecha Creación</th>
+                <th>Mapa</th>
                 <th>Acciones</th>
                 <th id="borrar-header" class="hidden">Administrar</th>
               </tr>
@@ -1962,6 +2105,9 @@
             </td>
             <td>${new Date(cancha.created_at).toLocaleDateString('es-ES')}</td>
             <td>
+              <button class="btn-mapa" data-cancha-id="${cancha.id}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem;" title="Ver en mapa">🗺️</button>
+            </td>
+            <td>
               <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
               </div>
             </td>
@@ -2111,6 +2257,14 @@
       function agregarEventListeners() {
         document.querySelectorAll('.btn-accion').forEach(btn => {
           btn.addEventListener('click', manejarAccion)
+        })
+        
+        // Event listeners para botones del mapa
+        document.querySelectorAll('.btn-mapa').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const canchaId = e.target.dataset.canchaId
+            abrirMapaModal(canchaId)
+          })
         })
       }
 
@@ -2732,8 +2886,88 @@
         }
       }
 
+      // Funciones para el Modal del Mapa
+      function abrirMapaModal(canchaId) {
+        const modal = document.getElementById('mapModal')
+        const mapContainer = document.getElementById('mapContainer')
+        const canchaIdSpan = document.getElementById('mapCanchaId')
+        const closeBtn = document.getElementById('mapCloseBtn')
+        
+        // Mostrar ID de la cancha en el título
+        canchaIdSpan.textContent = canchaId
+        
+        // Agregar event listener al botón de cerrar
+        closeBtn.addEventListener('click', cerrarMapaModal)
+        
+        // Mostrar el modal
+        modal.classList.add('show')
+        
+        // Agregar evento para cerrar con Escape
+        document.addEventListener('keydown', handleEscapeKey)
+        
+        // Mostrar indicador de carga
+        mapContainer.innerHTML = '<div class="map-loading">Cargando mapa...</div>'
+        
+        // Cargar el mapa en un iframe
+        setTimeout(() => {
+          const iframe = document.createElement('iframe')
+          iframe.src = '/mapbox-window'
+          iframe.style.width = '100%'
+          iframe.style.height = '100%'
+          iframe.style.border = 'none'
+          iframe.style.borderRadius = '0 0 16px 16px'
+          
+          mapContainer.innerHTML = ''
+          mapContainer.appendChild(iframe)
+        }, 300)
+      }
+      
+      function cerrarMapaModal() {
+        const modal = document.getElementById('mapModal')
+        const mapContainer = document.getElementById('mapContainer')
+        const closeBtn = document.getElementById('mapCloseBtn')
+        
+        modal.classList.remove('show')
+        
+        // Remover event listeners
+        document.removeEventListener('keydown', handleEscapeKey)
+        closeBtn.removeEventListener('click', cerrarMapaModal)
+        
+        // Limpiar el contenido del mapa
+        setTimeout(() => {
+          mapContainer.innerHTML = ''
+        }, 300)
+      }
+      
+      function handleEscapeKey(e) {
+        if (e.key === 'Escape') {
+          cerrarMapaModal()
+        }
+      }
+      
+      // Cerrar modal al hacer clic fuera del contenido
+      document.addEventListener('click', function(e) {
+        const modal = document.getElementById('mapModal')
+        if (e.target === modal) {
+          cerrarMapaModal()
+        }
+      })
+
       // Inicializar la aplicación
       inicializar()
     </script>
+
+    <!-- Modal para el Mapa -->
+    <div id="mapModal" class="map-modal">
+      <div class="map-modal-content">
+        <div class="map-modal-header">
+          <h3 class="map-modal-title">Visor de Mapa - Cancha <span id="mapCanchaId"></span></h3>
+          <button id="mapCloseBtn" class="map-close-btn">&times;</button>
+        </div>
+        <div id="mapContainer" class="map-container">
+          <!-- El mapa se cargará aquí dinámicamente -->
+        </div>
+      </div>
+    </div>
   </body>
 </html>

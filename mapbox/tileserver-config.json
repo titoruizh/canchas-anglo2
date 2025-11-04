@@ -1,0 +1,26 @@
+{
+  "styles": {},
+  "data": {
+    "mapbase": {
+      "mbtiles": "public/mapbase.mbtiles"
+    }
+  },
+  "options": {
+    "paths": {
+      "sprites": "",
+      "fonts": "",
+      "styles": "",
+      "mbtiles": ""
+    },
+    "formatQuality": {
+      "jpeg": 80,
+      "webp": 90,
+      "png": 100
+    },
+    "maxzoom": 19,
+    "maxsize": 2048,
+    "pbfAlias": "pbf",
+    "tileMargin": 0,
+    "tileBounds": [-70.762292, -33.136471, -70.708471, -33.111063]
+  }
+}

@@ -1,0 +1,725 @@
+---
+// Componente principal del mapa de minería
+---
+
+<style>
+  #map {
+    width: 100%;
+    height: 100vh;
+  }
+  
+  .mapboxgl-canvas {
+    /* Configuración base para el canvas del mapa */
+  }
+  
+  .map-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+
+  #map {
+    width: 100%;
+    height: 100%;
+  }
+  
+  .map-controls {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .control-panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    min-width: 200px;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  }
+  
+  .control-group {
+    margin-bottom: 16px;
+  }
+  
+  .control-group:last-child {
+    margin-bottom: 0;
+  }
+  
+  .control-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #374151;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .control-select, .control-button {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .control-select {
+    background: white;
+    color: #374151;
+    cursor: pointer;
+  }
+  
+  .control-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+  
+  .control-button {
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    color: white;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+  }
+  
+  .control-button:hover {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  }
+  
+  .control-button:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .layer-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .layer-toggle:hover {
+    background: rgba(59, 130, 246, 0.05);
+  }
+  
+  .layer-toggle input[type="checkbox"] {
+    margin: 0;
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+    cursor: pointer;
+  }
+  
+  .layer-toggle label {
+    margin: 0;
+    font-weight: 500;
+    cursor: pointer;
+    color: #4b5563;
+    font-size: 14px;
+    user-select: none;
+  }
+  
+  .loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 24px 32px;
+    border-radius: 12px;
+    z-index: 1001;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-weight: 500;
+    color: #374151;
+  }
+  
+  .error {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 1001;
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+    font-weight: 500;
+    max-width: 400px;
+    text-align: center;
+  }
+
+  .coordinate-display {
+    font-family: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    font-size: 12px;
+    color: #6b7280;
+    background: rgba(243, 244, 246, 0.8);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-weight: 500;
+  }
+</style>
+
+<div class="map-container">
+  <div id="map"></div>
+  
+  <div class="map-controls">
+    <div class="control-panel">
+      <div class="control-group">
+        <label class="control-label">Filtro de Muros</label>
+        <select id="muro-filter" class="control-select">
+          <option value="todos">Todos los Muros</option>
+          <option value="MP">MP</option>
+          <option value="MO">MO</option>
+          <option value="ME">ME</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  
+  <div id="loading" class="loading" style="display: none;">
+    Cargando datos...
+  </div>
+  
+  <div id="error" class="error" style="display: none;"></div>
+</div>
+
+<script>
+  import mapboxgl from 'mapbox-gl';
+  import { getMapboxToken, MAP_STYLES, POLYGON_STYLES, COORDINATE_SYSTEM, convertGeometry, calculateBounds, utmToWgs84 } from '../utils/mapbox.ts';
+  import { GISDataManager, RasterManager } from '../utils/gis.ts';
+
+  // Variables globales del mapa
+  let map;
+  let gisManager;
+  let isLoading = false;
+  let mapBounds = null;
+
+  // Elementos del DOM
+  const mapElement = document.getElementById('map');
+  const loadingElement = document.getElementById('loading');
+  const errorElement = document.getElementById('error');
+  const muroFilterSelect = document.getElementById('muro-filter');
+
+  // Configuración inicial del mapa
+  const MAP_CONFIG = {
+    // Coordenadas que funcionan en el TileServer GL
+    center: [-70.7376, -33.1193], // Coordenadas verificadas en el visor
+    zoom: 15, // Zoom mínimo donde hay datos
+    // Bounds exactos del MBTiles
+    bounds: [
+      [-70.762292, -33.136471], // suroeste
+      [-70.708471, -33.111063]  // noreste
+    ]
+  };
+
+  /**
+   * Bounds específicos para cada muro en coordenadas UTM 19S
+   */
+  const MURO_BOUNDS_UTM = {
+    MP: {
+      southwest: [336060.6, 6333765.9],
+      northeast: [338308.8, 6335338.4]
+    },
+    ME: {
+      southwest: [339617.2, 6333366.6], 
+      northeast: [340188.5, 6334496.9]
+    },
+    MO: {
+      southwest: [335507.8, 6332334.6],
+      northeast: [336515.2, 6333501.7]
+    }
+  };
+
+  /**
+   * Muestra/oculta el indicador de carga
+   */
+  function setLoading(loading) {
+    isLoading = loading;
+    loadingElement.style.display = loading ? 'block' : 'none';
+  }
+
+  /**
+   * Muestra un mensaje de error
+   */
+  function showError(message) {
+    errorElement.textContent = message;
+    errorElement.style.display = 'block';
+    setTimeout(() => {
+      errorElement.style.display = 'none';
+    }, 5000);
+  }
+
+  /**
+   * Inicializa el mapa de Mapbox
+   */
+  async function initializeMap() {
+    try {
+      setLoading(true);
+      
+      // Obtener token de Mapbox
+      const token = await getMapboxToken();
+      mapboxgl.accessToken = token;
+      console.log('🔐 Token de Mapbox obtenido:', token ? 'Sí' : 'No');
+
+      // Crear el mapa - Solo ortomosaico sin fondo satelital
+      console.log('🗺️ Creando mapa...');
+      map = new mapboxgl.Map({
+        container: 'map',
+        style: {
+          version: 8,
+          sources: {},
+          layers: [
+            {
+              id: 'background',
+              type: 'background',
+              paint: {
+                'background-color': '#f0f0f0' // Fondo gris claro para áreas sin ortomosaico
+              }
+            }
+          ]
+        },
+        center: MAP_CONFIG.center,
+        zoom: MAP_CONFIG.zoom,
+        maxBounds: MAP_CONFIG.bounds
+      });
+      console.log('✅ Mapa creado exitosamente');
+
+      // Agregar controles de navegación
+      map.addControl(new mapboxgl.NavigationControl());
+      map.addControl(new mapboxgl.ScaleControl());
+
+      // Esperar a que el mapa se cargue
+      await new Promise((resolve) => {
+        map.on('load', resolve);
+      });
+      console.log('✅ Mapa cargado exitosamente');
+
+      // Inicializar manager de datos GIS
+      gisManager = new GISDataManager();
+      console.log('📊 Iniciando carga de datos GIS...');
+
+      // Debug: escuchar errores de tiles
+      map.on('error', (e) => {
+        console.error('Error en el mapa:', e.error);
+      });
+      
+      map.on('sourcedata', (e) => {
+        if (e.sourceId === 'ortomosaico') {
+          console.log('Evento sourcedata para ortomosaico:', e);
+        }
+      });
+
+      // Cargar datos GIS
+      await loadGISData();
+
+      // Ajustar vista automáticamente si tenemos bounds calculados
+      if (mapBounds) {
+        map.fitBounds(mapBounds, { padding: 50 });
+        console.log('Vista ajustada a los datos cargados');
+      }
+
+      // Configurar eventos del mapa
+      setupMapEvents();
+
+      // Configurar controles
+      setupControls();
+
+      setLoading(false);
+
+    } catch (error) {
+      console.error('Error initializing map:', error);
+      showError('Error al inicializar el mapa: ' + error.message);
+      setLoading(false);
+    }
+  }
+
+  /**
+   * Carga los datos GIS (polígonos y sectores)
+   */
+  async function loadGISData() {
+    try {
+      // Cargar datos reales desde archivos GeoJSON
+      await loadRealData();
+
+      // Agregar capas al mapa
+      addDataLayers();
+
+    } catch (error) {
+      console.error('Error loading GIS data:', error);
+      showError('Error al cargar datos GIS: ' + error.message);
+      
+      // Como fallback, usar datos de ejemplo
+      await loadExampleData();
+      addDataLayers();
+    }
+  }
+
+  /**
+   * Carga datos reales desde archivos GeoJSON
+   */
+  async function loadRealData() {
+    try {
+      // Cargar polígonos de muros
+      const polygonsResponse = await fetch('/src/gis/poligonos.geojson');
+      if (!polygonsResponse.ok) {
+        throw new Error(`Error loading polygons: ${polygonsResponse.status}`);
+      }
+      const polygonsData = await polygonsResponse.json();
+
+      // Cargar sectores
+      const sectorsResponse = await fetch('/src/gis/sectores.geojson');
+      if (!sectorsResponse.ok) {
+        throw new Error(`Error loading sectors: ${sectorsResponse.status}`);
+      }
+      const sectorsData = await sectorsResponse.json();
+
+      console.log('Datos originales cargados, convirtiendo coordenadas...');
+
+      // Debug: mostrar coordenadas originales
+      const firstPolygon = polygonsData.features[0];
+      if (firstPolygon && firstPolygon.geometry.coordinates[0][0]) {
+        const originalCoord = firstPolygon.geometry.coordinates[0][0];
+        console.log('Coordenada UTM original:', originalCoord);
+        
+        const converted = utmToWgs84(originalCoord[0], originalCoord[1]);
+        console.log('Coordenada convertida (WGS84):', converted);
+      }
+
+      // Convertir coordenadas de UTM a WGS84
+      const convertedPolygons = {
+        ...polygonsData,
+        features: polygonsData.features.map(feature => ({
+          ...feature,
+          geometry: convertGeometry(feature.geometry),
+          properties: {
+            ...feature.properties,
+            tipo: feature.properties.NAME || feature.properties.tipo || 'otros'
+          }
+        }))
+      };
+
+      const convertedSectors = {
+        ...sectorsData,
+        features: sectorsData.features.map(feature => ({
+          ...feature,
+          geometry: convertGeometry(feature.geometry),
+          properties: {
+            ...feature.properties,
+            sector: feature.properties.NAME || feature.properties.sector || 'S1',
+            muro: (feature.properties.NAME || feature.properties.sector || '').split('_')[0] || 'MP'
+          }
+        }))
+      };
+
+      console.log('Coordenadas convertidas exitosamente');
+      console.log('Ejemplo polígono:', convertedPolygons.features[0]?.geometry?.coordinates[0]?.[0]);
+
+      // Calcular bounds automáticamente
+      const allFeatures = [...convertedPolygons.features, ...convertedSectors.features];
+      mapBounds = calculateBounds(allFeatures);
+      console.log('Bounds calculados:', mapBounds);
+
+      // Configurar fuentes de datos
+      map.addSource('poligonos', {
+        type: 'geojson',
+        data: convertedPolygons
+      });
+
+      map.addSource('sectores', {
+        type: 'geojson',
+        data: convertedSectors
+      });
+
+      console.log('Datos GIS cargados y convertidos exitosamente');
+      
+    } catch (error) {
+      console.error('Error loading real data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Carga datos de ejemplo para desarrollo
+   */
+  async function loadExampleData() {
+    // Simular polígonos de muros
+    const examplePolygons = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: { tipo: 'MP', id: 'mp_001' },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [-69.505, -23.495],
+              [-69.495, -23.495],
+              [-69.495, -23.505],
+              [-69.505, -23.505],
+              [-69.505, -23.495]
+            ]]
+          }
+        },
+        {
+          type: 'Feature',
+          properties: { tipo: 'MO', id: 'mo_001' },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [-69.515, -23.495],
+              [-69.505, -23.495],
+              [-69.505, -23.505],
+              [-69.515, -23.505],
+              [-69.515, -23.495]
+            ]]
+          }
+        }
+      ]
+    };
+
+    // Simular sectores
+    const exampleSectors = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: { sector: 'MP_S7', muro: 'MP', id: 'sector_001' },
+          geometry: {
+            type: 'Polygon',
+            coordinates: [[
+              [-69.503, -23.497],
+              [-69.497, -23.497],
+              [-69.497, -23.503],
+              [-69.503, -23.503],
+              [-69.503, -23.497]
+            ]]
+          }
+        }
+      ]
+    };
+
+    // Configurar fuentes de datos
+    map.addSource('poligonos', {
+      type: 'geojson',
+      data: examplePolygons
+    });
+
+    map.addSource('sectores', {
+      type: 'geojson',
+      data: exampleSectors
+    });
+
+    // Agregar fuente de imagen raster (ejemplo)
+    // Comentado temporalmente hasta que tengas tu imagen real
+    /*
+    const rasterBounds = [-69.52, -23.52, -69.48, -23.48];
+    map.addSource('ortomosaico', 
+      RasterManager.createRasterSource('/path/to/your/ortomosaic.jpg', rasterBounds)
+    );
+    */
+  }
+
+  /**
+   * Agrega las capas de datos al mapa
+   */
+  function addDataLayers() {
+    // PRIMERO: Agregar fuente y capa de ortomosaico (debe ir debajo de todo)
+    console.log('Configurando ortomosaico...');
+    
+    if (!map.getSource('ortomosaico')) {
+      console.log('🗺️ Configurando fuente del ortomosaico con TileServer GL...');
+      map.addSource('ortomosaico', {
+        type: 'raster',
+        tiles: ['http://localhost:8081/data/mapbase/{z}/{x}/{y}.jpg'],
+        tileSize: 256,
+        minzoom: 10,
+        maxzoom: 20,
+        bounds: [-70.762292, -33.136471, -70.708471, -33.111063]
+      });
+      console.log('✅ Fuente del ortomosaico configurada con tiles directos');
+    }
+    
+    // Agregar capa raster PRIMERA (para que esté debajo)
+    if (!map.getLayer('raster-layer')) {
+      map.addLayer({
+        id: 'raster-layer',
+        type: 'raster',
+        source: 'ortomosaico',
+        layout: {
+          visibility: 'visible'
+        },
+        paint: {
+          'raster-opacity': 1.0, // 100% opacidad como solicitado
+          'raster-fade-duration': 300
+        }
+      });
+      console.log('Capa de ortomosaico agregada como capa base con filtro de blancos');
+    }
+
+    // Capa de polígonos de muros - Solo contornos naranjas (ocultos inicialmente pero disponibles para backend)
+    map.addLayer({
+      id: 'polygons-stroke',
+      type: 'line',
+      source: 'poligonos',
+      layout: {
+        visibility: 'none'  // Ocultos pero disponibles para filtrado
+      },
+      paint: {
+        'line-color': '#ff7f00',  // Color naranjo
+        'line-width': 2,
+        'line-opacity': 0.8
+      }
+    });
+
+    // Capa de sectores
+    map.addLayer({
+      id: 'sectors-fill',
+      type: 'fill',
+      source: 'sectores',
+      paint: {
+        'fill-color': 'transparent',
+        'fill-opacity': 0
+      }
+    });
+
+    map.addLayer({
+      id: 'sectors-stroke',
+      type: 'line',
+      source: 'sectores',
+      paint: {
+        'line-color': POLYGON_STYLES.sector.stroke,
+        'line-width': POLYGON_STYLES.sector.strokeWidth,
+        'line-dasharray': [2, 2]
+      }
+    });
+
+    // Etiquetas para polígonos de muros (excluyendo "Otros", ocultas inicialmente)
+    map.addLayer({
+      id: 'polygons-labels',
+      type: 'symbol',
+      source: 'poligonos',
+      filter: ['!=', ['get', 'tipo'], 'Otros'], // Excluir "Otros"
+      layout: {
+        visibility: 'none',  // Ocultas pero disponibles para filtrado
+        'text-field': ['get', 'tipo'],
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': 14,
+        'text-anchor': 'center',
+        'text-allow-overlap': false,
+        'text-ignore-placement': false
+      },
+      paint: {
+        'text-color': '#ff7f00', // Color naranjo para las etiquetas
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 2
+      }
+    });
+
+    // Etiquetas para sectores
+    map.addLayer({
+      id: 'sectors-labels',
+      type: 'symbol',
+      source: 'sectores',
+      layout: {
+        'text-field': ['get', 'id'], // o el campo que contenga el nombre del sector
+        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+        'text-size': 12,
+        'text-anchor': 'center',
+        'text-allow-overlap': false,
+        'text-ignore-placement': false
+      },
+      paint: {
+        'text-color': POLYGON_STYLES.sector.stroke,
+        'text-halo-color': '#ffffff',
+        'text-halo-width': 2
+      }
+    });
+  }
+
+  /**
+   * Configura los eventos del mapa
+   */
+  function setupMapEvents() {
+    // Cambiar cursor al pasar sobre polígonos
+    map.on('mouseenter', ['polygons-stroke', 'sectors-fill'], () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+
+    map.on('mouseleave', ['polygons-stroke', 'sectors-fill'], () => {
+      map.getCanvas().style.cursor = '';
+    });
+  }
+
+  /**
+   * Configura los controles de la interfaz
+   */
+  function setupControls() {
+    // Filtro de muros con navegación automática
+    muroFilterSelect.addEventListener('change', (e) => {
+      const filter = e.target.value;
+      
+      if (filter !== 'todos') {
+        // Mostrar capas de polígonos y aplicar filtro
+        map.setLayoutProperty('polygons-stroke', 'visibility', 'visible');
+        map.setLayoutProperty('polygons-labels', 'visibility', 'visible');
+        map.setFilter('polygons-stroke', ['==', ['get', 'tipo'], filter]);
+        map.setFilter('polygons-labels', ['==', ['get', 'tipo'], filter]);
+        
+        // Centrar en las coordenadas específicas del muro
+        if (MURO_BOUNDS_UTM[filter]) {
+          const bounds = MURO_BOUNDS_UTM[filter];
+          const sw = utmToWgs84(bounds.southwest[0], bounds.southwest[1]);
+          const ne = utmToWgs84(bounds.northeast[0], bounds.northeast[1]);
+          
+          // Crear bounds en formato Mapbox [sw, ne]
+          const mapboxBounds = [sw, ne];
+          
+          map.fitBounds(mapboxBounds, {
+            padding: 50,
+            duration: 1000 // Animación de 1 segundo
+          });
+          
+          console.log(`Centrando en muro ${filter}:`, mapboxBounds);
+        }
+      } else {
+        // Ocultar polígonos y volver a la vista general
+        map.setLayoutProperty('polygons-stroke', 'visibility', 'none');
+        map.setLayoutProperty('polygons-labels', 'visibility', 'none');
+        
+        // Volver a la vista general
+        map.fitBounds(MAP_CONFIG.bounds, { 
+          padding: 50,
+          duration: 1000 
+        });
+      }
+    });
+  }
+
+  // Inicializar cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', initializeMap);
+</script>

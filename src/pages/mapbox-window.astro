@@ -1,0 +1,20 @@
+---
+import MiningMap from '../components/MiningMap.astro'
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Visor Mapbox - Integración</title>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css" rel="stylesheet" />
+    <style>html,body{height:100%;margin:0;padding:0}body{font-family:Inter,Arial,Helvetica,sans-serif}</style>
+  </head>
+  <body>
+    <!-- Render the MiningMap component -->
+    <main>
+      <MiningMap />
+    </main>
+  </body>
+</html>
