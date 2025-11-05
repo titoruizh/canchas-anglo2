@@ -1205,19 +1205,109 @@
         .map-modal-title {
           font-size: 1.2rem;
         }
+        
+        /* Responsive para modal de creación */
+        #createCanchaModal .map-modal-content {
+          width: 98vw !important;
+          height: 98vh !important;
+          margin: 1vh auto !important;
+        }
+        
+        .create-cancha-container {
+          flex-direction: column !important;
+          height: calc(100% - 60px) !important;
+        }
+        
+        .create-cancha-form {
+          flex: 0 0 auto !important;
+          max-height: 45vh !important;
+          border-right: none !important;
+          border-bottom: 2px solid #e1e8ed !important;
+          padding: 1.5rem !important;
+        }
+        
+        .create-cancha-map-panel {
+          flex: 1 !important;
+          min-height: 300px !important;
+        }
+        
+        .map-panel-header {
+          padding: 1rem !important;
+        }
+        
+        .form-actions {
+          flex-direction: row !important;
+          gap: 0.5rem !important;
+        }
+        
+        .form-actions button {
+          font-size: 0.8rem !important;
+          padding: 0.6rem 0.8rem !important;
+        }
       }
       
       /* Estilos para el Modal de Creación de Cancha */
-      .create-cancha-form {
-        padding: 2rem;
-        background: #f8f9fa;
+      #createCanchaModal .map-modal-content {
+        max-width: 1400px !important;
+        width: 95vw !important;
+        height: 90vh !important;
+        max-height: none !important;
       }
       
-      .form-row {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
+      .create-cancha-container {
+        display: flex !important;
+        height: calc(100% - 80px) !important; /* Altura total menos header */
+        gap: 0 !important;
+        flex-direction: row !important;
+      }
+      
+      .create-cancha-form {
+        flex: 0 0 380px !important; /* Ancho fijo para el formulario */
+        padding: 2rem !important;
+        background: #f8f9fa !important;
+        border-right: 2px solid #e1e8ed !important;
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 1.5rem !important;
+        overflow-y: auto !important;
+        min-height: 100% !important;
+      }
+      
+      .form-section-title {
+        color: #2c3e50 !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        margin: 0 0 1rem 0 !important;
+        padding-bottom: 0.5rem !important;
+        border-bottom: 2px solid #667eea !important;
+      }
+      
+      .create-cancha-map-panel {
+        flex: 1 !important; /* Ocupa el resto del espacio */
+        display: flex !important;
+        flex-direction: column !important;
+        background: #ffffff !important;
+        min-width: 0 !important; /* Permite que el flex item se encoja */
+      }
+      
+      .map-panel-header {
+        padding: 1.5rem 2rem 1rem 2rem !important;
+        border-bottom: 1px solid #e1e8ed !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        color: white !important;
+        flex-shrink: 0 !important;
+      }
+      
+      .map-panel-title {
+        margin: 0 0 0.5rem 0 !important;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+      }
+      
+      .map-panel-subtitle {
+        margin: 0 !important;
+        font-size: 0.9rem !important;
+        opacity: 0.9 !important;
       }
       
       .form-group {
@@ -1247,6 +1337,46 @@
         outline: none;
         border-color: #667eea;
         box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+      }
+      
+      .form-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        margin-top: auto; /* Empuja los botones hacia abajo */
+      }
+      
+      .form-actions button {
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: none;
+        font-size: 0.9rem;
+      }
+      
+      .drawing-map-container {
+        flex: 1;
+        min-height: 500px;
+        background: #f0f2f5;
+        position: relative;
+        border-radius: 0;
+        overflow: hidden;
+      }
+      
+      .drawing-map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+      
+      .drawing-status {
+        padding: 1rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-align: center;
+        font-size: 0.9rem;
       }
       
       .form-actions {
@@ -1315,16 +1445,33 @@
         border: 1px solid #2196f3;
       }
       
-      .drawing-map-container {
-        height: 400px;
-        border-radius: 0 0 16px 16px;
-        overflow: hidden;
+      
+      #createCanchaModal .drawing-map-container {
+        flex: 1 !important;
+        height: 100% !important;
+        min-height: 400px !important;
+        background: #f0f2f5 !important;
+        position: relative !important;
+        border-radius: 0 !important;
+        overflow: hidden !important;
+        display: flex !important; /* Siempre visible en el nuevo diseño */
+        align-items: center !important;
+        justify-content: center !important;
       }
       
-      .drawing-map-container iframe {
-        width: 100%;
-        height: 100%;
-        border: none;
+      #createCanchaModal .drawing-map-container iframe {
+        width: 100% !important;
+        height: 100% !important;
+        border: none !important;
+      }
+      
+      #createCanchaModal .drawing-map-container:empty::before {
+        content: "🗺️ El mapa aparecerá aquí cuando hagas clic en 'Dibujar Área en Mapa'" !important;
+        color: #6c757d !important;
+        font-style: italic !important;
+        text-align: center !important;
+        padding: 2rem !important;
+        line-height: 1.5 !important;
       }
       
       /* Estilos para el botón de crear cancha en el header */
@@ -3394,13 +3541,15 @@
 
     <!-- Modal para Crear Cancha (solo AngloAmerican) -->
     <div id="createCanchaModal" class="map-modal">
-      <div class="map-modal-content">
+      <div class="map-modal-content create-cancha-modal-content">
         <div class="map-modal-header">
           <h3 class="map-modal-title">Crear Nueva Cancha</h3>
           <button id="createCanchaCloseBtn" class="map-close-btn">&times;</button>
         </div>
-        <div class="create-cancha-form">
-          <div class="form-row">
+        <div class="create-cancha-container">
+          <!-- Panel izquierdo: Formulario -->
+          <div class="create-cancha-form">
+            <h4 class="form-section-title">📋 Datos de la Cancha</h4>
             <div class="form-group">
               <label for="muro-select">Muro:</label>
               <select id="muro-select" required>
@@ -3420,15 +3569,23 @@
               <label for="nombre-detalle-input">Nombre Detalle:</label>
               <input type="text" id="nombre-detalle-input" placeholder="ej: TEST1" required>
             </div>
+            <div class="form-actions">
+              <button id="open-drawing-btn" class="btn-primary" disabled>🗺️ Dibujar Área en Mapa</button>
+              <button id="create-cancha-btn" class="btn-success" disabled>✅ Crear Cancha</button>
+            </div>
+            <div id="drawing-status" class="drawing-status"></div>
           </div>
-          <div class="form-actions">
-            <button id="open-drawing-btn" class="btn-primary" disabled>🗺️ Dibujar Área en Mapa</button>
-            <button id="create-cancha-btn" class="btn-success" disabled>Crear Cancha</button>
+          
+          <!-- Panel derecho: Mapa -->
+          <div class="create-cancha-map-panel">
+            <div class="map-panel-header">
+              <h4 class="map-panel-title">🗺️ Área de Trabajo</h4>
+              <p class="map-panel-subtitle">Dibuja el polígono que define el área de la cancha</p>
+            </div>
+            <div id="drawingMapContainer" class="drawing-map-container">
+              <!-- El mapa de dibujo se cargará aquí -->
+            </div>
           </div>
-          <div id="drawing-status" class="drawing-status"></div>
-        </div>
-        <div id="drawingMapContainer" class="drawing-map-container" style="display: none;">
-          <!-- El mapa de dibujo se cargará aquí -->
         </div>
       </div>
     </div>
