@@ -2809,31 +2809,115 @@ import AuthGuard from '../components/AuthGuard.astro';
         const modal = document.getElementById('validacion-linkapsis-modal')
         const form = document.getElementById('form-validacion-linkapsis')
         
-        // Limpiar formulario
+        // Limpiar formulario básico
         form.reset()
         
         // Limpiar checkboxes específicamente
         document.getElementById('trabajo-corte').checked = false
         document.getElementById('trabajo-relleno').checked = false
         
-        // Limpiar todos los campos de coordenadas
-        const coordInputs = [
-          'p1-norte', 'p1-este', 'p1-cota',
-          'p2-norte', 'p2-este', 'p2-cota', 
-          'p3-norte', 'p3-este', 'p3-cota',
-          'p4-norte', 'p4-este', 'p4-cota'
-        ]
-        
-        coordInputs.forEach(id => {
-          const input = document.getElementById(id)
-          if (input) input.value = ''
-        })
+        // Verificar si ya existen coordenadas previas de Linkapsis
+        verificarCoordenadasExistentes(canchaId)
         
         // Cargar historial de observaciones (incluye observaciones de Besalco)
         cargarHistorialObservaciones(canchaId, 'historial-linkapsis')
         
         // Mostrar modal
         modal.classList.add('show')
+      }
+
+      async function verificarCoordenadasExistentes(canchaId) {
+        try {
+          const response = await fetch(`/api/canchas/${canchaId}/validaciones`)
+          const validaciones = await response.json()
+          
+          console.log('Validaciones obtenidas:', validaciones)
+          
+          // Buscar validaciones de Linkapsis (empresa_validadora_id = 3) que tengan coordenadas
+          if (validaciones && validaciones.length > 0) {
+            const validacionLinkapsis = validaciones.find(v => 
+              v.empresa_validadora_id === 3 && 
+              v.mediciones && 
+              v.mediciones.coordenadas
+            )
+            
+            if (validacionLinkapsis && validacionLinkapsis.mediciones && validacionLinkapsis.mediciones.coordenadas) {
+              const coordenadas = validacionLinkapsis.mediciones.coordenadas
+              console.log('Coordenadas existentes encontradas:', coordenadas)
+              console.log('Validación Linkapsis completa:', validacionLinkapsis)
+              
+              // Pre-llenar los campos con coordenadas existentes
+              const coordMap = {
+                'p1-norte': coordenadas.p1?.norte || '',
+                'p1-este': coordenadas.p1?.este || '',
+                'p1-cota': coordenadas.p1?.cota || '',
+                'p2-norte': coordenadas.p2?.norte || '',
+                'p2-este': coordenadas.p2?.este || '',
+                'p2-cota': coordenadas.p2?.cota || '',
+                'p3-norte': coordenadas.p3?.norte || '',
+                'p3-este': coordenadas.p3?.este || '',
+                'p3-cota': coordenadas.p3?.cota || '',
+                'p4-norte': coordenadas.p4?.norte || '',
+                'p4-este': coordenadas.p4?.este || '',
+                'p4-cota': coordenadas.p4?.cota || ''
+              }
+              
+              console.log('Mapa de coordenadas para llenar:', coordMap)
+              
+              // Llenar los campos si tienen valores
+              Object.keys(coordMap).forEach(id => {
+                const input = document.getElementById(id)
+                if (input && coordMap[id]) {
+                  console.log(`Llenando campo ${id} con valor: ${coordMap[id]}`)
+                  input.value = coordMap[id]
+                } else if (input) {
+                  console.log(`Campo ${id} encontrado pero sin valor para llenar`)
+                } else {
+                  console.log(`Campo ${id} NO encontrado en el DOM`)
+                }
+              })
+              
+              // Mantener espesor y checkboxes vacíos para nueva evaluación
+              const espesorInput = document.getElementById('espesor-linkapsis')
+              if (espesorInput) {
+                espesorInput.value = ''
+              }
+              
+              // Mantener checkboxes de tipo de trabajo sin marcar para nueva evaluación
+              document.getElementById('trabajo-corte').checked = false
+              document.getElementById('trabajo-relleno').checked = false
+            } else {
+              console.log('No se encontraron validaciones previas de Linkapsis con coordenadas')
+              console.log('Validaciones disponibles:', validaciones)
+              // No hay coordenadas previas, limpiar todos los campos
+              const coordInputs = [
+                'p1-norte', 'p1-este', 'p1-cota',
+                'p2-norte', 'p2-este', 'p2-cota', 
+                'p3-norte', 'p3-este', 'p3-cota',
+                'p4-norte', 'p4-este', 'p4-cota'
+              ]
+              
+              coordInputs.forEach(id => {
+                const input = document.getElementById(id)
+                if (input) input.value = ''
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Error al verificar coordenadas existentes:', error)
+          // En caso de error, limpiar campos por seguridad
+          const coordInputs = [
+            'p1-norte', 'p1-este', 'p1-cota',
+            'p2-norte', 'p2-este', 'p2-cota', 
+            'p3-norte', 'p3-este', 'p3-cota',
+            'p4-norte', 'p4-este', 'p4-cota'
+          ]
+          
+          coordInputs.forEach(id => {
+            const input = document.getElementById(id)
+            if (input) input.value = ''
+          })
+        }
       }
 
       function abrirModalLlayLlay(canchaId) {
