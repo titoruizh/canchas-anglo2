@@ -1,0 +1,90 @@
+---
+// src/components/AuthGuard.astro
+// Componente para proteger páginas que requieren autenticación
+
+export interface Props {
+  requireRole?: string;
+  requireCompany?: number;
+  redirectTo?: string;
+}
+
+const { requireRole, requireCompany, redirectTo = '/login' } = Astro.props;
+---
+
+<script define:vars={{ requireRole, requireCompany, redirectTo }}>
+  // AuthGuard - Protección de rutas del lado del cliente
+  class AuthGuard {
+    constructor(options = {}) {
+      this.requireRole = options.requireRole;
+      this.requireCompany = options.requireCompany;
+      this.redirectTo = options.redirectTo || '/login';
+      this.checkAuth();
+    }
+
+    checkAuth() {
+      try {
+        const sessionData = localStorage.getItem('userSession');
+        
+        if (!sessionData) {
+          this.redirectToLogin('No hay sesión activa');
+          return;
+        }
+
+        const session = JSON.parse(sessionData);
+        const expiresAt = new Date(session.expiresAt);
+        
+        if (expiresAt <= new Date()) {
+          localStorage.removeItem('userSession');
+          this.redirectToLogin('Sesión expirada');
+          return;
+        }
+
+        const user = session.usuario;
+
+        // Verificar rol específico si se requiere
+        if (this.requireRole && user.rol_nombre !== this.requireRole) {
+          this.redirectToLogin(`Se requiere el rol: ${this.requireRole}`);
+          return;
+        }
+
+        // Verificar empresa específica si se requiere
+        if (this.requireCompany && user.empresa_id !== this.requireCompany) {
+          this.redirectToLogin('No tiene permisos para acceder a esta empresa');
+          return;
+        }
+
+        // Autenticación exitosa
+        console.log('Usuario autenticado:', user.nombre_completo);
+        
+        // Dispatch evento de usuario cargado
+        window.dispatchEvent(new CustomEvent('userAuthenticated', { 
+          detail: user 
+        }));
+
+      } catch (error) {
+        console.error('Error verificando autenticación:', error);
+        this.redirectToLogin('Error de autenticación');
+      }
+    }
+
+    redirectToLogin(reason) {
+      console.warn('Redirigiendo al login:', reason);
+      
+      // Mostrar mensaje temporal si es posible
+      if (reason && window.location.pathname !== this.redirectTo) {
+        sessionStorage.setItem('authMessage', reason);
+      }
+      
+      window.location.href = this.redirectTo;
+    }
+  }
+
+  // Inicializar AuthGuard cuando el DOM esté listo
+  document.addEventListener('DOMContentLoaded', () => {
+    new AuthGuard({
+      requireRole,
+      requireCompany, 
+      redirectTo
+    });
+  });
+</script>

@@ -1,0 +1,460 @@
+---
+// src/pages/login.astro
+---
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistema Canchas AngloAmerican</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 480px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff6b35, #f7931e, #2a5298);
+        }
+
+        .logo-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo-section h1 {
+            color: #1e3c72;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .logo-section p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .form-control:disabled {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #2a5298 0%, #1e3c72 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(42, 82, 152, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .error-message {
+            background: #fee;
+            border: 1px solid #fcc;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success-message {
+            background: #efe;
+            border: 1px solid #cfc;
+            color: #3c3;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 24px;
+            border-left: 4px solid #2a5298;
+        }
+
+        .info-section h3 {
+            color: #1e3c72;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .info-section p {
+            color: #666;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+            }
+            
+            .logo-section h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo-section">
+            <h1>Sistema de Canchas</h1>
+            <p>AngloAmerican - Control de Calidad</p>
+        </div>
+
+        <form id="loginForm">
+            <div id="messageContainer"></div>
+
+            <div class="form-group">
+                <label for="empresaSelect">Empresa</label>
+                <select id="empresaSelect" class="form-control" required>
+                    <option value="">Seleccione una empresa...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="usuarioSelect">Usuario</label>
+                <select id="usuarioSelect" class="form-control" required disabled>
+                    <option value="">Primero seleccione una empresa</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="passwordInput">Contraseña</label>
+                <input type="password" id="passwordInput" class="form-control" placeholder="Ingrese su contraseña" required disabled>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn" disabled>
+                <span id="loginBtnText">Iniciar Sesión</span>
+            </button>
+        </form>
+
+        <div class="info-section">
+            <h3>Información de Desarrollo</h3>
+            <p>Todos los usuarios utilizan la contraseña: <strong>123</strong><br>
+            Seleccione su empresa y usuario correspondiente para acceder al sistema.</p>
+        </div>
+    </div>
+
+    <script>
+        class LoginManager {
+            constructor() {
+                this.empresaSelect = document.getElementById('empresaSelect');
+                this.usuarioSelect = document.getElementById('usuarioSelect');
+                this.passwordInput = document.getElementById('passwordInput');
+                this.loginForm = document.getElementById('loginForm');
+                this.loginBtn = document.getElementById('loginBtn');
+                this.loginBtnText = document.getElementById('loginBtnText');
+                this.messageContainer = document.getElementById('messageContainer');
+
+                this.init();
+            }
+
+            init() {
+                this.cargarEmpresas();
+                this.setupEventListeners();
+                this.checkExistingLogin();
+            }
+
+            setupEventListeners() {
+                this.empresaSelect.addEventListener('change', () => this.onEmpresaChange());
+                this.usuarioSelect.addEventListener('change', () => this.onUsuarioChange());
+                this.passwordInput.addEventListener('input', () => this.validateForm());
+                this.loginForm.addEventListener('submit', (e) => this.onLogin(e));
+            }
+
+            async cargarEmpresas() {
+                try {
+                    console.log('Intentando cargar empresas desde /api/empresas...');
+                    const response = await fetch('/api/empresas');
+                    console.log('Respuesta recibida:', response.status, response.statusText);
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    
+                    const data = await response.json();
+                    console.log('Datos de empresas recibidos:', data);
+
+                    if (data.success && data.empresas) {
+                        this.empresaSelect.innerHTML = '<option value="">Seleccione una empresa...</option>';
+                        console.log(`Cargando ${data.empresas.length} empresas...`);
+                        
+                        data.empresas.forEach(empresa => {
+                            const option = document.createElement('option');
+                            option.value = empresa.id;
+                            option.textContent = empresa.nombre;
+                            this.empresaSelect.appendChild(option);
+                            console.log(`- Empresa agregada: ${empresa.nombre} (ID: ${empresa.id})`);
+                        });
+                        
+                        console.log('Empresas cargadas exitosamente');
+                    } else {
+                        console.error('Respuesta de API no válida:', data);
+                        this.showMessage(data.error || 'Error al cargar empresas', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error completo cargando empresas:', error);
+                    this.showMessage(`Error de conexión: ${error.message}`, 'error');
+                }
+            }
+
+            async onEmpresaChange() {
+                const empresaId = this.empresaSelect.value;
+                
+                if (!empresaId) {
+                    this.usuarioSelect.innerHTML = '<option value="">Primero seleccione una empresa</option>';
+                    this.usuarioSelect.disabled = true;
+                    this.passwordInput.disabled = true;
+                    this.validateForm();
+                    return;
+                }
+
+                try {
+                    this.usuarioSelect.innerHTML = '<option value="">Cargando usuarios...</option>';
+                    this.usuarioSelect.disabled = true;
+
+                    const response = await fetch(`/api/usuarios?empresa_id=${empresaId}&activo=true`);
+                    const data = await response.json();
+
+                    if (data.success) {
+                        this.usuarioSelect.innerHTML = '<option value="">Seleccione un usuario...</option>';
+                        data.usuarios.forEach(usuario => {
+                            const option = document.createElement('option');
+                            option.value = usuario.id;
+                            option.textContent = `${usuario.nombre_completo} (${usuario.rol_nombre})`;
+                            this.usuarioSelect.appendChild(option);
+                        });
+                        this.usuarioSelect.disabled = false;
+                    } else {
+                        this.usuarioSelect.innerHTML = '<option value="">Error al cargar usuarios</option>';
+                        this.showMessage('Error al cargar usuarios de la empresa', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error cargando usuarios:', error);
+                    this.usuarioSelect.innerHTML = '<option value="">Error de conexión</option>';
+                    this.showMessage('Error de conexión al cargar usuarios', 'error');
+                }
+
+                this.validateForm();
+            }
+
+            onUsuarioChange() {
+                const usuarioId = this.usuarioSelect.value;
+                this.passwordInput.disabled = !usuarioId;
+                if (usuarioId) {
+                    this.passwordInput.focus();
+                }
+                this.validateForm();
+            }
+
+            validateForm() {
+                const isValid = this.empresaSelect.value && 
+                               this.usuarioSelect.value && 
+                               this.passwordInput.value.length > 0;
+                
+                this.loginBtn.disabled = !isValid;
+            }
+
+            async onLogin(event) {
+                event.preventDefault();
+                
+                const empresaId = this.empresaSelect.value;
+                const usuarioId = this.usuarioSelect.value;
+                const password = this.passwordInput.value;
+
+                if (!empresaId || !usuarioId || !password) {
+                    this.showMessage('Todos los campos son requeridos', 'error');
+                    return;
+                }
+
+                this.setLoading(true);
+
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            empresa_id: parseInt(empresaId),
+                            usuario_id: parseInt(usuarioId),
+                            password: password
+                        })
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        // Guardar información de sesión
+                        localStorage.setItem('userSession', JSON.stringify({
+                            usuario: data.usuario,
+                            loginTime: new Date().toISOString(),
+                            expiresAt: new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString() // 8 horas
+                        }));
+
+                        this.showMessage('¡Login exitoso! Redirigiendo...', 'success');
+                        
+                        // Redireccionar después de 1.5 segundos
+                        setTimeout(() => {
+                            window.location.href = '/';
+                        }, 1500);
+                    } else {
+                        this.showMessage(data.details || 'Credenciales incorrectas', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error en login:', error);
+                    this.showMessage('Error de conexión. Intente nuevamente.', 'error');
+                } finally {
+                    this.setLoading(false);
+                }
+            }
+
+            setLoading(loading) {
+                if (loading) {
+                    this.loginBtn.disabled = true;
+                    this.loginBtnText.innerHTML = '<span class="loading"></span>Iniciando sesión...';
+                } else {
+                    this.loginBtnText.textContent = 'Iniciar Sesión';
+                    this.validateForm(); // Revalida el estado del botón
+                }
+            }
+
+            showMessage(message, type) {
+                const className = type === 'error' ? 'error-message' : 'success-message';
+                this.messageContainer.innerHTML = `<div class="${className}">${message}</div>`;
+                
+                // Auto-ocultar mensajes exitosos después de 3 segundos
+                if (type === 'success') {
+                    setTimeout(() => {
+                        this.messageContainer.innerHTML = '';
+                    }, 3000);
+                }
+            }
+
+            checkExistingLogin() {
+                const session = localStorage.getItem('userSession');
+                if (session) {
+                    try {
+                        const sessionData = JSON.parse(session);
+                        const expiresAt = new Date(sessionData.expiresAt);
+                        
+                        if (expiresAt > new Date()) {
+                            // Sesión válida, redireccionar
+                            this.showMessage('Ya tiene una sesión activa. Redirigiendo...', 'success');
+                            setTimeout(() => {
+                                window.location.href = '/';
+                            }, 1500);
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error parsing session:', error);
+                    }
+                    
+                    // Limpiar sesión expirada
+                    localStorage.removeItem('userSession');
+                }
+            }
+        }
+
+        // Inicializar cuando el DOM esté listo
+        document.addEventListener('DOMContentLoaded', () => {
+            new LoginManager();
+        });
+    </script>
+</body>
+</html>

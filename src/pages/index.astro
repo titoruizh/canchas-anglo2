@@ -1,5 +1,8 @@
 ---
+import AuthGuard from '../components/AuthGuard.astro';
 ---
+
+<AuthGuard />
 
 <html lang="es">
   <head>
@@ -1580,34 +1583,19 @@
     <div class="container">
       <div id="mensaje-container"></div>
 
-      <!-- Pantalla de Login por Empresa -->
-      <div id="login-screen" class="login-container">
-        <div class="login-card">
-          <h2>Acceso al Sistema</h2>
-          <p>Selecciona tu empresa para continuar</p>
-          
-          <div class="login-form">
-            <div class="control-group">
-              <label for="empresa-login">Empresa:</label>
-              <select id="empresa-login">
-                <option value="">-- Selecciona tu empresa --</option>
-                <!-- Las empresas se cargarán dinámicamente -->
-              </select>
-            </div>
-            <button id="btn-ingresar" type="button" disabled>Ingresar al Sistema</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pantalla Principal (inicialmente oculta) -->
-      <div id="main-screen" class="hidden">
-        <!-- Header de empresa logueada -->
-        <div class="empresa-header">
+      <!-- Pantalla Principal -->
+      <div id="main-screen">
+        <!-- Header de usuario logueado -->
+        <div class="empresa-header" id="user-header">
           <div class="empresa-info">
-            <span class="empresa-nombre"></span>
-            <span class="empresa-rol"></span>
+            <span class="empresa-nombre" id="user-name">Cargando usuario...</span>
+            <span class="empresa-rol" id="user-role">Verificando permisos...</span>
           </div>
-          <button id="btn-cambiar-empresa" type="button">Cambiar Empresa</button>
+          <div style="display: flex; gap: 1rem; align-items: center;">
+            <span id="user-company" class="empresa-actual">Cargando...</span>
+            <a id="btn-admin-usuarios" href="/admin/usuarios" class="btn btn-warning" style="display: none;">👥 Gestión Usuarios</a>
+            <button id="btn-logout" type="button">Cerrar Sesión</button>
+          </div>
         </div>
 
         <!-- Controles y Filtros -->
@@ -1945,6 +1933,7 @@
 
     <script type="module">
       // Variables globales
+      let usuarioLogueado = null
       let empresaLogueada = null
       let cargando = false
       let vistaActual = 'acciones' // 'acciones' o 'historico'
@@ -1953,13 +1942,13 @@
       let canchasFiltradas = []
 
       // Elementos del DOM
-      const loginScreen = document.getElementById('login-screen')
       const mainScreen = document.getElementById('main-screen')
-      const empresaLogin = document.getElementById('empresa-login')
-      const btnIngresar = document.getElementById('btn-ingresar')
-      const btnCambiarEmpresa = document.getElementById('btn-cambiar-empresa')
-      const empresaNombre = document.querySelector('.empresa-nombre')
-      const empresaRol = document.querySelector('.empresa-rol')
+      const userHeader = document.getElementById('user-header')
+      const userName = document.getElementById('user-name')
+      const userRole = document.getElementById('user-role')
+      const userCompany = document.getElementById('user-company')
+      const btnAdminUsuarios = document.getElementById('btn-admin-usuarios')
+      const btnLogout = document.getElementById('btn-logout')
       const formCrearCancha = document.getElementById('form-crear-cancha')
       const btnCrearCancha = document.getElementById('btn-crear-cancha')
       const btnAbrirModalCrear = document.getElementById('btn-abrir-modal-crear')
@@ -1979,27 +1968,50 @@
       // Cargar datos iniciales
       async function inicializar() {
         try {
-          await cargarEmpresas()
           configurarEventListeners()
           
-          // Verificar si hay empresa guardada en localStorage
-          const empresaGuardada = localStorage.getItem('empresaLogueada')
-          if (empresaGuardada) {
-            const empresa = JSON.parse(empresaGuardada)
-            await loginEmpresa(empresa.id, empresa.nombre)
-          }
+          // Esperar a que el AuthGuard termine de verificar
+          window.addEventListener('userAuthenticated', (event) => {
+            cargarUsuarioAutenticado(event.detail)
+          })
+          
+          // Verificar si ya hay usuario autenticado
+          verificarUsuarioExistente()
+          
         } catch (error) {
           console.error('Error al inicializar:', error)
           mostrarMensaje('Error al cargar datos iniciales', 'error')
         }
       }
+      
+      // Verificar si hay usuario autenticado en localStorage
+      function verificarUsuarioExistente() {
+        try {
+          const sessionData = localStorage.getItem('userSession')
+          if (sessionData) {
+            const session = JSON.parse(sessionData)
+            const expiresAt = new Date(session.expiresAt)
+            
+            if (expiresAt > new Date()) {
+              cargarUsuarioAutenticado(session.usuario)
+            } else {
+              // Sesión expirada, redirigir al login
+              window.location.href = '/login'
+            }
+          } else {
+            // No hay sesión, redirigir al login
+            window.location.href = '/login'
+          }
+        } catch (error) {
+          console.error('Error verificando usuario:', error)
+          window.location.href = '/login'
+        }
+      }
 
       // Configurar todos los event listeners
       function configurarEventListeners() {
-        // Login
-        empresaLogin.addEventListener('change', validarFormularioLogin)
-        btnIngresar.addEventListener('click', manejarLogin)
-        btnCambiarEmpresa.addEventListener('click', cerrarSesion)
+        // Logout
+        btnLogout.addEventListener('click', cerrarSesion)
         
         // Filtros
         btnVistaAcciones.addEventListener('click', () => cambiarVista('acciones'))
@@ -2118,62 +2130,57 @@
         return todasLasCanchas
       }
 
-      // === FUNCIONES DE LOGIN ===
-      function validarFormularioLogin() {
-        const empresaSeleccionada = empresaLogin.value
-        btnIngresar.disabled = !empresaSeleccionada
-      }
+      // === FUNCIONES DE AUTENTICACIÓN ===
+      // Las funciones de autenticación ahora se manejan en login.astro y AuthGuard.astro
 
-      async function manejarLogin() {
-        const empresaId = parseInt(empresaLogin.value)
-        const empresaNombreSeleccionada = empresaLogin.options[empresaLogin.selectedIndex].text
-        
-        if (!empresaId) return
-        
-        await loginEmpresa(empresaId, empresaNombreSeleccionada)
-      }
-
-      async function loginEmpresa(empresaId, nombreEmpresa) {
+      // Cargar información del usuario autenticado
+      async function cargarUsuarioAutenticado(usuario) {
         try {
-          console.log('Iniciando login para empresa:', { empresaId, nombreEmpresa })
-          empresaLogueada = { id: empresaId, nombre: nombreEmpresa }
+          console.log('Cargando usuario autenticado:', usuario)
           
-          // Guardar en localStorage
-          localStorage.setItem('empresaLogueada', JSON.stringify(empresaLogueada))
+          usuarioLogueado = usuario
+          empresaLogueada = {
+            id: usuario.empresa_id,
+            nombre: usuario.empresa_nombre
+          }
           
-          // Actualizar UI
-          empresaNombre.textContent = nombreEmpresa
-          empresaRol.textContent = getRolEmpresa(nombreEmpresa)
+          // Actualizar UI del header
+          userName.textContent = usuario.nombre_completo
+          userRole.textContent = `${usuario.rol_nombre} - ${usuario.empresa_nombre}`
+          userCompany.textContent = usuario.empresa_nombre
+          userCompany.className = `empresa-actual empresa-${usuario.empresa_nombre.toLowerCase().replace(' ', '')}`
           
-          // Mostrar/ocultar formulario de crear cancha
-          if (nombreEmpresa === 'AngloAmerican') {
+          // Mostrar/ocultar formulario de crear cancha según la empresa
+          if (usuario.empresa_nombre === 'AngloAmerican') {
             console.log('Mostrando formulario de crear cancha para AngloAmerican')
             formCrearCancha.classList.remove('hidden')
           } else {
-            console.log('Ocultando formulario de crear cancha para:', nombreEmpresa)
+            console.log('Ocultando formulario de crear cancha para:', usuario.empresa_nombre)
             formCrearCancha.classList.add('hidden')
           }
           
-          // Cambiar a pantalla principal
-          loginScreen.classList.add('hidden')
-          mainScreen.classList.remove('hidden')
+          // Mostrar enlace de administración si es Admin
+          if (usuario.rol_nombre && usuario.rol_nombre.includes('Admin')) {
+            btnAdminUsuarios.style.display = 'inline-block'
+          } else {
+            btnAdminUsuarios.style.display = 'none'
+          }
           
           // Cargar datos
-          console.log('Cargando canchas...')
           await cargarCanchas()
           
           // Actualizar columna de administración
-          console.log('Actualizando columna de administración...')
           actualizarColumnaAdmin()
           
-          mostrarMensaje(`Bienvenido, ${nombreEmpresa}!`, 'success')
-          console.log('Login completado exitosamente')
+          mostrarMensaje(`¡Bienvenido, ${usuario.nombre_completo}!`, 'success')
+          
         } catch (error) {
-          console.error('Error en login:', error)
-          mostrarMensaje('Error al iniciar sesión', 'error')
+          console.error('Error cargando usuario:', error)
+          mostrarMensaje('Error al cargar información del usuario', 'error')
+          window.location.href = '/login'
         }
       }
-
+      
       function getRolEmpresa(nombreEmpresa) {
         const roles = {
           'AngloAmerican': 'Creación y cierre de canchas',
@@ -2185,19 +2192,14 @@
       }
 
       function cerrarSesion() {
+        usuarioLogueado = null
         empresaLogueada = null
-        localStorage.removeItem('empresaLogueada')
         
-        // Limpiar formularios
-        empresaLogin.value = ''
-        validarFormularioLogin()
+        // Limpiar localStorage
+        localStorage.removeItem('userSession')
         
-        // Cambiar a pantalla de login
-        mainScreen.classList.add('hidden')
-        loginScreen.classList.remove('hidden')
-        
-        // Limpiar datos
-        canchasTBody.innerHTML = ''
+        // Redirigir al login
+        window.location.href = '/login'
         todasLasCanchas = []
         canchasFiltradas = []
         
@@ -2207,23 +2209,7 @@
         mostrarMensaje('Sesión cerrada correctamente', 'success')
       }
 
-      // Cargar empresas
       // === FUNCIONES DE CARGA DE DATOS ===
-      async function cargarEmpresas() {
-        try {
-          const response = await fetch('/api/empresas')
-          const empresas = await response.json()
-          
-          empresas.forEach(empresa => {
-            const option = document.createElement('option')
-            option.value = empresa.id
-            option.textContent = empresa.nombre
-            empresaLogin.appendChild(option)
-          })
-        } catch (error) {
-          throw new Error('Error al cargar empresas: ' + error.message)
-        }
-      }
 
       // === FUNCIONES DE FILTROS ===
       function cambiarVista(nuevaVista) {
