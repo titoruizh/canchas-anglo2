@@ -2159,8 +2159,8 @@ import AuthGuard from '../components/AuthGuard.astro';
             formCrearCancha.classList.add('hidden')
           }
           
-          // Mostrar enlace de administración si es Admin
-          if (usuario.rol_nombre && usuario.rol_nombre.includes('Admin')) {
+          // Mostrar enlace de administración si es de AngloAmerican
+          if (usuario.empresa_id === 1) { // AngloAmerican
             btnAdminUsuarios.style.display = 'inline-block'
           } else {
             btnAdminUsuarios.style.display = 'none'

@@ -536,8 +536,8 @@ import AuthGuard from '../../components/AuthGuard.astro';
 
                     this.currentUser = session.usuario;
                     
-                    // Verificar que sea Admin
-                    if (!this.currentUser.rol_nombre.includes('Admin')) {
+                    // Verificar que sea de AngloAmerican
+                    if (this.currentUser.empresa_id !== 1) { // AngloAmerican
                         this.showMessage('No tienes permisos para acceder a esta sección', 'error');
                         setTimeout(() => {
                             window.location.href = '/';
