@@ -64,6 +64,8 @@ export interface Validacion {
   mediciones?: MedicionData
   created_at: string
   is_revalidacion?: boolean // Para distinguir primera vs segunda validación
+  usuario_validador?: string // Nombre del usuario que realizó la validación
+  usuario_validador_id?: number // ID del usuario que realizó la validación
 }
 
 // Interfaces para mediciones específicas
@@ -311,7 +313,7 @@ export class CanchaService {
       })
   }
 
-  static async finalizarBesalco(canchaId: number, observaciones?: string): Promise<void> {
+  static async finalizarBesalco(canchaId: number, observaciones?: string, usuario?: any): Promise<void> {
     // Enviar a Linkapsis
     const { error } = await supabase
       .from('canchas')
@@ -323,16 +325,24 @@ export class CanchaService {
     
     if (error) throw error
 
-    // Registrar finalización del trabajo
+    // Registrar finalización del trabajo con información del usuario
+    const validacionData: any = {
+      cancha_id: canchaId,
+      empresa_validadora_id: 2, // Besalco
+      tipo_validacion: 'trabajo_maquinaria',
+      resultado: 'validada',
+      observaciones
+    }
+
+    // Agregar información del usuario si está disponible
+    if (usuario) {
+      validacionData.usuario_validador_id = usuario.id
+      validacionData.usuario_validador_nombre = usuario.nombre_completo
+    }
+
     await supabase
       .from('validaciones')
-      .insert({
-        cancha_id: canchaId,
-        empresa_validadora_id: 2, // Besalco
-        tipo_validacion: 'trabajo_maquinaria',
-        resultado: 'validada',
-        observaciones
-      })
+      .insert(validacionData)
   }
 
   // Validar por Linkapsis
@@ -341,7 +351,8 @@ export class CanchaService {
     validar: boolean, 
     observaciones?: string, 
     mediciones?: MedicionData,
-    esRevalidacion: boolean = false
+    esRevalidacion: boolean = false,
+    usuario?: any
   ): Promise<void> {
     if (validar) {
       // Pasar a LlayLlay
@@ -353,18 +364,26 @@ export class CanchaService {
         })
         .eq('id', canchaId)
       
-      // Guardar validación con mediciones
+      // Guardar validación con mediciones y usuario
+      const validacionData: any = {
+        cancha_id: canchaId,
+        empresa_validadora_id: 3, // Linkapsis
+        tipo_validacion: 'espesores',
+        resultado: 'validada',
+        observaciones,
+        mediciones,
+        is_revalidacion: esRevalidacion
+      }
+
+      // Agregar información del usuario si está disponible
+      if (usuario) {
+        validacionData.usuario_validador_id = usuario.id
+        validacionData.usuario_validador_nombre = usuario.nombre_completo
+      }
+
       await supabase
         .from('validaciones')
-        .insert({
-          cancha_id: canchaId,
-          empresa_validadora_id: 3, // Linkapsis
-          tipo_validacion: 'espesores',
-          resultado: 'validada',
-          observaciones,
-          mediciones,
-          is_revalidacion: esRevalidacion
-        })
+        .insert(validacionData)
     } else {
       // Rechazar y volver a Besalco
       await supabase
@@ -375,16 +394,24 @@ export class CanchaService {
         })
         .eq('id', canchaId)
       
-      // Guardar rechazo
+      // Guardar rechazo con usuario
+      const rechazoData: any = {
+        cancha_id: canchaId,
+        empresa_validadora_id: 3, // Linkapsis
+        tipo_validacion: 'espesores',
+        resultado: 'rechazada',
+        observaciones
+      }
+
+      // Agregar información del usuario si está disponible
+      if (usuario) {
+        rechazoData.usuario_validador_id = usuario.id
+        rechazoData.usuario_validador_nombre = usuario.nombre_completo
+      }
+
       await supabase
         .from('validaciones')
-        .insert({
-          cancha_id: canchaId,
-          empresa_validadora_id: 3, // Linkapsis
-          tipo_validacion: 'espesores',
-          resultado: 'rechazada',
-          observaciones
-        })
+        .insert(rechazoData)
     }
   }
 
@@ -394,7 +421,8 @@ export class CanchaService {
     validar: boolean, 
     observaciones?: string, 
     mediciones?: MedicionData,
-    esRevalidacion: boolean = false
+    esRevalidacion: boolean = false,
+    usuario?: any
   ): Promise<void> {
     if (validar) {
       // Devolver a AngloAmerican para cierre
@@ -416,18 +444,26 @@ export class CanchaService {
         .eq('id', canchaId)
     }
 
-    // Registrar validación con mediciones
+    // Registrar validación con mediciones y usuario
+    const validacionData: any = {
+      cancha_id: canchaId,
+      empresa_validadora_id: 4, // LlayLlay
+      tipo_validacion: 'densidad',
+      resultado: validar ? 'validada' : 'rechazada',
+      observaciones,
+      mediciones,
+      is_revalidacion: esRevalidacion
+    }
+
+    // Agregar información del usuario si está disponible
+    if (usuario) {
+      validacionData.usuario_validador_id = usuario.id
+      validacionData.usuario_validador_nombre = usuario.nombre_completo
+    }
+
     await supabase
       .from('validaciones')
-      .insert({
-        cancha_id: canchaId,
-        empresa_validadora_id: 4, // LlayLlay
-        tipo_validacion: 'densidad',
-        resultado: validar ? 'validada' : 'rechazada',
-        observaciones,
-        mediciones,
-        is_revalidacion: esRevalidacion
-      })
+      .insert(validacionData)
   }
 
   // Cerrar cancha (AngloAmerican)

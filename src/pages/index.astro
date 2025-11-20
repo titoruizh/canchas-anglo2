@@ -3206,7 +3206,8 @@ import AuthGuard from '../components/AuthGuard.astro';
           
           const payload = {
             accion: accion,
-            observaciones: observaciones
+            observaciones: observaciones,
+            usuario: usuarioLogueado // Incluir información del usuario actual
           }
           
           if (mediciones) {

@@ -223,10 +223,34 @@ export const GET: APIRoute = async ({ params, request }) => {
         FIRMA_LL: '[Firma LlayLlay]',
         FIRMA2_LL: '[Firma LlayLlay 2]',
         
-        // Comentarios y observaciones separados por empresa
-        COMENTARIOS_BESALCO: validacionBesalco?.observaciones || '',
-        COMENTARIOS_LINKAPSIS: validacionLinkapsis?.observaciones || '',
-        COMENTARIOS_LLAYLLAY: validacionLlayLlay?.observaciones || '',
+        // Comentarios y observaciones: tomar los ÚLTIMOS comentarios de cada empresa (incluyendo rechazos)
+        COMENTARIOS_BESALCO: (() => {
+          const todasValidacionesBesalco = validaciones.filter(v => v.empresa_validadora_id === 2)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          return todasValidacionesBesalco[0]?.observaciones || ''
+        })(),
+        COMENTARIOS_LINKAPSIS: (() => {
+          const todasValidacionesLinkapsis = validaciones.filter(v => v.empresa_validadora_id === 3)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          return todasValidacionesLinkapsis[0]?.observaciones || ''
+        })(),
+        COMENTARIOS_LLAYLLAY: (() => {
+          const todasValidacionesLlayLlay = validaciones.filter(v => v.empresa_validadora_id === 4)
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          return todasValidacionesLlayLlay[0]?.observaciones || ''
+        })(),
+        
+        // Nombres de usuarios validadores - Besalco
+        NOMBRE_BS: validacionBesalco?.usuario_validador_nombre || '',
+        NOMBRE2_BS: validacionBesalco2?.usuario_validador_nombre || '',
+        
+        // Nombres de usuarios validadores - Linkapsis  
+        NOMBRE_LK: validacionLinkapsis?.usuario_validador_nombre || '',
+        NOMBRE2_LK: validacionLinkapsis2?.usuario_validador_nombre || '',
+        
+        // Nombres de usuarios validadores - LlayLlay
+        NOMBRE_LL: validacionLlayLlay?.usuario_validador_nombre || '',
+        NOMBRE2_LL: validacionLlayLlay2?.usuario_validador_nombre || '',
         
         // Personal de AngloAmerican (nombres reales desde la base de datos)
         NOMBRE_AAQAQC: usuarioQAQC?.nombre_completo || 'Ingeniero QA/QC',
