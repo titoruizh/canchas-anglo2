@@ -69,17 +69,30 @@ export const GET: APIRoute = async ({ params, request }) => {
     function extraerDatosParaTemplate(cancha: any, validaciones: any[] = []) {
       // Buscar validaciones específicas por empresa_validadora_id
       // ID 2 = Besalco, ID 3 = Linkapsis, ID 4 = LlayLlay
-      const validacionBesalco = validaciones.find(v => v.empresa_validadora_id === 2)
-      const validacionLinkapsis = validaciones.find(v => v.empresa_validadora_id === 3)
-      const validacionLlayLlay = validaciones.find(v => v.empresa_validadora_id === 4)
+      
+      // Obtener todas las validaciones por empresa (primera y revalidaciones)
+      const validacionesBesalco = validaciones.filter(v => v.empresa_validadora_id === 2 && v.resultado === 'validada')
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      const validacionesLinkapsis = validaciones.filter(v => v.empresa_validadora_id === 3 && v.resultado === 'validada')
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      const validacionesLlayLlay = validaciones.filter(v => v.empresa_validadora_id === 4 && v.resultado === 'validada')
+        .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
+      
+      // Obtener primera y segunda validación de cada empresa
+      const validacionBesalco = validacionesBesalco[0] || null
+      const validacionBesalco2 = validacionesBesalco[1] || null
+      const validacionLinkapsis = validacionesLinkapsis[0] || null
+      const validacionLinkapsis2 = validacionesLinkapsis[1] || null
+      const validacionLlayLlay = validacionesLlayLlay[0] || null
+      const validacionLlayLlay2 = validacionesLlayLlay[1] || null
       
       // DEBUG: Logs para ver la estructura de datos
       console.log('=== DEBUG VALIDACIONES ===')
       console.log('Cancha completa:', JSON.stringify(cancha, null, 2))
       console.log('Todas las validaciones:', JSON.stringify(validaciones, null, 2))
-      console.log('Validación Linkapsis:', JSON.stringify(validacionLinkapsis, null, 2))
-      console.log('Validación LlayLlay:', JSON.stringify(validacionLlayLlay, null, 2))
-      console.log('Validación Besalco:', JSON.stringify(validacionBesalco, null, 2))
+      console.log('Validaciones Besalco (1ra y 2da):', { primera: validacionBesalco, segunda: validacionBesalco2 })
+      console.log('Validaciones Linkapsis (1ra y 2da):', { primera: validacionLinkapsis, segunda: validacionLinkapsis2 })
+      console.log('Validaciones LlayLlay (1ra y 2da):', { primera: validacionLlayLlay, segunda: validacionLlayLlay2 })
       
       // Extraer datos de mediciones de las validaciones
       const medicionLinkapsis = validacionLinkapsis?.mediciones || {}
@@ -170,7 +183,8 @@ export const GET: APIRoute = async ({ params, request }) => {
         // Besalco (Movimiento de tierra) - usando fechas reales
         FECHA_BS: validacionBesalco?.created_at ? 
           new Date(validacionBesalco.created_at).toLocaleDateString('es-ES') : '',
-        FECHA2_BS: '', // Segunda entrega si existe
+        FECHA2_BS: validacionBesalco2?.created_at ? 
+          new Date(validacionBesalco2.created_at).toLocaleDateString('es-ES') : '',
         FIRMA_BS: '[Firma Besalco]',
         FIRMA2_BS: '[Firma Besalco 2]',
         
@@ -178,7 +192,8 @@ export const GET: APIRoute = async ({ params, request }) => {
         NUM_PLK: validacionLinkapsis?.id || '',
         FECHA_LK: validacionLinkapsis?.created_at ? 
           new Date(validacionLinkapsis.created_at).toLocaleDateString('es-ES') : '',
-        FECHA2_LK: '', // Segunda entrega si existe
+        FECHA2_LK: validacionLinkapsis2?.created_at ? 
+          new Date(validacionLinkapsis2.created_at).toLocaleDateString('es-ES') : '',
         FIRMA_LK: '[Firma Linkapsis]',
         FIRMA2_LK: '[Firma Linkapsis 2]',
         
@@ -186,7 +201,8 @@ export const GET: APIRoute = async ({ params, request }) => {
         NUM_PLL: validacionLlayLlay?.id || '',
         FECHA_LL: validacionLlayLlay?.created_at ? 
           new Date(validacionLlayLlay.created_at).toLocaleDateString('es-ES') : '',
-        FECHA2_LL: '', // Segunda entrega si existe
+        FECHA2_LL: validacionLlayLlay2?.created_at ? 
+          new Date(validacionLlayLlay2.created_at).toLocaleDateString('es-ES') : '',
         FIRMA_LL: '[Firma LlayLlay]',
         FIRMA2_LL: '[Firma LlayLlay 2]',
         
