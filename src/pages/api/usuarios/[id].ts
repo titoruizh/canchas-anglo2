@@ -1,4 +1,4 @@
-import { supabase } from '../../../../lib/supabase.js';
+import { supabase } from '../../../lib/supabase.js';
 import type { APIRoute } from 'astro';
 
 export const GET: APIRoute = async ({ params }) => {

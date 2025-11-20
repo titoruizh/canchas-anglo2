@@ -38,6 +38,7 @@ CREATE INDEX IF NOT EXISTS idx_usuarios_rol_id ON public.usuarios(rol_id);
 CREATE INDEX IF NOT EXISTS idx_usuarios_activo ON public.usuarios(activo);
 
 -- 4. Crear vista para usuarios completos con información de empresa y rol
+-- NOTA: Incluye TODOS los usuarios (activos e inactivos) para permitir gestión completa
 CREATE OR REPLACE VIEW public.vista_usuarios_completa AS
 SELECT 
     u.id,
@@ -54,7 +55,6 @@ SELECT
 FROM public.usuarios u
 JOIN public.empresas e ON u.empresa_id = e.id
 JOIN public.roles r ON u.rol_id = r.id
-WHERE u.activo = true
 ORDER BY e.nombre, r.nombre, u.nombre_completo;
 
 -- 5. Insertar roles predeterminados para cada empresa existente
