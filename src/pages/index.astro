@@ -1085,23 +1085,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         transform: translateY(-2px);
       }
       
-      .historial-entry::after {
-        content: '────────────────────────────────────────────────────────';
-        position: absolute;
-        bottom: -15px;
-        left: 50%;
-        transform: translateX(-50%);
-        color: #bdc3c7;
-        font-size: 1.2rem;
-        letter-spacing: 2px;
-        text-align: center;
-        width: 100%;
-        z-index: 1;
-      }
-      
-      .historial-entry:last-child::after {
-        display: none;
-      }
+
       
       .empresa-nombre {
         font-size: 1.4rem;
@@ -1192,6 +1176,17 @@ import AuthGuard from '../components/AuthGuard.astro';
         font-family: 'Courier New', monospace;
         font-size: 1.1rem;
         font-weight: 800;
+      }
+      
+      /* Separador entre empresas */
+      .separador-empresas {
+        text-align: center;
+        margin: 2rem 0;
+        font-size: 1.2rem;
+        color: #bdc3c7;
+        letter-spacing: 3px;
+        font-family: monospace;
+        line-height: 1;
       }
       
       .hidden {
@@ -2885,6 +2880,12 @@ import AuthGuard from '../components/AuthGuard.astro';
                   const empresaNombre = val.empresa_validadora?.nombre || 'Empresa desconocida'
                   const empresaClass = empresaNombre.toLowerCase().replace(/\s+/g, '')
                   
+                  // Generar separador solo si no es la última entrada
+                  const separador = index < validaciones.length - 1 ? `
+                    <div class="separador-empresas">
+                      ──────────────────────────────────────
+                    </div>` : ''
+                  
                   return `
                     <div class="historial-entry empresa-${empresaClass}">
                       <div class="empresa-nombre">🏢 ${empresaNombre}</div>
@@ -2902,7 +2903,7 @@ import AuthGuard from '../components/AuthGuard.astro';
                         <span class="observacion-label">💬 Observaciones:</span> "${val.observaciones || 'Sin observaciones específicas'}"
                       </div>
                       ${medicionesHtml}
-                    </div>`
+                    </div>${separador}`
                 }).join('')}
               </div>
             `
