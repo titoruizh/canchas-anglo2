@@ -284,6 +284,20 @@ import AuthGuard from '../components/AuthGuard.astro';
         background: #f8f9fa;
       }
       
+      /* Estilo para filas clickeables con doble-click */
+      .cancha-row {
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+      }
+      
+      .cancha-row:hover {
+        background: #e3f2fd !important;
+      }
+      
+      .cancha-row:active {
+        background: #bbdefb !important;
+      }
+      
       .estado {
         padding: 0.4rem 0.8rem;
         border-radius: 20px;
@@ -2911,7 +2925,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Renderizar tabla de canchas
       function renderizarCanchas(canchas) {
         canchasTBody.innerHTML = canchas.map(cancha => `
-          <tr data-cancha-id="${cancha.id}">
+          <tr data-cancha-id="${cancha.id}" class="cancha-row">
             <td><strong>${cancha.nombre.toUpperCase()}</strong></td>
             <td>
               <span class="estado estado-${cancha.estado_actual.toLowerCase().replace(/\s+/g, '-')}">
@@ -2989,6 +3003,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         // Agregar event listeners a los botones
         agregarEventListeners()
         console.log('Event listeners agregados')
+        
+        // Agregar event listeners de doble-click
+        agregarEventListenersDobleClick()
       }
 
       // Generar botones según empresa y estado
@@ -3095,7 +3112,38 @@ import AuthGuard from '../components/AuthGuard.astro';
         })
         
         // Los event listeners para botones del mapa se agregan en renderizarCanchas()
-        console.log('� Event listeners de acciones agregados')
+        console.log('🖱️ Event listeners de acciones agregados')
+      }
+      
+      // Agregar event listeners de doble-click a las filas de la tabla
+      function agregarEventListenersDobleClick() {
+        document.querySelectorAll('.cancha-row').forEach(row => {
+          row.addEventListener('dblclick', (e) => {
+            const canchaId = e.currentTarget.dataset.canchaId
+            console.log('🖱️ Doble-click en cancha:', canchaId)
+            hacerZoomEnMapaDashboard(canchaId)
+          })
+        })
+        console.log('✅ Event listeners de doble-click agregados')
+      }
+      
+      // Enviar mensaje al iframe del mapa para hacer zoom a una cancha
+      function hacerZoomEnMapaDashboard(canchaId) {
+        const mapContainer = document.getElementById('dashboard-map-container')
+        const iframe = mapContainer?.querySelector('iframe')
+        
+        if (!iframe || !iframe.contentWindow) {
+          console.log('⚠️ Iframe del mapa no disponible')
+          return
+        }
+        
+        // Enviar mensaje al iframe
+        iframe.contentWindow.postMessage({
+          type: 'zoom-to-cancha',
+          canchaId: canchaId
+        }, '*')
+        
+        console.log('📤 Mensaje de zoom enviado al mapa:', canchaId)
       }
 
       // Manejar acciones de botones

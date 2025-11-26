@@ -739,18 +739,9 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
             }
           });
           
-          // Calcular bounds de todas las canchas y hacer zoom
-          const allCoords = canchasConPoligono.flatMap(c => c.poligono_coordenadas);
-          if (allCoords.length > 0) {
-            const bounds = allCoords.reduce((bounds, coord) => {
-              return bounds.extend(coord);
-            }, new mapboxgl.LngLatBounds(allCoords[0], allCoords[0]));
-            
-            map.fitBounds(bounds, {
-              padding: 50,
-              duration: 1500
-            });
-          }
+          // NO hacer zoom automático - mantener vista general
+          // El zoom se hará solo cuando el usuario haga doble-click en una fila de la tabla
+          console.log('✅ Mapa cargado en vista general (sin auto-zoom)');
           
           // Agregar popup al hacer click
           map.on('click', 'canchas-dashboard-fill', (e) => {
@@ -780,9 +771,59 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
           
           console.log('✅ Múltiples canchas mostradas exitosamente');
           
+          // Escuchar mensajes del parent para hacer zoom a canchas específicas
+          window.addEventListener('message', (event) => {
+            if (event.data.type === 'zoom-to-cancha') {
+              const canchaId = event.data.canchaId;
+              console.log('🔍 Haciendo zoom a cancha:', canchaId);
+              zoomToCanchaInDashboard(canchaId);
+            }
+          });
+          
         } catch (error) {
           console.error('❌ Error al cargar múltiples canchas:', error);
           showError('Error al cargar las áreas de las canchas: ' + (error as Error).message);
+        }
+      }
+      
+      // Hacer zoom a una cancha específica en el dashboard
+      function zoomToCanchaInDashboard(canchaId) {
+        try {
+          const source = map.getSource('canchas-dashboard');
+          if (!source) {
+            console.log('⚠️ Fuente de canchas no disponible');
+            return;
+          }
+          
+          // Obtener los features del source
+          const data = source._data;
+          if (!data || !data.features) return;
+          
+          // Encontrar la cancha específica
+          const canchaFeature = data.features.find(f => f.properties.cancha_id == canchaId);
+          
+          if (!canchaFeature) {
+            console.log('⚠️ Cancha no encontrada en el mapa:', canchaId);
+            return;
+          }
+          
+          // Calcular bounds del polígono de la cancha
+          const coords = canchaFeature.geometry.coordinates[0];
+          const bounds = coords.reduce((bounds, coord) => {
+            return bounds.extend(coord);
+          }, new mapboxgl.LngLatBounds(coords[0], coords[0]));
+          
+          // Hacer zoom con animación
+          map.fitBounds(bounds, {
+            padding: 100,
+            duration: 1500,
+            easing: (t) => t * (2 - t)
+          });
+          
+          console.log('✅ Zoom completado a cancha:', canchaId);
+          
+        } catch (error) {
+          console.error('❌ Error al hacer zoom a cancha:', error);
         }
       }
 
