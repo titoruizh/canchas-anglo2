@@ -6,7 +6,9 @@ const url = Astro.url
 const muro = url.searchParams.get('muro')
 const drawing = url.searchParams.get('drawing') === 'true'
 const canchaId = url.searchParams.get('canchaId')
-console.log('🔧 Parámetros recibidos:', { muro, drawing, canchaId })
+const dashboardMode = url.searchParams.get('dashboardMode') === 'true'
+const canchaIds = url.searchParams.get('canchaIds')
+console.log('🔧 Parámetros recibidos:', { muro, drawing, canchaId, dashboardMode, canchaIds })
 ---
 
 <!doctype html>
@@ -75,7 +77,7 @@ console.log('🔧 Parámetros recibidos:', { muro, drawing, canchaId })
     
     <!-- Render the MiningMap component -->
     <main>
-      <MiningMap muroFilter={muro || undefined} drawingMode={drawing} canchaId={canchaId || undefined} />
+      <MiningMap muroFilter={muro || undefined} drawingMode={drawing} canchaId={canchaId || undefined} dashboardMode={dashboardMode} canchaIds={canchaIds || undefined} />
     </main>
   </body>
 </html>

@@ -6,10 +6,12 @@ interface Props {
   muroFilter?: string
   drawingMode?: boolean
   canchaId?: string
+  dashboardMode?: boolean
+  canchaIds?: string
 }
 
-const { muroFilter, drawingMode = false, canchaId } = Astro.props
-console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, canchaId })
+const { muroFilter, drawingMode = false, canchaId, dashboardMode = false, canchaIds } = Astro.props
+console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, canchaId, dashboardMode, canchaIds })
 ---
 
 <style>
@@ -119,7 +121,7 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
   }
 </style>
 
-<div class="map-container" data-muro-filter={muroFilter || ''} data-drawing-mode={drawingMode.toString()} data-cancha-id={canchaId || ''}>
+<div class="map-container" data-muro-filter={muroFilter || ''} data-drawing-mode={drawingMode.toString()} data-cancha-id={canchaId || ''} data-dashboard-mode={dashboardMode.toString()} data-cancha-ids={canchaIds || ''}>
   <div id="map"></div>
   
   <div class="map-controls">
@@ -268,8 +270,16 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
             await setupDrawingTools();
           }
 
-          // Si tenemos un canchaId, cargar y mostrar el polígono de la cancha
-          if (canchaId && canchaId !== '') {
+          // Verificar si estamos en modo dashboard
+          const isDashboardMode = mapContainer?.getAttribute('data-dashboard-mode') === 'true';
+          const canchaIdsStr = mapContainer?.getAttribute('data-cancha-ids') || '';
+          
+          if (isDashboardMode && canchaIdsStr) {
+            // Modo dashboard: cargar múltiples canchas
+            console.log('🎯 Modo Dashboard activo - Cargando múltiples canchas');
+            await loadMultipleCanchas(canchaIdsStr);
+          } else if (canchaId && canchaId !== '') {
+            // Modo individual: cargar una sola cancha
             await loadCanchaPolygon(canchaId);
           }
 
@@ -641,6 +651,138 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
         } catch (error) {
           console.error('❌ Error al configurar herramientas de dibujo:', error);
           showError('Error al cargar herramientas de dibujo: ' + (error as Error).message);
+        }
+      }
+
+      // Cargar y mostrar múltiples canchas en modo dashboard
+      async function loadMultipleCanchas(canchaIdsStr) {
+        try {
+          // Parsear los IDs
+          const ids = canchaIdsStr.split(',').map(id => id.trim()).filter(id => id);
+          
+          if (ids.length === 0) {
+            console.log('⚠️ No hay canchas para mostrar');
+            return;
+          }
+          
+          console.log('🔍 Cargando múltiples canchas:', ids);
+          
+          // Cargar todas las canchas en paralelo
+          const promises = ids.map(id => fetch(`/api/canchas/${id}`).then(r => r.json()));
+          const responses = await Promise.all(promises);
+          
+          // Filtrar canchas válidas con polígonos
+          const canchasConPoligono = responses
+            .filter(data => data.success && data.cancha && data.cancha.poligono_coordenadas && Array.isArray(data.cancha.poligono_coordenadas))
+            .map(data => data.cancha);
+          
+          console.log(`📊 ${canchasConPoligono.length} de ${ids.length} canchas tienen polígonos`);
+          
+          if (canchasConPoligono.length === 0) {
+            console.log('⚠️ Ninguna cancha tiene polígono definido');
+            return;
+          }
+          
+          // Crear GeoJSON con todos los polígonos
+          const features = canchasConPoligono.map(cancha => ({
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [cancha.poligono_coordenadas]
+            },
+            properties: {
+              cancha_id: cancha.id,
+              cancha_nombre: cancha.nombre,
+              estado_actual: cancha.estado_actual || 'Sin estado',
+              empresa_actual: cancha.empresa_actual || 'Sin empresa',
+              tipo: 'cancha_area'
+            }
+          }));
+          
+          const polygonsGeoJSON = {
+            type: 'FeatureCollection',
+            features: features
+          };
+          
+          // Remover fuentes anteriores si existen
+          if (map.getSource('canchas-dashboard')) {
+            map.getLayer('canchas-dashboard-fill') && map.removeLayer('canchas-dashboard-fill');
+            map.getLayer('canchas-dashboard-stroke') && map.removeLayer('canchas-dashboard-stroke');
+            map.removeSource('canchas-dashboard');
+          }
+          
+          // Agregar fuente con todos los polígonos
+          map.addSource('canchas-dashboard', {
+            type: 'geojson',
+            data: polygonsGeoJSON
+          });
+          
+          // Agregar capas con estilos
+          map.addLayer({
+            id: 'canchas-dashboard-fill',
+            type: 'fill',
+            source: 'canchas-dashboard',
+            paint: {
+              'fill-color': '#3b82f6', // Azul para todas por ahora
+              'fill-opacity': 0.3
+            }
+          });
+          
+          map.addLayer({
+            id: 'canchas-dashboard-stroke',
+            type: 'line',
+            source: 'canchas-dashboard',
+            paint: {
+              'line-color': '#2563eb',
+              'line-width': 2,
+              'line-opacity': 0.8
+            }
+          });
+          
+          // Calcular bounds de todas las canchas y hacer zoom
+          const allCoords = canchasConPoligono.flatMap(c => c.poligono_coordenadas);
+          if (allCoords.length > 0) {
+            const bounds = allCoords.reduce((bounds, coord) => {
+              return bounds.extend(coord);
+            }, new mapboxgl.LngLatBounds(allCoords[0], allCoords[0]));
+            
+            map.fitBounds(bounds, {
+              padding: 50,
+              duration: 1500
+            });
+          }
+          
+          // Agregar popup al hacer click
+          map.on('click', 'canchas-dashboard-fill', (e) => {
+            const feature = e.features[0];
+            const props = feature.properties;
+            
+            new mapboxgl.Popup()
+              .setLngLat(e.lngLat)
+              .setHTML(`
+                <div style="padding: 0.5rem;">
+                  <h4 style="margin: 0 0 0.5rem 0; font-weight: 700;">${props.cancha_nombre}</h4>
+                  <p style="margin: 0.25rem 0;"><strong>Estado:</strong> ${props.estado_actual}</p>
+                  <p style="margin: 0.25rem 0;"><strong>Empresa:</strong> ${props.empresa_actual}</p>
+                </div>
+              `)
+              .addTo(map);
+          });
+          
+          // Cambiar cursor al pasar sobre las canchas
+          map.on('mouseenter', 'canchas-dashboard-fill', () => {
+            map.getCanvas().style.cursor = 'pointer';
+          });
+          
+          map.on('mouseleave', 'canchas-dashboard-fill', () => {
+            map.getCanvas().style.cursor = '';
+          });
+          
+          console.log('✅ Múltiples canchas mostradas exitosamente');
+          
+        } catch (error) {
+          console.error('❌ Error al cargar múltiples canchas:', error);
+          showError('Error al cargar las áreas de las canchas: ' + (error as Error).message);
         }
       }
 

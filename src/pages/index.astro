@@ -1828,6 +1828,82 @@ import AuthGuard from '../components/AuthGuard.astro';
         margin-top: 0.5rem;
         font-style: italic;
       }
+
+      /* === ESTILOS DEL MAPA DASHBOARD === */
+      .dashboard-map-section {
+        margin: 2rem 0;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+      }
+
+      .dashboard-map-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        border-bottom: 3px solid #3b82f6;
+      }
+
+      .dashboard-map-title {
+        margin: 0;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .dashboard-map-subtitle {
+        margin: 0.5rem 0 0 0;
+        color: #cbd5e1;
+        font-size: 0.9rem;
+        font-weight: 400;
+      }
+
+      .dashboard-map-container {
+        position: relative;
+        width: 100%;
+        height: 600px;
+        background: #f8fafc;
+      }
+
+      .dashboard-map-container iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+      }
+
+      .dashboard-map-loading {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        color: #64748b;
+        font-size: 1rem;
+        font-weight: 500;
+      }
+
+      .dashboard-map-loading::before {
+        content: '🗺️';
+        display: block;
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.7; transform: scale(1.1); }
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .dashboard-map-container {
+          height: 400px;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1953,6 +2029,19 @@ import AuthGuard from '../components/AuthGuard.astro';
               <!-- Las canchas se cargarán dinámicamente -->
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <!-- === MAPA DASHBOARD === -->
+      <div class="dashboard-map-section">
+        <div class="dashboard-map-header">
+          <h3 class="dashboard-map-title">
+            🗺️ Vista de Mapa
+          </h3>
+          <p class="dashboard-map-subtitle" id="map-subtitle">Mostrando todas las canchas</p>
+        </div>
+        <div class="dashboard-map-container" id="dashboard-map-container">
+          <div class="dashboard-map-loading">Cargando mapa...</div>
         </div>
       </div>
 
@@ -2647,6 +2736,72 @@ import AuthGuard from '../components/AuthGuard.astro';
         } else {
           accionLabel.textContent = 'Canchas Mostradas'
         }
+        
+        // Actualizar subtítulo del mapa
+        actualizarSubtituloMapa(mostradas)
+      }
+      
+      // Actualizar subtítulo del mapa según filtros activos
+      function actualizarSubtituloMapa(cantidadCanchas) {
+        const subtitle = document.getElementById('map-subtitle')
+        if (!subtitle) return
+        
+        let texto = ''
+        
+        if (vistaActual === 'acciones') {
+          texto = `Mostrando ${cantidadCanchas} cancha${cantidadCanchas !== 1 ? 's' : ''} con acciones disponibles`
+        } else {
+          texto = `Mostrando ${cantidadCanchas} cancha${cantidadCanchas !== 1 ? 's' : ''} del histórico`
+        }
+        
+        // Agregar información del filtro de fecha
+        if (filtroFecha === 'today') {
+          texto += ' (Hoy)'
+        } else if (filtroFecha === 'week') {
+          texto += ' (Última semana)'
+        } else if (filtroFecha === 'month') {
+          texto += ' (Último mes)'
+        } else if (filtroFecha === 'custom') {
+          texto += ' (Rango personalizado)'
+        }
+        
+        subtitle.textContent = texto
+      }
+      
+      // Actualizar mapa dashboard con las canchas filtradas
+      function actualizarMapaDashboard(canchas) {
+        const mapContainer = document.getElementById('dashboard-map-container')
+        if (!mapContainer) return
+        
+        console.log('🗺️ Actualizando mapa dashboard con', canchas.length, 'canchas')
+        
+        // Extraer IDs de canchas para el mapa
+        const canchaIds = canchas.map(c => c.id).join(',')
+        
+        // Construir URL del iframe con parámetros de filtrado
+        const params = new URLSearchParams()
+        params.set('dashboardMode', 'true')
+        params.set('canchaIds', canchaIds)
+        
+        const mapUrl = `/mapbox-window?${params.toString()}`
+        
+        // Crear o actualizar iframe
+        let iframe = mapContainer.querySelector('iframe')
+        if (!iframe) {
+          iframe = document.createElement('iframe')
+          iframe.style.width = '100%'
+          iframe.style.height = '100%'
+          iframe.style.border = 'none'
+          
+          // Limpiar loading y agregar iframe
+          mapContainer.innerHTML = ''
+          mapContainer.appendChild(iframe)
+        }
+        
+        // Actualizar src del iframe
+        iframe.src = mapUrl
+        
+        console.log('✅ Mapa dashboard actualizado con URL:', mapUrl)
       }
       
       // Función para animar números
@@ -2750,6 +2905,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Mostrar canchas filtradas
       function mostrarCanchas(canchas) {
         renderizarCanchas(canchas)
+        actualizarMapaDashboard(canchas)
       }
 
       // Renderizar tabla de canchas
