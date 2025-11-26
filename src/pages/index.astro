@@ -807,8 +807,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         color: white;
         display: flex;
         flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
+        gap: 0.75rem;
         flex: 1;
         box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         transition: transform 0.2s, box-shadow 0.2s;
@@ -820,33 +819,40 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
 
       .stat-card.stat-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
       }
 
       .stat-card.stat-info {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
       }
 
       .stat-icon {
-        font-size: 2rem;
+        font-size: 2.5rem;
         opacity: 0.9;
+        line-height: 1;
       }
 
       .stat-content {
-        text-align: center;
+        width: 100%;
+      }
+      
+      .stat-content-top {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
       }
 
       .stat-number {
-        font-size: 2rem;
+        font-size: 2.5rem;
         font-weight: 700;
         line-height: 1;
-        margin-bottom: 0.25rem;
       }
 
       .stat-label {
         font-size: 0.875rem;
         opacity: 0.9;
         font-weight: 500;
+        margin-top: 0.5rem;
       }
 
       /* === DASHBOARD DE ESTADOS (NUEVA SECCIÓN) === */
@@ -889,10 +895,46 @@ import AuthGuard from '../components/AuthGuard.astro';
         flex: 1;
         min-width: 0;
         transition: transform 0.3s ease;
+        cursor: pointer;
+        user-select: none;
       }
       
       .estado-widget:hover {
         transform: translateY(-4px);
+      }
+      
+      /* No hover para widgets dimmed */
+      .estado-widget.dimmed:hover {
+        transform: none;
+      }
+      
+      .estado-widget.selected .widget-circle {
+        transform: scale(1.2);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        border-width: 6px;
+      }
+      
+      .estado-widget.selected .widget-label {
+        font-weight: 700;
+        color: #1f2937;
+      }
+      
+      /* Widgets no seleccionados cuando hay uno activo */
+      .estado-widget.dimmed .widget-circle {
+        opacity: 0.3 !important;
+        filter: grayscale(100%) !important;
+        transform: scale(1) !important;
+      }
+      
+      .estado-widget.dimmed:hover .widget-circle {
+        opacity: 0.3 !important;
+        filter: grayscale(100%) !important;
+        transform: scale(1) !important;
+      }
+      
+      .estado-widget.dimmed .widget-label {
+        opacity: 0.4;
+        color: #9ca3af;
       }
       
       .widget-circle {
@@ -908,7 +950,7 @@ import AuthGuard from '../components/AuthGuard.astro';
         position: relative;
       }
       
-      .estado-widget:hover .widget-circle {
+      .estado-widget:not(.dimmed):hover .widget-circle {
         transform: scale(1.1);
         box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
       }
@@ -2122,11 +2164,9 @@ import AuthGuard from '../components/AuthGuard.astro';
         <div class="controls">
           <!-- Formulario para crear nueva cancha (solo AngloAmerican) -->
           <div id="form-crear-cancha" class="control-group hidden">
-            <h3>Crear Nueva Cancha</h3>
             <div class="form-row">
               <div>
                 <button id="btn-abrir-modal-crear" type="button" class="btn-crear-cancha">🏗️ Crear Nueva Cancha</button>
-                <p class="texto-ayuda">Podrás dibujar el área de trabajo en el mapa</p>
               </div>
             </div>
           </div>
@@ -2171,19 +2211,23 @@ import AuthGuard from '../components/AuthGuard.astro';
               <!-- Dashboard de Estadísticas en sidebar -->
               <div class="stats-sidebar">
                 <div class="stat-card stat-primary">
-                  <div class="stat-icon">⚙️</div>
                   <div class="stat-content">
-                    <div class="stat-number" id="stat-acciones">-</div>
-                    <div class="stat-label">Acciones Disponibles</div>
+                    <div class="stat-content-top">
+                      <div class="stat-icon">⚙️</div>
+                      <div class="stat-number" id="stat-acciones">-</div>
+                    </div>
                   </div>
+                  <div class="stat-label">Acciones Disponibles</div>
                 </div>
                 
                 <div class="stat-card stat-info">
-                  <div class="stat-icon">📋</div>
                   <div class="stat-content">
-                    <div class="stat-number" id="stat-total">-</div>
-                    <div class="stat-label">Total de Canchas</div>
+                    <div class="stat-content-top">
+                      <div class="stat-icon">📋</div>
+                      <div class="stat-number" id="stat-total">-</div>
+                    </div>
                   </div>
+                  <div class="stat-label">Total de Canchas</div>
                 </div>
               </div>
             </div>
@@ -2651,6 +2695,7 @@ import AuthGuard from '../components/AuthGuard.astro';
       // Variables de paginación
       let paginaActual = 1
       const filasPorPagina = 15
+      let filtroEstadoActivo = null // Estado seleccionado desde los círculos
 
       // Elementos del DOM
       const mainScreen = document.getElementById('main-screen')
@@ -2782,6 +2827,26 @@ import AuthGuard from '../components/AuthGuard.astro';
           const totalPaginas = Math.ceil(canchasFiltradas.length / filasPorPagina)
           paginaActual = totalPaginas || 1
           renderizarPaginaCanchas()
+        })
+        
+        // Configurar event listeners para widgets de estado (doble click)
+        const estadoWidgets = document.querySelectorAll('.estado-widget')
+        estadoWidgets.forEach(widget => {
+          widget.addEventListener('dblclick', () => {
+            const estadoData = widget.getAttribute('data-estado')
+            const estadoMap = {
+              'creada': 'Creada',
+              'en-espera': 'En Espera',
+              'en-proceso': 'En Proceso',
+              'validada': 'Validada',
+              'rechazada-en-espera': 'Rechazada, en Espera',
+              'cerrada': 'Cerrada'
+            }
+            const estadoNombre = estadoMap[estadoData]
+            if (estadoNombre) {
+              filtrarPorEstadoWidget(estadoNombre)
+            }
+          })
         })
       }
 
@@ -3006,6 +3071,17 @@ import AuthGuard from '../components/AuthGuard.astro';
         // Filtro por fecha
         canchasFiltradas = filtrarPorFecha(canchasFiltradas)
         
+        // Filtro por estado desde widgets circulares
+        if (filtroEstadoActivo) {
+          canchasFiltradas = canchasFiltradas.filter(cancha => 
+            cancha.estado_actual === filtroEstadoActivo
+          )
+          console.log('Canchas después del filtro de estado:', canchasFiltradas.length)
+        }
+        
+        // Reiniciar a la primera página al aplicar filtros
+        paginaActual = 1
+        
         // Mostrar resultados
         mostrarCanchas(canchasFiltradas)
         actualizarContadorResultados(canchasFiltradas.length, todasLasCanchas.length)
@@ -3186,6 +3262,47 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         // Actualizar subtítulo del mapa
         actualizarSubtituloMapa(mostradas)
+      }
+      
+      // Manejar doble click en widgets de estado para filtrar
+      function filtrarPorEstadoWidget(estadoNombre) {
+        const widgets = document.querySelectorAll('.estado-widget')
+        
+        // Si se clickea el mismo estado, desactivar filtro
+        if (filtroEstadoActivo === estadoNombre) {
+          filtroEstadoActivo = null
+          widgets.forEach(w => {
+            w.classList.remove('selected')
+            w.classList.remove('dimmed')
+          })
+        } else {
+          // Activar nuevo filtro
+          filtroEstadoActivo = estadoNombre
+          
+          // Actualizar clases de selección y dimmed
+          widgets.forEach(widget => {
+            const estadoWidget = widget.getAttribute('data-estado')
+            const estadoMap = {
+              'creada': 'Creada',
+              'en-espera': 'En Espera',
+              'en-proceso': 'En Proceso',
+              'validada': 'Validada',
+              'rechazada-en-espera': 'Rechazada, en Espera',
+              'cerrada': 'Cerrada'
+            }
+            
+            if (estadoMap[estadoWidget] === estadoNombre) {
+              widget.classList.add('selected')
+              widget.classList.remove('dimmed')
+            } else {
+              widget.classList.remove('selected')
+              widget.classList.add('dimmed')
+            }
+          })
+        }
+        
+        // Re-aplicar filtros
+        aplicarFiltros()
       }
       
       // Actualizar subtítulo del mapa según filtros activos
