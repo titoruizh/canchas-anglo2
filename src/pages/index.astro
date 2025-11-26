@@ -792,147 +792,234 @@ import AuthGuard from '../components/AuthGuard.astro';
         flex: 1;
       }
       
-      /* Sidebar de estadísticas */
+      /* === STATS SIDEBAR (WIDGETS ORIGINALES) === */
       .stats-sidebar {
         display: flex;
         flex-direction: row;
         gap: 1rem;
-        min-width: 400px;
+        margin-bottom: 1rem;
       }
-      
-      .stats-sidebar .stat-card {
-        flex: 1;
-        min-width: 180px;
-      }
-      
+
       .stat-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-        border-radius: 16px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        padding: 1.25rem;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        flex: 1;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+
+      .stat-card.stat-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      .stat-card.stat-info {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      .stat-icon {
+        font-size: 2rem;
+        opacity: 0.9;
+      }
+
+      .stat-content {
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 0.25rem;
+      }
+
+      .stat-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+        font-weight: 500;
+      }
+
+      /* === DASHBOARD DE ESTADOS (NUEVA SECCIÓN) === */
+      .dashboard-estados-section {
+        background: white;
+        border-radius: 12px;
         padding: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+      }
+
+      .dashboard-estados-header {
+        margin-bottom: 1.5rem;
+      }
+
+      .dashboard-estados-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+      }
+      
+      /* Dashboard de Estados - Widgets circulares */
+      .dashboard-estados {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        min-width: 700px;
+      }
+      
+      .estado-widget {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+        min-width: 0;
+        transition: transform 0.3s ease;
+      }
+      
+      .estado-widget:hover {
+        transform: translateY(-4px);
+      }
+      
+      .widget-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 1rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         transition: all 0.3s ease;
-        border: 1px solid #e1e8ed;
+        border: 4px solid;
         position: relative;
-        overflow: hidden;
       }
       
-      .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        transition: width 0.3s ease;
-      }
-      
-      .stat-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      }
-      
-      .stat-card:hover::before {
-        width: 8px;
-      }
-      
-      .stat-primary::before {
-        background: linear-gradient(180deg, #3498db 0%, #2980b9 100%);
-      }
-      
-      .stat-info::before {
-        background: linear-gradient(180deg, #9b59b6 0%, #8e44ad 100%);
-      }
-      
-      .stat-success::before {
-        background: linear-gradient(180deg, #27ae60 0%, #229954 100%);
-      }
-      
-      .stat-icon {
-        font-size: 2.5rem;
-        opacity: 0.8;
-        transition: all 0.3s ease;
-      }
-      
-      .stat-card:hover .stat-icon {
+      .estado-widget:hover .widget-circle {
         transform: scale(1.1);
-        opacity: 1;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
       }
       
-      .stat-content {
-        flex: 1;
-      }
-      
-      .stat-number, .stat-percentage {
-        font-size: 2.2rem;
+      .widget-number {
+        font-size: 2rem;
         font-weight: 800;
-        color: #2c3e50;
-        margin-bottom: 0.25rem;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         font-family: 'Segoe UI', system-ui, sans-serif;
-        line-height: 1;
       }
       
-      .stat-label {
-        font-size: 0.9rem;
-        color: #7f8c8d;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+      .widget-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        text-align: center;
+        line-height: 1.2;
+        text-transform: capitalize;
       }
       
-      .stat-primary .stat-number {
-        color: #3498db;
+      /* Colores específicos por estado - Basados en el mapa */
+      .widget-creada {
+        background: #3b82f6; /* Azul */
+        border-color: #2563eb; /* Azul oscuro */
       }
       
-      .stat-info .stat-number {
-        color: #9b59b6;
+      .widget-en-espera {
+        background: #fbbf24; /* Amarillo */
+        border-color: #f59e0b; /* Amarillo oscuro */
       }
       
-      .stat-success .stat-percentage {
-        color: #27ae60;
+      .widget-en-proceso {
+        background: #fbbf24; /* Amarillo */
+        border-color: #10b981; /* Verde - diferenciador */
       }
       
-      @media (max-width: 1024px) {
+      .widget-validada {
+        background: #10b981; /* Verde */
+        border-color: #fbbf24; /* Amarillo - diferenciador */
+      }
+      
+      .widget-rechazada-en-espera {
+        background: #ef4444; /* Rojo */
+        border-color: #fbbf24; /* Amarillo */
+      }
+      
+      .widget-cerrada {
+        background: #10b981; /* Verde */
+        border-color: #059669; /* Verde oscuro */
+      }
+      
+      @media (max-width: 1200px) {
         .filtros-main-layout {
           grid-template-columns: 1fr;
           gap: 1.5rem;
         }
         
-        .stats-sidebar {
-          justify-content: center;
+        .dashboard-estados {
           min-width: unset;
+          gap: 1.2rem;
+        }
+        
+        .widget-circle {
+          width: 70px;
+          height: 70px;
+        }
+        
+        .widget-number {
+          font-size: 1.75rem;
+        }
+        
+        .widget-label {
+          font-size: 0.8rem;
         }
       }
       
       @media (max-width: 768px) {
-        .stats-sidebar {
-          gap: 0.8rem;
+        .dashboard-estados {
+          flex-wrap: wrap;
+          justify-content: center;
+          gap: 1.5rem;
         }
         
-        .stats-sidebar .stat-card {
-          padding: 1.25rem;
-          min-width: 160px;
+        .estado-widget {
+          flex: 0 0 auto;
+          min-width: 90px;
         }
         
-        .stat-number {
-          font-size: 1.8rem;
-        }
-        
-        .stat-icon {
-          font-size: 2rem;
+        .widget-circle {
+          width: 75px;
+          height: 75px;
         }
       }
       
       @media (max-width: 480px) {
-        .stats-sidebar {
-          flex-direction: column;
+        .dashboard-estados {
           gap: 1rem;
         }
         
-        .stats-sidebar .stat-card {
-          min-width: unset;
+        .widget-circle {
+          width: 65px;
+          height: 65px;
+        }
+        
+        .widget-number {
+          font-size: 1.5rem;
+        }
+        
+        .widget-label {
+          font-size: 0.75rem;
         }
       }
       
@@ -2140,6 +2227,56 @@ import AuthGuard from '../components/AuthGuard.astro';
         </div>
       </div>
 
+      <!-- === DASHBOARD DE ESTADOS === -->
+      <div class="dashboard-estados-section">
+        <div class="dashboard-estados-header">
+          <h3 class="dashboard-estados-title">📊 Estados de Canchas</h3>
+        </div>
+        <div class="dashboard-estados">
+          <div class="estado-widget" data-estado="creada">
+            <div class="widget-circle widget-creada">
+              <span class="widget-number" id="count-creada">0</span>
+            </div>
+            <div class="widget-label">Creada</div>
+          </div>
+          
+          <div class="estado-widget" data-estado="en-espera">
+            <div class="widget-circle widget-en-espera">
+              <span class="widget-number" id="count-en-espera">0</span>
+            </div>
+            <div class="widget-label">En Espera</div>
+          </div>
+          
+          <div class="estado-widget" data-estado="en-proceso">
+            <div class="widget-circle widget-en-proceso">
+              <span class="widget-number" id="count-en-proceso">0</span>
+            </div>
+            <div class="widget-label">En Proceso</div>
+          </div>
+          
+          <div class="estado-widget" data-estado="validada">
+            <div class="widget-circle widget-validada">
+              <span class="widget-number" id="count-validada">0</span>
+            </div>
+            <div class="widget-label">Validada</div>
+          </div>
+          
+          <div class="estado-widget" data-estado="rechazada-en-espera">
+            <div class="widget-circle widget-rechazada-en-espera">
+              <span class="widget-number" id="count-rechazada-en-espera">0</span>
+            </div>
+            <div class="widget-label">Rechazada, en Espera</div>
+          </div>
+          
+          <div class="estado-widget" data-estado="cerrada">
+            <div class="widget-circle widget-cerrada">
+              <span class="widget-number" id="count-cerrada">0</span>
+            </div>
+            <div class="widget-label">Cerrada</div>
+          </div>
+        </div>
+      </div>
+
       <!-- === MAPA DASHBOARD === -->
       <div class="dashboard-map-section">
         <div class="dashboard-map-header">
@@ -2956,23 +3093,96 @@ import AuthGuard from '../components/AuthGuard.astro';
         })
       }
 
+      // Actualizar dashboard de estados con contadores
       function actualizarContadorResultados(mostradas, total) {
+        // === ACTUALIZAR WIDGETS ORIGINALES (SIDEBAR) ===
+        // Contar acciones disponibles
+        const accionesDisponibles = canchasFiltradas.filter(cancha => {
+          const estado = cancha.estado_actual
+          const empresaActual = cancha.empresa_actual
+          
+          let tieneAccion = false
+          switch(empresaActual) {
+            case 'AngloAmerican':
+              tieneAccion = (estado === 'Creada') || (estado === 'Validada') || (estado === 'Rechazada, en Espera')
+              break
+            case 'Besalco':
+              tieneAccion = (estado === 'En Espera' && empresaActual === 'Besalco') ||
+                           (estado === 'Rechazada, en Espera' && empresaActual === 'Besalco')
+              break
+            case 'Linkapsis':
+              tieneAccion = (estado === 'En Espera' && empresaActual === 'Linkapsis') ||
+                           (estado === 'En Proceso' && empresaActual === 'Linkapsis')
+              break
+            case 'LlayLlay':
+              tieneAccion = (estado === 'En Espera' && empresaActual === 'LlayLlay') ||
+                           (estado === 'En Proceso' && empresaActual === 'LlayLlay')
+              break
+            default:
+              tieneAccion = false
+          }
+          return tieneAccion
+        }).length
+        
+        // Actualizar contadores del sidebar
         const statAcciones = document.getElementById('stat-acciones')
         const statTotal = document.getElementById('stat-total')
         
-        if (!statAcciones || !statTotal) return
-        
-        // Actualizar números con animación
-        animateNumber(statAcciones, parseInt(statAcciones.textContent) || 0, mostradas)
-        animateNumber(statTotal, parseInt(statTotal.textContent) || 0, total)
-        
-        // Actualizar etiquetas según la vista
-        const accionLabel = document.querySelector('#stat-acciones').parentElement.querySelector('.stat-label')
-        if (vistaActual === 'acciones') {
-          accionLabel.textContent = 'Acciones Disponibles'
-        } else {
-          accionLabel.textContent = 'Canchas Mostradas'
+        if (statAcciones) {
+          animateNumber(statAcciones, 
+                       parseInt(statAcciones.textContent) || 0, 
+                       accionesDisponibles)
         }
+        
+        if (statTotal) {
+          animateNumber(statTotal, 
+                       parseInt(statTotal.textContent) || 0, 
+                       total)
+        }
+        
+        // === ACTUALIZAR WIDGETS CIRCULARES (DASHBOARD DE ESTADOS) ===
+        // Contar canchas por estado
+        const contadores = {
+          'Creada': 0,
+          'En Espera': 0,
+          'En Proceso': 0,
+          'Validada': 0,
+          'Rechazada, en Espera': 0,
+          'Cerrada': 0
+        }
+        
+        // Contar las canchas filtradas por estado
+        canchasFiltradas.forEach(cancha => {
+          const estado = cancha.estado_actual
+          if (contadores.hasOwnProperty(estado)) {
+            contadores[estado]++
+          }
+        })
+        
+        // Actualizar los widgets circulares con animación
+        animateNumber(document.getElementById('count-creada'), 
+                     parseInt(document.getElementById('count-creada').textContent) || 0, 
+                     contadores['Creada'])
+        
+        animateNumber(document.getElementById('count-en-espera'), 
+                     parseInt(document.getElementById('count-en-espera').textContent) || 0, 
+                     contadores['En Espera'])
+        
+        animateNumber(document.getElementById('count-en-proceso'), 
+                     parseInt(document.getElementById('count-en-proceso').textContent) || 0, 
+                     contadores['En Proceso'])
+        
+        animateNumber(document.getElementById('count-validada'), 
+                     parseInt(document.getElementById('count-validada').textContent) || 0, 
+                     contadores['Validada'])
+        
+        animateNumber(document.getElementById('count-rechazada-en-espera'), 
+                     parseInt(document.getElementById('count-rechazada-en-espera').textContent) || 0, 
+                     contadores['Rechazada, en Espera'])
+        
+        animateNumber(document.getElementById('count-cerrada'), 
+                     parseInt(document.getElementById('count-cerrada').textContent) || 0, 
+                     contadores['Cerrada'])
         
         // Actualizar subtítulo del mapa
         actualizarSubtituloMapa(mostradas)
