@@ -267,12 +267,42 @@ export class CanchaService {
     const { error } = await supabase
       .from('canchas')
       .update({
-        estado_actual_id: 2, // En Proceso
+        estado_actual_id: 7, // En Espera (nuevo estado)
         empresa_actual_id: 2  // Besalco
       })
       .eq('id', canchaId)
     
     if (error) throw error
+  }
+
+  // Tomar trabajo (cambiar de "En Espera" a "En Proceso")
+  static async tomarTrabajo(canchaId: number, empresa: string): Promise<void> {
+    // Obtener la cancha actual para validar estado
+    const { data: cancha, error: errorGet } = await supabase
+      .from('canchas')
+      .select('estado_actual_id, empresa_actual_id')
+      .eq('id', canchaId)
+      .single()
+    
+    if (errorGet) throw errorGet
+    
+    // Validar que esté en "En Espera" (7) o "Rechazada, en Espera" (8)
+    if (cancha.estado_actual_id !== 7 && cancha.estado_actual_id !== 8) {
+      throw new Error('La cancha no está en estado de espera')
+    }
+    
+    // Cambiar a "En Proceso" (3)
+    const { error } = await supabase
+      .from('canchas')
+      .update({
+        estado_actual_id: 3 // En Proceso
+        // empresa_actual_id no cambia, permanece la misma
+      })
+      .eq('id', canchaId)
+    
+    if (error) throw error
+    
+    console.log(`Trabajo tomado por ${empresa}: cancha ${canchaId} ahora en estado En Proceso (3)`)
   }
 
   // Finalizar trabajo de Besalco
@@ -290,11 +320,11 @@ export class CanchaService {
 
   // Rechazar por Besalco (nueva función)
   static async rechazarBesalco(canchaId: number, observaciones?: string): Promise<void> {
-    // Devolver a AngloAmerican con estado rechazada
+    // Devolver a AngloAmerican con estado "Rechazada, en Espera"
     const { error } = await supabase
       .from('canchas')
       .update({
-        estado_actual_id: 5, // Rechazada
+        estado_actual_id: 8, // Rechazada, en Espera
         empresa_actual_id: 1  // AngloAmerican
       })
       .eq('id', canchaId)
@@ -314,11 +344,11 @@ export class CanchaService {
   }
 
   static async finalizarBesalco(canchaId: number, observaciones?: string, usuario?: any): Promise<void> {
-    // Enviar a Linkapsis
+    // Enviar a Linkapsis en estado "En Espera"
     const { error } = await supabase
       .from('canchas')
       .update({
-        estado_actual_id: 2, // En Proceso
+        estado_actual_id: 7, // En Espera
         empresa_actual_id: 3  // Linkapsis
       })
       .eq('id', canchaId)
@@ -355,11 +385,11 @@ export class CanchaService {
     usuario?: any
   ): Promise<void> {
     if (validar) {
-      // Pasar a LlayLlay
+      // Pasar a LlayLlay en estado "En Espera"
       await supabase
         .from('canchas')
         .update({
-          estado_actual_id: 2, // En Proceso
+          estado_actual_id: 7, // En Espera
           empresa_actual_id: 4  // LlayLlay
         })
         .eq('id', canchaId)
@@ -385,11 +415,11 @@ export class CanchaService {
         .from('validaciones')
         .insert(validacionData)
     } else {
-      // Rechazar y volver a Besalco
+      // Rechazar y volver a Besalco en estado "Rechazada, en Espera"
       await supabase
         .from('canchas')
         .update({
-          estado_actual_id: 5, // Rechazada
+          estado_actual_id: 8, // Rechazada, en Espera
           empresa_actual_id: 2  // Besalco
         })
         .eq('id', canchaId)
@@ -425,20 +455,20 @@ export class CanchaService {
     usuario?: any
   ): Promise<void> {
     if (validar) {
-      // Devolver a AngloAmerican para cierre
+      // Devolver a AngloAmerican para cierre en estado "En Espera"
       await supabase
         .from('canchas')
         .update({
-          estado_actual_id: 2, // En Proceso
+          estado_actual_id: 7, // En Espera
           empresa_actual_id: 1  // AngloAmerican
         })
         .eq('id', canchaId)
     } else {
-      // Rechazar y volver a Besalco
+      // Rechazar y volver a Besalco en estado "Rechazada, en Espera"
       await supabase
         .from('canchas')
         .update({
-          estado_actual_id: 5, // Rechazada
+          estado_actual_id: 8, // Rechazada, en Espera
           empresa_actual_id: 2  // Besalco
         })
         .eq('id', canchaId)

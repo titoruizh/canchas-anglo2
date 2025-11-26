@@ -4,12 +4,13 @@ import type { APIRoute } from 'astro'
 export const POST: APIRoute = async ({ params, request }) => {
   try {
     const canchaId = parseInt(params.id!)
-    const { accion, observaciones, mediciones, usuario } = await request.json()
+    const { accion, observaciones, mediciones, usuario, empresa } = await request.json()
     
     console.log('API Debug - Acción recibida:', accion)
     console.log('API Debug - Observaciones:', observaciones)
     console.log('API Debug - Mediciones:', mediciones)
     console.log('API Debug - Usuario:', usuario)
+    console.log('API Debug - Empresa:', empresa)
     console.log('API Debug - CanchaID:', canchaId)
     
     if (!canchaId || !accion) {
@@ -22,6 +23,10 @@ export const POST: APIRoute = async ({ params, request }) => {
     }
     
     switch (accion) {
+      case 'tomar_trabajo':
+        console.log('API Debug - Tomando trabajo para empresa:', empresa)
+        await CanchaService.tomarTrabajo(canchaId, empresa)
+        break
       case 'enviar_besalco':
         await CanchaService.enviarABesalco(canchaId)
         break

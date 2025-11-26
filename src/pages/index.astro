@@ -1070,6 +1070,23 @@ import AuthGuard from '../components/AuthGuard.astro';
         background: #c0392b;
       }
       
+      .btn-comenzar {
+        background: #3498db;
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      
+      .btn-comenzar:hover {
+        background: #2980b9;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+      }
+      
       #empresa-selector {
         font-size: 1.2rem;
         font-weight: 600;
@@ -2194,6 +2211,94 @@ import AuthGuard from '../components/AuthGuard.astro';
       </div>
 
       <!-- Modal para validación de LlayLlay (Densidad) -->
+      <!-- Modal de RECEPCIÓN de trabajo para Besalco -->
+      <div id="recepcion-besalco-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">📋 Recepción de Trabajo - Besalco</h3>
+            <button class="close-btn">×</button>
+          </div>
+          
+          <!-- Historial de observaciones (solo lectura) -->
+          <div id="historial-recepcion-besalco" class="historial-observaciones">
+            <h4>Observaciones del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
+          <div style="padding: 1rem; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 4px; margin: 1rem 0;">
+            <p style="margin: 0; color: #2c3e50;">
+              <strong>Modo Recepción:</strong> Revise el trabajo anterior y presione "Comenzar Trabajo" para iniciar la validación.
+            </p>
+          </div>
+          
+          <div class="form-actions" style="justify-content: center;">
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="button" class="btn-comenzar" id="btn-comenzar-besalco">🚀 Comenzar Trabajo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de RECEPCIÓN de trabajo para Linkapsis -->
+      <div id="recepcion-linkapsis-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">📋 Recepción de Trabajo - Linkapsis</h3>
+            <button class="close-btn">×</button>
+          </div>
+          
+          <!-- Historial de observaciones (solo lectura) -->
+          <div id="historial-recepcion-linkapsis" class="historial-observaciones">
+            <h4>Observaciones del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
+          <div style="padding: 1rem; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 4px; margin: 1rem 0;">
+            <p style="margin: 0; color: #2c3e50;">
+              <strong>Modo Recepción:</strong> Revise el trabajo anterior y presione "Comenzar Trabajo" para iniciar la validación de espesores.
+            </p>
+          </div>
+          
+          <div class="form-actions" style="justify-content: center;">
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="button" class="btn-comenzar" id="btn-comenzar-linkapsis">🚀 Comenzar Trabajo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de RECEPCIÓN de trabajo para LlayLlay -->
+      <div id="recepcion-llayllay-modal" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">📋 Recepción de Trabajo - LlayLlay</h3>
+            <button class="close-btn">×</button>
+          </div>
+          
+          <!-- Historial de observaciones (solo lectura) -->
+          <div id="historial-recepcion-llayllay" class="historial-observaciones">
+            <h4>Observaciones del Proceso:</h4>
+            <div class="historial-content">
+              <p>Cargando historial...</p>
+            </div>
+          </div>
+          
+          <div style="padding: 1rem; background: #e8f4f8; border-left: 4px solid #3498db; border-radius: 4px; margin: 1rem 0;">
+            <p style="margin: 0; color: #2c3e50;">
+              <strong>Modo Recepción:</strong> Revise el trabajo anterior y presione "Comenzar Trabajo" para iniciar la validación de densidad.
+            </p>
+          </div>
+          
+          <div class="form-actions" style="justify-content: center;">
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="button" class="btn-comenzar" id="btn-comenzar-llayllay">🚀 Comenzar Trabajo</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de VALIDACIÓN de trabajo para LlayLlay -->
       <div id="validacion-llayllay-modal" class="modal">
         <div class="modal-content">
           <div class="modal-header">
@@ -2680,19 +2785,24 @@ import AuthGuard from '../components/AuthGuard.astro';
               break
                      
             case 'Besalco':
-              // Besalco puede actuar cuando la cancha está en proceso en Besalco o rechazada
-              tieneAccion = (estado === 'En Proceso' && empresaActual === 'Besalco') || 
-                           (estado === 'Rechazada' && empresaActual === 'Besalco')
+              // Besalco puede actuar cuando:
+              // - Está en espera (recién asignada o rechazada)
+              // - Está en proceso (trabajando activamente)
+              tieneAccion = (estado === 'En Espera' && empresaActual === 'Besalco') || 
+                           (estado === 'En Proceso' && empresaActual === 'Besalco') ||
+                           (estado === 'Rechazada, en Espera' && empresaActual === 'Besalco')
               break
                      
             case 'Linkapsis':
-              // Linkapsis puede actuar cuando la cancha está en proceso en Linkapsis
-              tieneAccion = estado === 'En Proceso' && empresaActual === 'Linkapsis'
+              // Linkapsis puede actuar cuando está en espera o en proceso
+              tieneAccion = (estado === 'En Espera' && empresaActual === 'Linkapsis') ||
+                           (estado === 'En Proceso' && empresaActual === 'Linkapsis')
               break
               
             case 'LlayLlay':
-              // LlayLlay puede actuar cuando la cancha está en proceso en LlayLlay
-              tieneAccion = estado === 'En Proceso' && empresaActual === 'LlayLlay'
+              // LlayLlay puede actuar cuando está en espera o en proceso
+              tieneAccion = (estado === 'En Espera' && empresaActual === 'LlayLlay') ||
+                           (estado === 'En Proceso' && empresaActual === 'LlayLlay')
               break
               
             default:
@@ -3058,22 +3168,34 @@ import AuthGuard from '../components/AuthGuard.astro';
         
         // Besalco
         else if (empresaId === 2) {
-          if ((estado === 'En Proceso' || estado === 'Rechazada') && empresaActual === 'Besalco') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-besalco" data-cancha-id="${canchaId}">Gestionar Trabajo</button>`)
+          if ((estado === 'En Espera' || estado === 'Rechazada, en Espera') && empresaActual === 'Besalco') {
+            // Cancha en espera - Recepcionar para revisar
+            botones.push(`<button class="btn-accion btn-info" data-accion="recepcionar-besalco" data-cancha-id="${canchaId}">📋 Recepcionar Trabajo</button>`)
+          } else if (estado === 'En Proceso' && empresaActual === 'Besalco') {
+            // Cancha en proceso - Validar trabajo activo
+            botones.push(`<button class="btn-accion btn-success" data-accion="validar-besalco" data-cancha-id="${canchaId}">✅ Validar Trabajo</button>`)
           }
         }
         
         // Linkapsis
         else if (empresaId === 3) {
-          if (estado === 'En Proceso' && empresaActual === 'Linkapsis') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-linkapsis" data-cancha-id="${canchaId}">Gestionar Cancha</button>`)
+          if (estado === 'En Espera' && empresaActual === 'Linkapsis') {
+            // Cancha en espera - Recepcionar para revisar
+            botones.push(`<button class="btn-accion btn-info" data-accion="recepcionar-linkapsis" data-cancha-id="${canchaId}">📋 Recepcionar Trabajo</button>`)
+          } else if (estado === 'En Proceso' && empresaActual === 'Linkapsis') {
+            // Cancha en proceso - Validar espesores
+            botones.push(`<button class="btn-accion btn-success" data-accion="validar-linkapsis" data-cancha-id="${canchaId}">✅ Validar Espesores</button>`)
           }
         }
         
         // LlayLlay
         else if (empresaId === 4) {
-          if (estado === 'En Proceso' && empresaActual === 'LlayLlay') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-llayllay" data-cancha-id="${canchaId}">Gestionar Cancha</button>`)
+          if (estado === 'En Espera' && empresaActual === 'LlayLlay') {
+            // Cancha en espera - Recepcionar para revisar
+            botones.push(`<button class="btn-accion btn-info" data-accion="recepcionar-llayllay" data-cancha-id="${canchaId}">📋 Recepcionar Trabajo</button>`)
+          } else if (estado === 'En Proceso' && empresaActual === 'LlayLlay') {
+            // Cancha en proceso - Validar densidad
+            botones.push(`<button class="btn-accion btn-success" data-accion="validar-llayllay" data-cancha-id="${canchaId}">✅ Validar Densidad</button>`)
           }
         }
         
@@ -3153,17 +3275,32 @@ import AuthGuard from '../components/AuthGuard.astro';
         const accion = e.target.dataset.accion
         const canchaId = parseInt(e.target.dataset.canchaId)
         
-        // Manejar apertura de modales
-        if (accion === 'abrir-modal-besalco') {
+        // Manejar apertura de modales de RECEPCIÓN (solo lectura + botón Comenzar)
+        if (accion === 'recepcionar-besalco') {
+          abrirModalRecepcionBesalco(canchaId)
+          return
+        } else if (accion === 'recepcionar-linkapsis') {
+          abrirModalRecepcionLinkapsis(canchaId)
+          return
+        } else if (accion === 'recepcionar-llayllay') {
+          abrirModalRecepcionLlayLlay(canchaId)
+          return
+        }
+        
+        // Manejar apertura de modales de VALIDACIÓN (formulario completo)
+        else if (accion === 'validar-besalco') {
           abrirModalBesalco(canchaId)
           return
-        } else if (accion === 'abrir-modal-linkapsis') {
+        } else if (accion === 'validar-linkapsis') {
           abrirModalLinkapsis(canchaId)
           return
-        } else if (accion === 'abrir-modal-llayllay') {
+        } else if (accion === 'validar-llayllay') {
           abrirModalLlayLlay(canchaId)
           return
-        } else if (accion === 'abrir-modal-cierre') {
+        }
+        
+        // Otros modales
+        else if (accion === 'abrir-modal-cierre') {
           abrirModalCierre(canchaId)
           return
         } else if (accion === 'abrir-modal-borrar') {
@@ -3464,6 +3601,43 @@ import AuthGuard from '../components/AuthGuard.astro';
         modal.classList.add('show')
       }
 
+      // ============ MODALES DE RECEPCIÓN (solo lectura + botón Comenzar) ============
+      
+      function abrirModalRecepcionBesalco(canchaId) {
+        canchaIdActual = canchaId
+        const modal = document.getElementById('recepcion-besalco-modal')
+        
+        // Cargar historial de observaciones
+        cargarHistorialObservaciones(canchaId, 'historial-recepcion-besalco')
+        
+        // Mostrar modal
+        modal.classList.add('show')
+      }
+
+      function abrirModalRecepcionLinkapsis(canchaId) {
+        canchaIdActual = canchaId
+        const modal = document.getElementById('recepcion-linkapsis-modal')
+        
+        // Cargar historial de observaciones
+        cargarHistorialObservaciones(canchaId, 'historial-recepcion-linkapsis')
+        
+        // Mostrar modal
+        modal.classList.add('show')
+      }
+
+      function abrirModalRecepcionLlayLlay(canchaId) {
+        canchaIdActual = canchaId
+        const modal = document.getElementById('recepcion-llayllay-modal')
+        
+        // Cargar historial de observaciones
+        cargarHistorialObservaciones(canchaId, 'historial-recepcion-llayllay')
+        
+        // Mostrar modal
+        modal.classList.add('show')
+      }
+
+      // ============ MODALES DE CIERRE Y BORRADO ============
+
       function abrirModalCierre(canchaId) {
         canchaIdActual = canchaId
         const modal = document.getElementById('cerrar-cancha-modal')
@@ -3554,6 +3728,22 @@ import AuthGuard from '../components/AuthGuard.astro';
           }
         }
         
+        // Botones de "Comenzar Trabajo" en modales de recepción
+        const btnComenzarBesalco = document.getElementById('btn-comenzar-besalco')
+        if (btnComenzarBesalco) {
+          btnComenzarBesalco.addEventListener('click', () => comenzarTrabajo('Besalco'))
+        }
+        
+        const btnComenzarLinkapsis = document.getElementById('btn-comenzar-linkapsis')
+        if (btnComenzarLinkapsis) {
+          btnComenzarLinkapsis.addEventListener('click', () => comenzarTrabajo('Linkapsis'))
+        }
+        
+        const btnComenzarLlayLlay = document.getElementById('btn-comenzar-llayllay')
+        if (btnComenzarLlayLlay) {
+          btnComenzarLlayLlay.addEventListener('click', () => comenzarTrabajo('LlayLlay'))
+        }
+        
         // Formulario Linkapsis
         const formLinkapsis = document.getElementById('form-validacion-linkapsis')
         if (formLinkapsis) {
@@ -3604,6 +3794,46 @@ import AuthGuard from '../components/AuthGuard.astro';
       }
 
       // === FUNCIONES DE PROCESAMIENTO DE VALIDACIONES ===
+
+      // Función para cambiar estado de "En Espera" a "En Proceso"
+      async function comenzarTrabajo(empresa) {
+        try {
+          if (!canchaIdActual) {
+            mostrarMensaje('No hay cancha seleccionada', 'error')
+            return
+          }
+          
+          console.log(`Comenzando trabajo para ${empresa} en cancha ${canchaIdActual}`)
+          
+          // Cambiar estado de En Espera (7) o Rechazada, en Espera (8) → En Proceso (3)
+          const response = await fetch(`/api/canchas/${canchaIdActual}/accion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              accion: 'tomar_trabajo',
+              empresa: empresa
+            })
+          })
+          
+          if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.error || 'Error al comenzar trabajo')
+          }
+          
+          const result = await response.json()
+          console.log('Trabajo iniciado:', result)
+          
+          mostrarMensaje(`✅ Trabajo iniciado para ${empresa}`, 'success')
+          cerrarTodosLosModales()
+          
+          // Recargar canchas para actualizar la tabla
+          await cargarCanchas()
+          
+        } catch (error) {
+          console.error('Error al comenzar trabajo:', error)
+          mostrarMensaje(`Error: ${error.message}`, 'error')
+        }
+      }
 
       async function procesarValidacionBesalco(e) {
         e.preventDefault()
