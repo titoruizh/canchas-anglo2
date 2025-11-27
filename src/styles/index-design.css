@@ -53,8 +53,15 @@ body {
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(40px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .header {
@@ -141,6 +148,16 @@ body {
   transform: translateY(-1px);
 }
 
+.header-btn-create {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--primary);
+}
+
+.header-btn-create:hover {
+  background: rgba(59, 130, 246, 0.2);
+  transform: translateY(-1px);
+}
+
 /* Controls & Filters */
 .controls {
   background: white;
@@ -194,10 +211,11 @@ body {
 .toggle-btn.active {
   background: white;
   color: var(--primary);
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-select, input {
+select,
+input {
   padding: 0.6rem 1rem;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
@@ -207,7 +225,8 @@ select, input {
   transition: all 0.2s;
 }
 
-select:focus, input:focus {
+select:focus,
+input:focus {
   outline: none;
   border-color: var(--primary);
   background: white;
@@ -264,12 +283,35 @@ tr:hover {
   display: inline-block;
 }
 
-.estado-creada { background: #e0f2fe; color: #0284c7; }
-.estado-en-proceso { background: #ffedd5; color: #c2410c; }
-.estado-finalizada { background: #dcfce7; color: #15803d; }
-.estado-validada { background: #dcfce7; color: #15803d; }
-.estado-rechazada { background: #fee2e2; color: #b91c1c; }
-.estado-cerrada { background: #f3e8ff; color: #7e22ce; }
+.estado-creada {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.estado-en-proceso {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.estado-finalizada {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.estado-validada {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.estado-rechazada {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.estado-cerrada {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
 
 .empresa-actual {
   font-weight: 600;
@@ -278,10 +320,25 @@ tr:hover {
   font-size: 0.8rem;
 }
 
-.empresa-angloamerican { background: #e0f2fe; color: #0284c7; }
-.empresa-besalco { background: #ffedd5; color: #c2410c; }
-.empresa-linkapsis { background: #dcfce7; color: #15803d; }
-.empresa-llayllay { background: #f3e8ff; color: #7e22ce; }
+.empresa-angloamerican {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+.empresa-besalco {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.empresa-linkapsis {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.empresa-llayllay {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
 
 /* Action Buttons */
 .btn-accion {
@@ -406,16 +463,29 @@ tr:hover {
 }
 
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
-.close-btn, .map-close-btn {
+.close-btn,
+.map-close-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
   color: inherit;
@@ -430,7 +500,8 @@ tr:hover {
   font-size: 1.2rem;
 }
 
-.close-btn:hover, .map-close-btn:hover {
+.close-btn:hover,
+.map-close-btn:hover {
   background: rgba(255, 255, 255, 0.3);
   transform: rotate(90deg);
 }
@@ -510,8 +581,13 @@ textarea:focus {
 }
 
 /* Utilities */
-.hidden { display: none !important; }
-.text-center { text-align: center; }
+.hidden {
+  display: none !important;
+}
+
+.text-center {
+  text-align: center;
+}
 
 /* Historial Styles */
 .historial-observaciones {
@@ -528,7 +604,7 @@ textarea:focus {
   border-radius: 8px;
   margin-bottom: 0.8rem;
   border: 1px solid #f1f5f9;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* Create Cancha Modal Layout */
@@ -563,6 +639,7 @@ textarea:focus {
   .create-cancha-container {
     flex-direction: column;
   }
+
   .create-cancha-form {
     width: 100%;
     height: auto;
@@ -577,22 +654,23 @@ textarea:focus {
     padding: 1rem;
     margin: 1rem;
   }
-  
+
   .header h1 {
     font-size: 1.8rem;
   }
-  
+
   .filtros-row {
     flex-direction: column;
     align-items: stretch;
     gap: 1rem;
   }
-  
+
   .table-container {
     overflow-x: auto;
   }
-  
-  th, td {
+
+  th,
+  td {
     padding: 1rem;
     white-space: nowrap;
   }

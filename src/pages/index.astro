@@ -2266,6 +2266,12 @@ import AuthGuard from "../components/AuthGuard.astro";
           </div>
           <div class="header-buttons">
             <span id="user-company" class="empresa-actual">Cargando...</span>
+            <button
+              id="btn-abrir-modal-crear"
+              type="button"
+              class="header-btn header-btn-create"
+              style="display: none;">🏗️ Crear Cancha</button
+            >
             <a
               id="btn-admin-usuarios"
               href="/admin/usuarios"
@@ -2282,18 +2288,7 @@ import AuthGuard from "../components/AuthGuard.astro";
 
         <!-- Controles y Filtros -->
         <div class="controls">
-          <!-- Formulario para crear nueva cancha (solo AngloAmerican) -->
-          <div id="form-crear-cancha" class="control-group hidden">
-            <div class="form-row">
-              <div>
-                <button
-                  id="btn-abrir-modal-crear"
-                  type="button"
-                  class="btn-crear-cancha">🏗️ Crear Nueva Cancha</button
-                >
-              </div>
-            </div>
-          </div>
+          <!-- Filtros -->
 
           <!-- Filtros -->
           <div class="filtros-container">
@@ -3439,18 +3434,17 @@ import AuthGuard from "../components/AuthGuard.astro";
           userCompany.textContent = usuario.empresa_nombre;
           userCompany.className = `empresa-actual empresa-${usuario.empresa_nombre.toLowerCase().replace(" ", "")}`;
 
-          // Mostrar/ocultar formulario de crear cancha según la empresa
+          // Mostrar/ocultar botón de crear cancha según la empresa
           if (usuario.empresa_nombre === "AngloAmerican") {
-            console.log(
-              "Mostrando formulario de crear cancha para AngloAmerican",
-            );
-            formCrearCancha.classList.remove("hidden");
+            console.log("Mostrando botón de crear cancha para AngloAmerican");
+            if (btnAbrirModalCrear)
+              btnAbrirModalCrear.style.display = "inline-flex";
           } else {
             console.log(
-              "Ocultando formulario de crear cancha para:",
+              "Ocultando botón de crear cancha para:",
               usuario.empresa_nombre,
             );
-            formCrearCancha.classList.add("hidden");
+            if (btnAbrirModalCrear) btnAbrirModalCrear.style.display = "none";
           }
 
           // Mostrar enlace de administración si es de AngloAmerican
