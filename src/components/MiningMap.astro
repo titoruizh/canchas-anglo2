@@ -162,10 +162,10 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
 
       const MAP_CONFIG = {
         center: [-70.7376, -33.1193],
-        zoom: 15, // Zoom original - TODO: Expandir cuando ortomosaico esté actualizado
+        zoom: 14.6, // Zoom moderado - un poco más alejado que el original
         bounds: [
-          [-70.762292, -33.136471],  // Bounds originales
-          [-70.708471, -33.111063]   // TODO: Expandir ~30% cuando imagen esté lista
+          [-70.772, -33.142],     // Límite suroeste
+          [-70.703, -33.102615]   // Límite noreste: 33° 06' 09.414625"
         ]
       };
 
@@ -234,7 +234,8 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
           map = new mapboxgl.Map({
             container: 'map',
             style: { 
-              version: 8, 
+              version: 8,
+              glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf', // Habilitar renderizado de texto
               sources: {}, 
               layers: [ 
                 { 
@@ -360,7 +361,7 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
               tileSize: 256,
               minzoom: 10,
               maxzoom: 20,
-              bounds: [-70.762292, -33.136471, -70.708471, -33.111063]
+              bounds: [-70.772, -33.142, -70.703, -33.096]
             });
             console.log('✅ Fuente de ortomosaico agregada');
           }
@@ -411,6 +412,72 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
             paint: { 'line-color': '#ff7f00', 'line-width': 2, 'line-opacity': 0.8 } 
           });
 
+          // ETIQUETAS: Nombres de sectores (aparecen solo desde zoom de 100m o menos)
+          map.addLayer({
+            id: 'sectores-labels',
+            type: 'symbol',
+            source: 'sectores',
+            minzoom: 15, // Aparecen solo cuando el zoom es >= 100m de escala
+            layout: {
+              'text-field': ['get', 'NAME'],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': 18,
+              'text-offset': [0, 0],
+              'text-anchor': 'center',
+              'text-letter-spacing': 0.05,
+              'text-allow-overlap': false,
+              'text-ignore-placement': false,
+              'symbol-avoid-edges': true,
+              'symbol-placement': 'point',
+              visibility: 'visible'
+            },
+            paint: {
+              'text-color': '#ffffff',
+              'text-halo-color': '#000000',
+              'text-halo-width': 2.5,
+              'text-halo-blur': 1,
+              'text-opacity': 1
+            }
+          });
+
+          // ETIQUETAS: Nombres de polígonos (halo azul profesional, desaparecen con zoom cercano)
+          map.addLayer({
+            id: 'poligonos-labels',
+            type: 'symbol',
+            source: 'poligonos',
+            filter: ['!=', ['get', 'NAME'], 'Otros'],
+            minzoom: 0,
+            maxzoom: 15.5, // Desaparecen cuando el zoom es mayor a ~75m de escala
+            layout: {
+              'text-field': [
+                'concat',
+                [
+                  'case',
+                  ['==', ['slice', ['get', 'NAME'], 0, 2], 'MO'], 'Muro Oeste',
+                  ['==', ['slice', ['get', 'NAME'], 0, 2], 'MP'], 'Muro Principal',
+                  ['==', ['slice', ['get', 'NAME'], 0, 2], 'ME'], 'Muro Este',
+                  ['get', 'NAME']
+                ],
+                ['slice', ['get', 'NAME'], 2]
+              ],
+              'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+              'text-size': 18,
+              'text-offset': [0, 0],
+              'text-anchor': 'center',
+              'text-letter-spacing': 0.05,
+              'text-allow-overlap': false,
+              'text-ignore-placement': false,
+              visibility: 'visible'
+            },
+            paint: {
+              'text-color': '#ffffff',
+              'text-halo-color': '#2563eb',
+              'text-halo-width': 3,
+              'text-halo-blur': 1,
+              'text-opacity': 1
+            }
+          });
+
           console.log('✅ Todas las capas configuradas correctamente');
           setupControls();
 
@@ -457,6 +524,8 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
             // Mostrar capas de polígonos y aplicar filtro
             map.setLayoutProperty('polygons-stroke', 'visibility', 'visible');
             map.setFilter('polygons-stroke', ['==', ['get', 'tipo'], filter]);
+            // Las etiquetas ya están siempre visibles, solo aplicar filtro
+            map.setFilter('poligonos-labels', ['all', ['!=', ['get', 'NAME'], 'Otros'], ['==', ['get', 'tipo'], filter]]);
             
             // Centrar en las coordenadas específicas del muro usando UTM
             if (MURO_BOUNDS_UTM[filter]) {
@@ -492,6 +561,8 @@ console.log('🏗️ MiningMap iniciado con:', { muroFilter, drawingMode, cancha
             
             // Ocultar polígonos y volver a la vista general
             map.setLayoutProperty('polygons-stroke', 'visibility', 'none');
+            // Restaurar filtro de etiquetas para mostrar todas (excepto "Otros")
+            map.setFilter('poligonos-labels', ['!=', ['get', 'NAME'], 'Otros']);
             
             // Volver a la vista general
             map.fitBounds(MAP_CONFIG.bounds, {
