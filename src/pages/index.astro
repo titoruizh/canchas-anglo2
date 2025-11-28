@@ -516,13 +516,7 @@ import AuthGuard from "../components/AuthGuard.astro";
         border-color: transparent;
       }
 
-      #borrar-header {
-        text-align: center;
-        background: #f8f9fa;
-        font-weight: 600;
-        color: #e74c3c;
-        border-left: 3px solid #e74c3c;
-      }
+      /* Estilos #borrar-header eliminados - columna removida */
 
       .loading {
         text-align: center;
@@ -2373,6 +2367,112 @@ import AuthGuard from "../components/AuthGuard.astro";
         margin-right: 0.5rem;
         font-size: 0.9rem;
       }
+
+      /* === ESTILOS DE SELECCIÓN MÚLTIPLE === */
+      .cancha-checkbox {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        accent-color: #3b82f6;
+      }
+
+      #select-all-checkbox {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+        accent-color: #3b82f6;
+      }
+
+      .cancha-row.selected {
+        background-color: #eff6ff !important;
+        border-left: 3px solid #3b82f6;
+      }
+
+      /* Barra flotante de acciones masivas */
+      .bulk-actions-bar {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        padding: 1rem 2rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        z-index: 1000;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+
+      .bulk-actions-bar.hidden {
+        display: none;
+      }
+
+      .bulk-actions-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .selected-count {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.5rem 1rem;
+        background: rgba(59, 130, 246, 0.2);
+        border-radius: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+
+      .bulk-actions-buttons {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .btn-bulk-action {
+        padding: 0.6rem 1.5rem;
+        border: none;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .btn-bulk-delete {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+      }
+
+      .btn-bulk-delete:hover {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      }
+
+      .btn-bulk-delete:active {
+        transform: translateY(0);
+      }
+
+      .btn-clear-selection {
+        padding: 0.6rem 1.2rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        color: white;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .btn-clear-selection:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.05);
+      }
     </style>
   </head>
   <body>
@@ -2501,13 +2601,15 @@ import AuthGuard from "../components/AuthGuard.astro";
           <table>
             <thead>
               <tr>
+                <th style="width: 50px;">
+                  <input type="checkbox" id="select-all-checkbox" title="Seleccionar todas">
+                </th>
                 <th>Nombre de Cancha</th>
                 <th>Estado Actual</th>
                 <th>Empresa Actual</th>
                 <th>Fecha Creación</th>
                 <th>Mapa</th>
                 <th>Acciones</th>
-                <th id="borrar-header" class="hidden">Administrar</th>
               </tr>
             </thead>
             <tbody id="canchas-tbody">
@@ -2550,6 +2652,22 @@ import AuthGuard from "../components/AuthGuard.astro";
               >
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- === BOTÓN FLOTANTE DE ACCIONES MASIVAS === -->
+      <div id="bulk-actions-bar" class="bulk-actions-bar hidden">
+        <div class="bulk-actions-content">
+          <span id="selected-count" class="selected-count">0 canchas seleccionadas</span>
+          <div class="bulk-actions-buttons">
+            <button id="btn-bulk-delete" class="btn-bulk-action btn-bulk-delete hidden" title="Borrar canchas seleccionadas">
+              🗑️ Borrar Seleccionadas
+            </button>
+            <!-- Espacio para futuros botones de acciones masivas -->
+          </div>
+          <button id="btn-clear-selection" class="btn-clear-selection" title="Limpiar selección">
+            ✖ Limpiar
+          </button>
         </div>
       </div>
 
@@ -3605,9 +3723,6 @@ import AuthGuard from "../components/AuthGuard.astro";
           // Cargar datos
           await cargarCanchas();
 
-          // Actualizar columna de administración
-          actualizarColumnaAdmin();
-
           // Mensaje de bienvenida eliminado para evitar duplicados
         } catch (error) {
           console.error("Error cargando usuario:", error);
@@ -3637,9 +3752,6 @@ import AuthGuard from "../components/AuthGuard.astro";
         window.location.href = "/login";
         todasLasCanchas = [];
         canchasFiltradas = [];
-
-        // Ocultar columna de administración
-        actualizarColumnaAdmin();
 
         mostrarMensaje("Sesión cerrada correctamente", "success");
       }
@@ -4194,6 +4306,9 @@ import AuthGuard from "../components/AuthGuard.astro";
           .map(
             (cancha) => `
           <tr data-cancha-id="${cancha.id}" class="cancha-row">
+            <td style="text-align: center;">
+              <input type="checkbox" class="cancha-checkbox" data-cancha-id="${cancha.id}" data-cancha-nombre="${cancha.nombre}">
+            </td>
             <td><strong>${cancha.nombre.toUpperCase()}</strong></td>
             <td>
               <span class="estado estado-${cancha.estado_actual.toLowerCase().replace(/\s+/g, "-")}">
@@ -4211,10 +4326,6 @@ import AuthGuard from "../components/AuthGuard.astro";
             </td>
             <td>
               <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
-              </div>
-            </td>
-            <td class="borrar-column hidden">
-              <div class="admin-actions" data-cancha-id="${cancha.id}">
               </div>
             </td>
           </tr>
@@ -4238,6 +4349,9 @@ import AuthGuard from "../components/AuthGuard.astro";
               abrirMapaModal(canchaId, canchaName);
             });
           });
+
+          // Agregar listeners de checkboxes
+          attachCheckboxListeners();
         }, 100); // Pequeño delay para asegurar que el DOM esté actualizado
 
         actualizarAcciones();
@@ -4274,10 +4388,8 @@ import AuthGuard from "../components/AuthGuard.astro";
       function actualizarAcciones() {
         console.log("Actualizando acciones para empresa:", empresaLogueada);
         const actionsDivs = document.querySelectorAll(".actions");
-        const adminDivs = document.querySelectorAll(".admin-actions");
 
         console.log("Encontrados", actionsDivs.length, "divs de acciones");
-        console.log("Encontrados", adminDivs.length, "divs de admin");
 
         actionsDivs.forEach((div, index) => {
           const canchaId = div.dataset.canchaId;
@@ -4295,15 +4407,6 @@ import AuthGuard from "../components/AuthGuard.astro";
           );
           console.log(`Botones generados: ${botonesHTML}`);
           div.innerHTML = botonesHTML;
-        });
-
-        // Actualizar botones de administración
-        adminDivs.forEach((div, index) => {
-          const canchaId = div.dataset.canchaId;
-          console.log(`Procesando admin div ${index}: canchaId=${canchaId}`);
-          const adminHTML = generarBotonesAdmin(canchaId);
-          console.log(`Admin botones generados: ${adminHTML}`);
-          div.innerHTML = adminHTML;
         });
 
         // Agregar event listeners a los botones
@@ -4443,29 +4546,8 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       // Generar botones de administración (solo para AngloAmerican)
-      function generarBotonesAdmin(canchaId) {
-        if (!empresaLogueada || empresaLogueada.id !== 1) {
-          return ""; // Solo AngloAmerican puede administrar
-        }
-
-        return `<button class="btn-accion btn-danger" data-accion="abrir-modal-borrar" data-cancha-id="${canchaId}">🗑️ Borrar</button>`;
-      }
-
-      // Mostrar/ocultar columna de administración según empresa
-      function actualizarColumnaAdmin() {
-        const borrarHeader = document.getElementById("borrar-header");
-        const borrarColumns = document.querySelectorAll(".borrar-column");
-
-        if (empresaLogueada && empresaLogueada.id === 1) {
-          // Mostrar columna para AngloAmerican
-          borrarHeader.classList.remove("hidden");
-          borrarColumns.forEach((col) => col.classList.remove("hidden"));
-        } else {
-          // Ocultar columna para otras empresas
-          borrarHeader.classList.add("hidden");
-          borrarColumns.forEach((col) => col.classList.add("hidden"));
-        }
-      }
+      // NOTA: Las funciones generarBotonesAdmin() y actualizarColumnaAdmin() fueron eliminadas
+      // porque ahora se usa el sistema de selección múltiple con checkboxes
 
       // Agregar event listeners a botones de acción
       function agregarEventListeners() {
@@ -4995,7 +5077,159 @@ import AuthGuard from "../components/AuthGuard.astro";
       });
 
       // Event listeners para botones de cerrar y cancelar
+      // === SISTEMA DE SELECCIÓN MÚLTIPLE ===
+      let selectedCanchas = new Set();
+
+      function initializeSelectionSystem() {
+        const selectAllCheckbox = document.getElementById("select-all-checkbox");
+        const bulkActionsBar = document.getElementById("bulk-actions-bar");
+        const btnBulkDelete = document.getElementById("btn-bulk-delete");
+        const btnClearSelection = document.getElementById("btn-clear-selection");
+
+        // Seleccionar/Deseleccionar todas
+        if (selectAllCheckbox) {
+          selectAllCheckbox.addEventListener("change", (e) => {
+            const checkboxes = document.querySelectorAll(".cancha-checkbox");
+            checkboxes.forEach(checkbox => {
+              checkbox.checked = e.target.checked;
+              const canchaId = checkbox.dataset.canchaId;
+              if (e.target.checked) {
+                selectedCanchas.add(canchaId);
+                checkbox.closest("tr").classList.add("selected");
+              } else {
+                selectedCanchas.delete(canchaId);
+                checkbox.closest("tr").classList.remove("selected");
+              }
+            });
+            updateBulkActionsBar();
+          });
+        }
+
+        // Limpiar selección
+        if (btnClearSelection) {
+          btnClearSelection.addEventListener("click", clearSelection);
+        }
+
+        // Borrar canchas seleccionadas
+        if (btnBulkDelete) {
+          btnBulkDelete.addEventListener("click", handleBulkDelete);
+        }
+      }
+
+      // Manejar click en checkbox individual (se agrega después de renderizar)
+      function attachCheckboxListeners() {
+        document.querySelectorAll(".cancha-checkbox").forEach(checkbox => {
+          checkbox.addEventListener("change", (e) => {
+            const canchaId = e.target.dataset.canchaId;
+            const row = e.target.closest("tr");
+            
+            if (e.target.checked) {
+              selectedCanchas.add(canchaId);
+              row.classList.add("selected");
+            } else {
+              selectedCanchas.delete(canchaId);
+              row.classList.remove("selected");
+              document.getElementById("select-all-checkbox").checked = false;
+            }
+            
+            updateBulkActionsBar();
+          });
+        });
+
+        // Prevenir que el click en checkbox dispare el evento de la fila
+        document.querySelectorAll(".cancha-checkbox").forEach(checkbox => {
+          checkbox.addEventListener("click", (e) => {
+            e.stopPropagation();
+          });
+        });
+      }
+
+      function updateBulkActionsBar() {
+        const bulkActionsBar = document.getElementById("bulk-actions-bar");
+        const selectedCount = document.getElementById("selected-count");
+        const btnBulkDelete = document.getElementById("btn-bulk-delete");
+        const count = selectedCanchas.size;
+
+        if (count > 0) {
+          bulkActionsBar.classList.remove("hidden");
+          selectedCount.textContent = `${count} cancha${count > 1 ? 's' : ''} seleccionada${count > 1 ? 's' : ''}`;
+          
+          // Mostrar botón de borrar solo si es AngloAmerican
+          if (empresaLogueada && empresaLogueada.nombre === "AngloAmerican") {
+            btnBulkDelete.classList.remove("hidden");
+          } else {
+            btnBulkDelete.classList.add("hidden");
+          }
+        } else {
+          bulkActionsBar.classList.add("hidden");
+        }
+      }
+
+      function clearSelection() {
+        selectedCanchas.clear();
+        document.querySelectorAll(".cancha-checkbox").forEach(checkbox => {
+          checkbox.checked = false;
+          checkbox.closest("tr").classList.remove("selected");
+        });
+        document.getElementById("select-all-checkbox").checked = false;
+        updateBulkActionsBar();
+      }
+
+      async function handleBulkDelete() {
+        if (selectedCanchas.size === 0) return;
+
+        const canchaIds = Array.from(selectedCanchas);
+        
+        // Si es solo una cancha, usar el modal normal
+        if (canchaIds.length === 1) {
+          abrirModalBorrar(canchaIds[0]);
+          return;
+        }
+
+        // Si son múltiples canchas, abrir modal adaptado para borrado masivo
+        abrirModalBorradoMasivo(canchaIds);
+      }
+
+      function abrirModalBorradoMasivo(canchaIds) {
+        const modal = document.getElementById("borrar-cancha-modal");
+        const inputConfirmacion = document.getElementById("confirmacion-borrado");
+        const btnConfirmar = document.getElementById("confirmar-borrado");
+        const historialDiv = document.getElementById("historial-borrado");
+
+        // Limpiar input y deshabilitar botón
+        inputConfirmacion.value = "";
+        btnConfirmar.disabled = true;
+
+        // Mostrar lista de canchas que se borrarán
+        const canchaNames = canchaIds.map(id => {
+          const checkbox = document.querySelector(`.cancha-checkbox[data-cancha-id="${id}"]`);
+          return checkbox ? checkbox.dataset.canchaNombre : `ID ${id}`;
+        });
+
+        historialDiv.innerHTML = `
+          <h4>⚠️ Se eliminarán ${canchaIds.length} canchas:</h4>
+          <div class="historial-content" style="max-height: 200px; overflow-y: auto;">
+            <ul style="margin: 0; padding-left: 1.5rem;">
+              ${canchaNames.map(name => `<li><strong>${name}</strong></li>`).join('')}
+            </ul>
+            <p style="margin-top: 1rem; color: #e74c3c; font-weight: 600;">
+              Se eliminarán todas las validaciones y observaciones asociadas a estas canchas.
+            </p>
+          </div>
+        `;
+
+        // Guardar los IDs para el borrado
+        modal.dataset.bulkDeleteIds = JSON.stringify(canchaIds);
+        modal.dataset.isBulkDelete = 'true';
+
+        // Mostrar modal
+        modal.classList.add("show");
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
+        // === SISTEMA DE SELECCIÓN MÚLTIPLE ===
+        initializeSelectionSystem();
+
         // Botones de cerrar (X)
         document.querySelectorAll(".close-btn").forEach((btn) => {
           btn.addEventListener("click", cerrarTodosLosModales);
@@ -5105,7 +5339,21 @@ import AuthGuard from "../components/AuthGuard.astro";
           });
 
           btnConfirmarBorrado.addEventListener("click", async () => {
-            await ejecutarAccion("borrar_cancha", canchaIdActual, null);
+            const modal = document.getElementById("borrar-cancha-modal");
+            const isBulkDelete = modal.dataset.isBulkDelete === 'true';
+
+            if (isBulkDelete) {
+              // Borrado masivo
+              const canchaIds = JSON.parse(modal.dataset.bulkDeleteIds || '[]');
+              await ejecutarBorradoMasivo(canchaIds);
+            } else {
+              // Borrado individual
+              await ejecutarAccion("borrar_cancha", canchaIdActual, null);
+            }
+            
+            // Limpiar dataset y cerrar modal
+            delete modal.dataset.isBulkDelete;
+            delete modal.dataset.bulkDeleteIds;
             cerrarTodosLosModales();
           });
         }
@@ -5485,6 +5733,54 @@ import AuthGuard from "../components/AuthGuard.astro";
         } catch (error) {
           console.error("Error al ejecutar acción:", error);
           mostrarMensaje("Error al procesar la acción", "error");
+        } finally {
+          cargando = false;
+        }
+      }
+
+      // Función para ejecutar borrado masivo de canchas
+      async function ejecutarBorradoMasivo(canchaIds) {
+        try {
+          cargando = true;
+          let eliminadas = 0;
+          let errores = 0;
+
+          for (const canchaId of canchaIds) {
+            try {
+              const response = await fetch(`/api/canchas/${canchaId}`, {
+                method: "DELETE",
+              });
+
+              if (response.ok) {
+                eliminadas++;
+              } else {
+                errores++;
+                console.error(`Error al borrar cancha ${canchaId}`);
+              }
+            } catch (error) {
+              errores++;
+              console.error(`Error al borrar cancha ${canchaId}:`, error);
+            }
+          }
+
+          // Limpiar selección
+          clearSelection();
+
+          // Mostrar resultado
+          if (eliminadas > 0) {
+            mostrarMensaje(
+              `✅ ${eliminadas} cancha${eliminadas > 1 ? 's eliminadas' : ' eliminada'} correctamente${errores > 0 ? `. ${errores} error${errores > 1 ? 'es' : ''}` : ''}`,
+              errores > 0 ? "warning" : "success"
+            );
+          } else {
+            mostrarMensaje("❌ No se pudo eliminar ninguna cancha", "error");
+          }
+
+          // Recargar canchas
+          await cargarCanchas();
+        } catch (error) {
+          console.error("Error en borrado masivo:", error);
+          mostrarMensaje("Error al borrar las canchas seleccionadas", "error");
         } finally {
           cargando = false;
         }
