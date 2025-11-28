@@ -271,9 +271,18 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       .table-container {
         background: white;
-        border-radius: 12px 12px 0 0;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        border-radius: 16px;
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
         overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        margin-bottom: 2rem;
+        transition: transform 0.3s ease;
+      }
+
+      .table-container:hover {
+        transform: translateY(-2px);
       }
 
       /* Estilos de paginación */
@@ -339,44 +348,60 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
       }
 
       th,
       td {
-        padding: 1rem;
+        padding: 1.2rem 1rem;
         text-align: center;
-        border-bottom: 1px solid #e1e8ed;
+        border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
       }
 
       th {
-        background: #f8f9fa;
-        font-weight: 600;
-        color: #2c3e50;
+        background: linear-gradient(to bottom, #f0f9ff, #e0f2fe);
+        font-weight: 700;
+        color: #1e3a8a;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.05em;
+        border-bottom: 2px solid #bfdbfe;
+        position: relative;
       }
 
       /* Asegurar que el contenido de las celdas esté centrado */
       td {
         text-align: center !important;
+        color: #475569;
+        font-size: 0.95rem;
       }
 
       td strong {
         display: inline-block;
+        color: #1e293b;
+        font-weight: 600;
+      }
+
+      tr:last-child td {
+        border-bottom: none;
       }
 
       tr:hover {
-        background: #f8f9fa;
+        background: #f8fafc;
       }
 
       /* Estilo para filas clickeables con doble-click */
       .cancha-row {
         cursor: pointer;
-        transition: background-color 0.2s ease;
+        transition: all 0.2s ease;
       }
 
       .cancha-row:hover {
-        background: #e3f2fd !important;
+        background: #f8fafc !important;
+        transform: scale(1.001);
+        border-left: 3px solid #3b82f6;
       }
 
       .cancha-row:active {
@@ -384,38 +409,47 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       .estado {
-        padding: 0.4rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.8rem;
+        font-weight: 700;
         text-align: center;
         white-space: nowrap;
-        display: inline-block;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
       }
 
       .estado-creada {
-        background: #e3f2fd;
-        color: #1976d2;
+        background: #eff6ff;
+        color: #2563eb;
+        border: 1px solid #dbeafe;
       }
       .estado-en-proceso {
-        background: #fff3e0;
-        color: #f57c00;
+        background: #fff7ed;
+        color: #ea580c;
+        border: 1px solid #ffedd5;
       }
       .estado-finalizada {
-        background: #e8f5e8;
-        color: #388e3c;
+        background: #f0fdf4;
+        color: #16a34a;
+        border: 1px solid #dcfce7;
       }
       .estado-validada {
-        background: #e8f5e8;
-        color: #2e7d32;
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #dcfce7;
       }
       .estado-rechazada {
-        background: #ffebee;
-        color: #d32f2f;
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fee2e2;
       }
       .estado-cerrada {
-        background: #f3e5f5;
-        color: #7b1fa2;
+        background: #faf5ff;
+        color: #9333ea;
+        border: 1px solid #f3e8ff;
       }
 
       .actions {
@@ -429,8 +463,27 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       .actions button {
         padding: 0.5rem 1rem;
-        font-size: 0.85rem;
+        font-size: 0.8rem;
         margin: 0;
+        border-radius: 50px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
+      }
+
+      .btn-accion {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5);
+      }
+
+      .btn-accion:hover {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
       }
 
       .admin-actions {
@@ -441,21 +494,26 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       .admin-actions button {
-        padding: 0.5rem 0.75rem;
+        padding: 0.5rem 1rem;
         font-size: 0.8rem;
-        border-radius: 6px;
-        border: none;
+        border-radius: 50px;
+        border: 1px solid #ef4444;
         cursor: pointer;
         transition: all 0.3s ease;
-        background: #e74c3c;
-        color: white;
+        background: white;
+        color: #ef4444;
         font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
       }
 
       .admin-actions button:hover {
-        background: #c0392b;
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
         transform: translateY(-1px);
-        box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        border-color: transparent;
       }
 
       #borrar-header {
@@ -492,28 +550,33 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       .empresa-actual {
         font-weight: 600;
-        padding: 0.3rem 0.6rem;
-        border-radius: 15px;
+        padding: 0.4rem 0.8rem;
+        border-radius: 50px;
         font-size: 0.8rem;
         text-align: center;
         display: inline-block;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
       }
 
       .empresa-angloamerican {
-        background: #e3f2fd;
-        color: #1976d2;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #dbeafe;
       }
       .empresa-besalco {
-        background: #fff3e0;
-        color: #f57c00;
+        background: #fff7ed;
+        color: #c2410c;
+        border: 1px solid #ffedd5;
       }
       .empresa-linkapsis {
-        background: #e8f5e8;
-        color: #388e3c;
+        background: #f0fdf4;
+        color: #15803d;
+        border: 1px solid #dcfce7;
       }
       .empresa-llayllay {
-        background: #f3e5f5;
-        color: #7b1fa2;
+        background: #faf5ff;
+        color: #7e22ce;
+        border: 1px solid #f3e8ff;
       }
 
       .modal {
@@ -4039,7 +4102,7 @@ import AuthGuard from "../components/AuthGuard.astro";
             </td>
             <td>${new Date(cancha.created_at).toLocaleDateString("es-ES")}</td>
             <td>
-              <button class="btn-mapa" data-cancha-id="${cancha.id}" data-cancha-nombre="${cancha.nombre}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem;" title="Ver en mapa">🗺️</button>
+              <button class="btn-mapa" data-cancha-id="${cancha.id}" data-cancha-nombre="${cancha.nombre}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem; transition: transform 0.2s;" title="Ver en mapa">🗺️</button>
             </td>
             <td>
               <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
@@ -4168,7 +4231,7 @@ import AuthGuard from "../components/AuthGuard.astro";
           if (estado === "Creada") {
             console.log("Estado es Creada, agregando botón enviar a Besalco");
             botones.push(
-              `<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">Enviar a Besalco</button>`,
+              `<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">📤 Enviar a Besalco</button>`,
             );
           } else if (
             estado === "En Proceso" &&
@@ -4203,20 +4266,20 @@ import AuthGuard from "../components/AuthGuard.astro";
                   "Todas las validaciones completas, agregando botón PDF",
                 );
                 botones.push(
-                  `<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 Exportar PDF</button>`,
+                  `<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 PDF</button>`,
                 );
               }
             }
 
             console.log("Agregando botón cerrar cancha");
             botones.push(
-              `<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">Cerrar Cancha</button>`,
+              `<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">🔒 Cerrar Cancha</button>`,
             );
           } else if (estado === "Finalizada" || estado === "Cerrada") {
             console.log("Estado es Finalizada/Cerrada, agregando botón PDF");
             // Para canchas finalizadas o cerradas, siempre mostrar el botón PDF
             botones.push(
-              `<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 Exportar PDF</button>`,
+              `<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 PDF</button>`,
             );
           }
         }
@@ -4234,7 +4297,7 @@ import AuthGuard from "../components/AuthGuard.astro";
           } else if (estado === "En Proceso" && empresaActual === "Besalco") {
             // Cancha en proceso - Validar trabajo activo
             botones.push(
-              `<button class="btn-accion btn-success" data-accion="validar-besalco" data-cancha-id="${canchaId}">✅ Validar Trabajo</button>`,
+              `<button class="btn-accion btn-success" data-accion="validar-besalco" data-cancha-id="${canchaId}">🛠️ Gestionar</button>`,
             );
           }
         }
@@ -4249,7 +4312,7 @@ import AuthGuard from "../components/AuthGuard.astro";
           } else if (estado === "En Proceso" && empresaActual === "Linkapsis") {
             // Cancha en proceso - Validar espesores
             botones.push(
-              `<button class="btn-accion btn-success" data-accion="validar-linkapsis" data-cancha-id="${canchaId}">✅ Validar Espesores</button>`,
+              `<button class="btn-accion btn-success" data-accion="validar-linkapsis" data-cancha-id="${canchaId}">📏 Gestionar</button>`,
             );
           }
         }
@@ -4264,7 +4327,7 @@ import AuthGuard from "../components/AuthGuard.astro";
           } else if (estado === "En Proceso" && empresaActual === "LlayLlay") {
             // Cancha en proceso - Validar densidad
             botones.push(
-              `<button class="btn-accion btn-success" data-accion="validar-llayllay" data-cancha-id="${canchaId}">✅ Validar Densidad</button>`,
+              `<button class="btn-accion btn-success" data-accion="validar-llayllay" data-cancha-id="${canchaId}">🧪 Gestionar</button>`,
             );
           }
         }

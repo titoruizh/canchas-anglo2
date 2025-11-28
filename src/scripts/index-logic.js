@@ -463,7 +463,7 @@ function renderizarCanchas(canchas) {
       </td>
       <td>${new Date(cancha.created_at).toLocaleDateString('es-ES')}</td>
       <td>
-        <button class="btn-mapa" data-cancha-id="${cancha.id}" data-cancha-nombre="${cancha.nombre}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem;" title="Ver en mapa">🗺️</button>
+        <button class="btn-mapa" data-cancha-id="${cancha.id}" data-cancha-nombre="${cancha.nombre}" type="button" style="background:none; border:none; font-size:1.5rem; cursor:pointer; padding:0.5rem; transition: transform 0.2s;" title="Ver en mapa">🗺️</button>
       </td>
       <td>
         <div class="actions" data-cancha-id="${cancha.id}" data-estado="${cancha.estado_actual}" data-empresa="${cancha.empresa_actual}">
@@ -527,7 +527,7 @@ function generarBotonesAccion(canchaId, estado, empresaActual) {
     // AngloAmerican
     if (empresaId === 1) {
         if (estado === 'Creada') {
-            botones.push(`<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">Enviar a Besalco</button>`)
+            botones.push(`<button class="btn-accion" data-accion="enviar-besalco" data-cancha-id="${canchaId}">📤 Enviar a Besalco</button>`)
         } else if (estado === 'En Proceso' && empresaActual === 'AngloAmerican') {
             // Buscar la cancha para verificar validaciones
             const cancha = todasLasCanchas.find(c => c.id == canchaId)
@@ -538,34 +538,34 @@ function generarBotonesAccion(canchaId, estado, empresaActual) {
                 const hasBesalco = validaciones.some(v => v.empresa === 'Besalco' && v.estado === 'VALIDADO')
 
                 if (hasLinkapsis && hasLlayLlay && hasBesalco) {
-                    botones.push(`<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 Exportar PDF</button>`)
+                    botones.push(`<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 PDF</button>`)
                 }
             }
 
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">Cerrar Cancha</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-cierre" data-cancha-id="${canchaId}">🔒 Cerrar Cancha</button>`)
         } else if (estado === 'Finalizada' || estado === 'Cerrada') {
-            botones.push(`<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 Exportar PDF</button>`)
+            botones.push(`<button class="btn-accion btn-pdf" data-accion="exportar-pdf" data-cancha-id="${canchaId}">📄 PDF</button>`)
         }
     }
 
     // Besalco
     else if (empresaId === 2) {
         if ((estado === 'En Proceso' || estado === 'Rechazada') && empresaActual === 'Besalco') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-besalco" data-cancha-id="${canchaId}">Gestionar Trabajo</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-besalco" data-cancha-id="${canchaId}">🛠️ Gestionar</button>`)
         }
     }
 
     // Linkapsis
     else if (empresaId === 3) {
         if (estado === 'En Proceso' && empresaActual === 'Linkapsis') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-linkapsis" data-cancha-id="${canchaId}">Gestionar Cancha</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-linkapsis" data-cancha-id="${canchaId}">📏 Gestionar</button>`)
         }
     }
 
     // LlayLlay
     else if (empresaId === 4) {
         if (estado === 'En Proceso' && empresaActual === 'LlayLlay') {
-            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-llayllay" data-cancha-id="${canchaId}">Gestionar Cancha</button>`)
+            botones.push(`<button class="btn-accion btn-success" data-accion="abrir-modal-llayllay" data-cancha-id="${canchaId}">🧪 Gestionar</button>`)
         }
     }
 
