@@ -2457,6 +2457,21 @@ import AuthGuard from "../components/AuthGuard.astro";
         transform: translateY(0);
       }
 
+      .btn-bulk-timeline {
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+      }
+
+      .btn-bulk-timeline:hover {
+        background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100 %);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+      }
+
+      .btn-bulk-timeline:active {
+        transform: translateY(0);
+      }
+
       .btn-clear-selection {
         padding: 0.6rem 1.2rem;
         background: rgba(255, 255, 255, 0.1);
@@ -2472,6 +2487,186 @@ import AuthGuard from "../components/AuthGuard.astro";
       .btn-clear-selection:hover {
         background: rgba(255, 255, 255, 0.2);
         transform: scale(1.05);
+      }
+
+      /* === ESTILOS DEL MODAL TIMELINE === */
+      .modal-timeline {
+        max-width: 95vw;
+        width: 1400px;
+        max-height: 90vh;
+      }
+
+      .timeline-container {
+        padding: 1rem 0;
+      }
+
+      .timeline-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding: 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+      }
+
+      .timeline-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .timeline-legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 2px currentColor;
+      }
+
+      .timeline-legend-name {
+        font-weight: 600;
+        color: #2c3e50;
+        font-size: 0.9rem;
+      }
+
+      .timeline-legend {
+        display: flex;
+        gap: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(to right, #f8fafc, #f1f5f9);
+        border-radius: 8px;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .timeline-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .timeline-legend-color {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .timeline-legend-name {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      .timeline-canvas-wrapper {
+        position: relative;
+        width: 100%;
+        min-height: 400px;
+        background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+        border-radius: 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border: 1px solid #e1e8ed;
+        padding: 40px 20px;
+      }
+
+      #timeline-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .timeline-axis {
+        position: absolute;
+        top: 50%;
+        left: 60px;
+        right: 60px;
+        height: 4px;
+        background: linear-gradient(to right, #3b82f6, #8b5cf6, #ec4899);
+        border-radius: 2px;
+        box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        transform: translateY(-50%);
+      }
+
+      .timeline-events {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .timeline-event {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        z-index: 10;
+      }
+
+      .timeline-event:hover {
+        transform: translate(-50%, -50%) scale(1.15);
+        z-index: 100;
+      }
+
+      .timeline-dot {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+        position: relative;
+        z-index: 2;
+      }
+
+      .timeline-line {
+        position: absolute;
+        width: 3px;
+        background: currentColor;
+        opacity: 0.6;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1;
+      }
+
+      .timeline-label {
+        position: absolute;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #1e293b;
+        background: white;
+        padding: 0.4rem 0.8rem;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        pointer-events: none;
+        z-index: 3;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .timeline-date-marker {
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, 40px);
+        font-size: 0.8rem;
+        color: #475569;
+        font-weight: 600;
+        background: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        white-space: nowrap;
       }
     </style>
   </head>
@@ -2660,6 +2855,9 @@ import AuthGuard from "../components/AuthGuard.astro";
         <div class="bulk-actions-content">
           <span id="selected-count" class="selected-count">0 canchas seleccionadas</span>
           <div class="bulk-actions-buttons">
+            <button id="btn-bulk-timeline" class="btn-bulk-action btn-bulk-timeline" title="Ver timeline de canchas seleccionadas">
+              📊 Ver Timeline
+            </button>
             <button id="btn-bulk-delete" class="btn-bulk-action btn-bulk-delete hidden" title="Borrar canchas seleccionadas">
               🗑️ Borrar Seleccionadas
             </button>
@@ -3238,6 +3436,25 @@ import AuthGuard from "../components/AuthGuard.astro";
               id="confirmar-borrado"
               disabled>BORRAR CANCHA DEFINITIVAMENTE</button
             >
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal para Timeline de Canchas -->
+      <div id="timeline-modal" class="modal">
+        <div class="modal-content modal-timeline">
+          <div class="modal-header">
+            <h3 class="modal-title">📊 Timeline de Canchas Seleccionadas</h3>
+            <button class="close-btn" id="timeline-close-btn">×</button>
+          </div>
+
+          <div class="timeline-container">
+            <div id="timeline-legend" class="timeline-legend"></div>
+            <div id="timeline-canvas-wrapper" class="timeline-canvas-wrapper">
+              <canvas id="timeline-canvas"></canvas>
+              <div id="timeline-axis" class="timeline-axis"></div>
+              <div id="timeline-events" class="timeline-events"></div>
+            </div>
           </div>
         </div>
       </div>
@@ -5086,6 +5303,7 @@ import AuthGuard from "../components/AuthGuard.astro";
         const selectAllCheckbox = document.getElementById("select-all-checkbox");
         const bulkActionsBar = document.getElementById("bulk-actions-bar");
         const btnBulkDelete = document.getElementById("btn-bulk-delete");
+        const btnBulkTimeline = document.getElementById("btn-bulk-timeline");
         const btnClearSelection = document.getElementById("btn-clear-selection");
 
         // Seleccionar/Deseleccionar todas
@@ -5115,6 +5333,11 @@ import AuthGuard from "../components/AuthGuard.astro";
         // Borrar canchas seleccionadas
         if (btnBulkDelete) {
           btnBulkDelete.addEventListener("click", handleBulkDelete);
+        }
+
+        // Ver timeline de canchas seleccionadas
+        if (btnBulkTimeline) {
+          btnBulkTimeline.addEventListener("click", openTimelineModal);
         }
       }
 
@@ -5793,6 +6016,250 @@ import AuthGuard from "../components/AuthGuard.astro";
         } finally {
           cargando = false;
         }
+      }
+
+      // ========== FUNCIONES DEL TIMELINE ==========
+      
+      // Generar color aleatorio vibrante para cada cancha
+      function generateRandomColor() {
+        const hue = Math.floor(Math.random() * 360);
+        return `hsl(${hue}, 70%, 50%)`;
+      }
+
+      // Abrir modal de timeline
+      async function openTimelineModal() {
+        if (selectedCanchas.size === 0) {
+          mostrarMensaje("Selecciona al menos una cancha para ver el timeline", "warning");
+          return;
+        }
+
+        const modal = document.getElementById("timeline-modal");
+        const legendContainer = document.getElementById("timeline-legend");
+        const eventsContainer = document.getElementById("timeline-events");
+        
+        modal.style.display = "flex";
+
+        try {
+          cargando = true;
+
+          // Obtener transiciones de todas las canchas seleccionadas
+          const canchaIds = Array.from(selectedCanchas);
+          const timelineData = await fetchTimelineData(canchaIds);
+
+          // Generar colores para cada cancha
+          const canchaColors = {};
+          timelineData.forEach((data, index) => {
+            canchaColors[data.canchaId] = generateRandomColor();
+          });
+
+          // Renderizar leyenda
+          renderLegend(timelineData, canchaColors, legendContainer);
+
+          // Renderizar timeline
+          renderTimeline(timelineData, canchaColors, eventsContainer);
+
+        } catch (error) {
+          console.error("Error cargando timeline:", error);
+          mostrarMensaje("Error al cargar el timeline", "error");
+        } finally {
+          cargando = false;
+        }
+      }
+
+      // Obtener datos de transiciones para múltiples canchas
+      async function fetchTimelineData(canchaIds) {
+        const promises = canchaIds.map(async (id) => {
+          try {
+            const response = await fetch(`/api/canchas/${id}/timeline`);
+            if (!response.ok) throw new Error("Error al obtener timeline");
+            
+            const data = await response.json();
+            const cancha = todasLasCanchas.find(c => c.id == id);
+            
+            return {
+              canchaId: id,
+              canchaName: cancha?.nombre || `Cancha ${id}`,
+              transiciones: data.transiciones || []
+            };
+          } catch (error) {
+            console.error(`Error obteniendo timeline de cancha ${id}:`, error);
+            return {
+              canchaId: id,
+              canchaName: `Cancha ${id}`,
+              transiciones: []
+            };
+          }
+        });
+
+        return await Promise.all(promises);
+      }
+
+      // Renderizar leyenda de canchas
+      function renderLegend(timelineData, canchaColors, container) {
+        container.innerHTML = timelineData
+          .map(data => `
+            <div class="timeline-legend-item">
+              <div class="timeline-legend-color" style="background-color: ${canchaColors[data.canchaId]};"></div>
+              <span class="timeline-legend-name">${data.canchaName}</span>
+            </div>
+          `)
+          .join('');
+      }
+
+      // Renderizar timeline visual
+      function renderTimeline(timelineData, canchaColors, container) {
+        container.innerHTML = '';
+
+        // Obtener todas las fechas para calcular el rango
+        let allDates = [];
+        let allTransitions = [];
+        
+        timelineData.forEach(data => {
+          data.transiciones.forEach(t => {
+            allDates.push(new Date(t.fecha_transicion));
+            allTransitions.push({
+              ...t,
+              canchaId: data.canchaId,
+              canchaName: data.canchaName,
+              color: canchaColors[data.canchaId]
+            });
+          });
+        });
+
+        if (allDates.length === 0) {
+          container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">No hay transiciones para mostrar</p>';
+          return;
+        }
+
+        // Ordenar transiciones por fecha
+        allTransitions.sort((a, b) => new Date(a.fecha_transicion) - new Date(b.fecha_transicion));
+
+        const minDate = new Date(Math.min(...allDates));
+        const maxDate = new Date(Math.max(...allDates));
+        const timeRange = maxDate - minDate || 86400000; // Mínimo 1 día
+
+        const containerWidth = container.parentElement.offsetWidth - 140;
+        const containerHeight = container.parentElement.offsetHeight;
+        const startX = 70;
+        const centerY = containerHeight / 2;
+
+        // Agrupar eventos por posición X para evitar superposición
+        const eventsByPosition = {};
+        
+        allTransitions.forEach((transicion) => {
+          const eventDate = new Date(transicion.fecha_transicion);
+          const xPosition = startX + ((eventDate - minDate) / timeRange) * containerWidth;
+          const xKey = Math.round(xPosition / 5) * 5; // Agrupar por cada 5px
+          
+          if (!eventsByPosition[xKey]) {
+            eventsByPosition[xKey] = [];
+          }
+          eventsByPosition[xKey].push({ transicion, xPosition });
+        });
+
+        // Renderizar cada evento
+        Object.values(eventsByPosition).forEach(events => {
+          events.forEach((eventData, stackIndex) => {
+            const { transicion, xPosition } = eventData;
+            const eventDate = new Date(transicion.fecha_transicion);
+            
+            // Alternar eventos arriba y abajo de la línea central
+            const isTop = stackIndex % 2 === 0;
+            const offsetMultiplier = Math.floor(stackIndex / 2) + 1;
+            const baseOffset = 80;
+            const yOffset = baseOffset * offsetMultiplier;
+            const yPosition = isTop ? centerY - yOffset : centerY + yOffset;
+
+            // Crear marcador de evento
+            const eventDiv = document.createElement('div');
+            eventDiv.className = 'timeline-event';
+            eventDiv.style.left = `${xPosition}px`;
+            eventDiv.style.top = `${centerY}px`;
+            eventDiv.style.color = transicion.color;
+
+            // Línea perpendicular desde el eje hasta el punto
+            const line = document.createElement('div');
+            line.className = 'timeline-line';
+            line.style.backgroundColor = transicion.color;
+            
+            if (isTop) {
+              line.style.height = `${yOffset}px`;
+              line.style.bottom = '10px';
+            } else {
+      // Renderizar marcadores de fecha en el eje
+      function renderDateMarkers(minDate, maxDate, timeRange, startX, containerWidth, container, centerY) {
+        const daysDiff = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
+        const markerCount = Math.min(Math.max(daysDiff, 5), 12); // Entre 5 y 12 marcadores
+
+        for (let i = 0; i <= markerCount; i++) {
+          const progress = i / markerCount;
+          const markerDate = new Date(minDate.getTime() + (progress * timeRange));
+          const xPosition = startX + (progress * containerWidth);
+
+          const marker = document.createElement('div');
+          marker.className = 'timeline-date-marker';
+          marker.style.left = `${xPosition}px`;
+          marker.style.top = `${centerY}px`;
+          
+          marker.textContent = markerDate.toLocaleDateString('es-CL', { 
+            day: '2-digit', 
+            month: 'short' 
+          });
+
+          container.appendChild(marker);
+        }
+      }     }
+
+            eventDiv.appendChild(line);
+            eventDiv.appendChild(dot);
+            eventDiv.appendChild(label);
+
+            container.appendChild(eventDiv);
+          });
+        });
+
+        // Agregar marcadores de fecha en el eje
+        renderDateMarkers(minDate, maxDate, timeRange, startX, containerWidth, container, centerY);
+      }
+
+      // Renderizar marcadores de fecha en el eje
+      function renderDateMarkers(minDate, maxDate, timeRange, startX, containerWidth, container) {
+        const daysDiff = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
+        const markerCount = Math.min(daysDiff + 1, 10);
+        
+        // Posicionar el eje horizontal
+        const axisElement = document.getElementById('timeline-axis');
+        if (axisElement) {
+          const containerHeight = container.parentElement.offsetHeight;
+          axisElement.style.bottom = '50px';
+          axisElement.style.left = `${startX}px`;
+          axisElement.style.width = `${containerWidth}px`;
+        }
+
+        for (let i = 0; i <= markerCount; i++) {
+          const progress = i / markerCount;
+          const markerDate = new Date(minDate.getTime() + (progress * timeRange));
+          const xPosition = startX + (progress * containerWidth);
+
+          const marker = document.createElement('div');
+          marker.className = 'timeline-date-marker';
+          marker.style.left = `${xPosition}px`;
+          marker.textContent = markerDate.toLocaleDateString('es-CL', { 
+            day: '2-digit', 
+            month: 'short' 
+          });
+
+          container.appendChild(marker);
+        }
+      }
+
+      // Cerrar modal de timeline
+      const timelineCloseBtn = document.getElementById("timeline-close-btn");
+      if (timelineCloseBtn) {
+        timelineCloseBtn.addEventListener("click", () => {
+          const modal = document.getElementById("timeline-modal");
+          modal.style.display = "none";
+        });
       }
 
       // Funciones para el Modal del Mapa
