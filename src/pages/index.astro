@@ -2397,7 +2397,9 @@ import AuthGuard from "../components/AuthGuard.astro";
         background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         padding: 1rem 2rem;
         border-radius: 50px;
-        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3), 0 0 20px rgba(59, 130, 246, 0.2);
+        box-shadow:
+          0 10px 40px rgba(0, 0, 0, 0.3),
+          0 0 20px rgba(59, 130, 246, 0.2);
         display: flex;
         align-items: center;
         gap: 1.5rem;
@@ -2567,18 +2569,36 @@ import AuthGuard from "../components/AuthGuard.astro";
         font-weight: 600;
         color: #334155;
       }
-
+    </style>
+    <style is:global>
+      /* === TIMELINE ENTERPRISE REDESIGN (REFINED) === */
       .timeline-canvas-wrapper {
         position: relative;
         width: 100%;
-        min-height: 500px;
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-        border-radius: 16px;
+        min-height: 550px;
+        background: #f8fafc; /* Clean background */
+        border-radius: 24px;
         overflow-x: auto;
         overflow-y: hidden;
-        border: 2px solid #cbd5e1;
-        padding: 60px 40px;
-        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        padding: 100px 40px; /* More vertical space */
+        box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.02);
+        /* Scrollbar styling */
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 transparent;
+      }
+
+      .timeline-canvas-wrapper::-webkit-scrollbar {
+        height: 6px;
+      }
+
+      .timeline-canvas-wrapper::-webkit-scrollbar-track {
+        background: transparent;
+      }
+
+      .timeline-canvas-wrapper::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 20px;
       }
 
       #timeline-canvas {
@@ -2592,13 +2612,19 @@ import AuthGuard from "../components/AuthGuard.astro";
         top: 50%;
         left: 60px;
         right: 60px;
-        height: 6px;
-        background: linear-gradient(to right, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
-        border-radius: 3px;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4), 0 2px 4px rgba(0, 0, 0, 0.1);
+        height: 4px; /* Thinner axis */
+        background: linear-gradient(
+          90deg,
+          #e2e8f0 0%,
+          #cbd5e1 50%,
+          #e2e8f0 100%
+        ); /* Subtle axis */
+        border-radius: 2px;
         transform: translateY(-50%);
         z-index: 1;
       }
+
+      /* Highlight the active part of the axis if needed, or keep it subtle */
 
       .timeline-events {
         position: absolute;
@@ -2613,88 +2639,105 @@ import AuthGuard from "../components/AuthGuard.astro";
         position: absolute;
         pointer-events: all;
         z-index: 10;
+        transition: z-index 0s linear 0.3s;
       }
 
       .timeline-event:hover {
         z-index: 100;
+        transition-delay: 0s;
       }
 
-      .timeline-event:hover .timeline-dot {
-        transform: translate(-50%, -50%) scale(1.3);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
-
-      .timeline-event:hover .timeline-label {
-        transform: translateX(-50%) scale(1.08);
-        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18), 0 4px 8px rgba(0, 0, 0, 0.12);
-        border-color: #cbd5e1;
-      }
-
-      .timeline-event:hover .timeline-line {
-        opacity: 1;
-        width: 4px;
-      }
-
+      /* Ring Style Dots */
       .timeline-dot {
-        width: 28px;
-        height: 28px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
-        border: 5px solid #fff;
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 2px 4px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff !important; /* Force white center */
+        border: 4px solid currentColor; /* Use the color set by JS */
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        z-index: 10;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 20; /* Above lines */
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
         cursor: pointer;
+      }
+
+      .timeline-event:hover .timeline-dot {
+        transform: translate(-50%, -50%) scale(1.3);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-width: 5px;
       }
 
       .timeline-line {
         position: absolute;
-        width: 3px;
+        width: 2px !important; /* Thinner lines */
         background: currentColor;
-        opacity: 0.8;
+        opacity: 0.4;
         left: 50%;
         transform: translateX(-50%);
         z-index: 5;
-        border-radius: 2px;
         transition: all 0.3s ease;
+      }
+
+      .timeline-event:hover .timeline-line {
+        opacity: 0.8;
+        width: 2px !important;
       }
 
       .timeline-label {
         position: absolute;
         white-space: nowrap;
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #1e293b;
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        padding: 0.65rem 1.2rem;
-        border-radius: 10px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
-        border: 2px solid #e2e8f0;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #334155;
+        background: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        box-shadow:
+          0 2px 8px rgba(0, 0, 0, 0.06),
+          0 1px 2px rgba(0, 0, 0, 0.04);
+        border: 1px solid #f1f5f9;
         pointer-events: none;
-        z-index: 20;
+        z-index: 30;
         left: 50%;
         transform: translateX(-50%);
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        letter-spacing: 0.3px;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        letter-spacing: 0.01em;
+        text-align: center;
+        min-width: 100px;
       }
 
-      .timeline-date-marker {
+      .timeline-event:hover .timeline-label {
+        transform: translateX(-50%) translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+        border-color: #e2e8f0;
+        color: #0f172a;
+        z-index: 101;
+      }
+
+      /* Date Markers - Positioned below the dot */
+      .timeline-event-date {
         position: absolute;
-        font-size: 0.85rem;
+        top: 50%;
+        margin-top: 24px; /* Below the 32px dot */
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 0.75rem;
         color: #64748b;
         font-weight: 700;
-        background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
-        padding: 0.4rem 0.8rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        border: 1.5px solid #cbd5e1;
         white-space: nowrap;
-        letter-spacing: 0.5px;
         text-transform: uppercase;
-        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        z-index: 15;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+        pointer-events: none;
+      }
+
+      .timeline-event:hover .timeline-event-date {
+        color: #334155;
+        transform: translateX(-50%) scale(1.1);
       }
     </style>
   </head>
@@ -2825,7 +2868,11 @@ import AuthGuard from "../components/AuthGuard.astro";
             <thead>
               <tr>
                 <th style="width: 50px;">
-                  <input type="checkbox" id="select-all-checkbox" title="Seleccionar todas">
+                  <input
+                    type="checkbox"
+                    id="select-all-checkbox"
+                    title="Seleccionar todas"
+                  />
                 </th>
                 <th>Nombre de Cancha</th>
                 <th>Estado Actual</th>
@@ -2881,17 +2928,31 @@ import AuthGuard from "../components/AuthGuard.astro";
       <!-- === BOTÓN FLOTANTE DE ACCIONES MASIVAS === -->
       <div id="bulk-actions-bar" class="bulk-actions-bar hidden">
         <div class="bulk-actions-content">
-          <span id="selected-count" class="selected-count">0 canchas seleccionadas</span>
+          <span id="selected-count" class="selected-count"
+            >0 canchas seleccionadas</span
+          >
           <div class="bulk-actions-buttons">
-            <button id="btn-bulk-timeline" class="btn-bulk-action btn-bulk-timeline" title="Ver timeline de canchas seleccionadas">
+            <button
+              id="btn-bulk-timeline"
+              class="btn-bulk-action btn-bulk-timeline"
+              title="Ver timeline de canchas seleccionadas"
+            >
               📊 Ver Timeline
             </button>
-            <button id="btn-bulk-delete" class="btn-bulk-action btn-bulk-delete hidden" title="Borrar canchas seleccionadas">
+            <button
+              id="btn-bulk-delete"
+              class="btn-bulk-action btn-bulk-delete hidden"
+              title="Borrar canchas seleccionadas"
+            >
               🗑️ Borrar Seleccionadas
             </button>
             <!-- Espacio para futuros botones de acciones masivas -->
           </div>
-          <button id="btn-clear-selection" class="btn-clear-selection" title="Limpiar selección">
+          <button
+            id="btn-clear-selection"
+            class="btn-clear-selection"
+            title="Limpiar selección"
+          >
             ✖ Limpiar
           </button>
         </div>
@@ -5328,17 +5389,21 @@ import AuthGuard from "../components/AuthGuard.astro";
       let selectedCanchas = new Set();
 
       function initializeSelectionSystem() {
-        const selectAllCheckbox = document.getElementById("select-all-checkbox");
+        const selectAllCheckbox = document.getElementById(
+          "select-all-checkbox",
+        );
         const bulkActionsBar = document.getElementById("bulk-actions-bar");
         const btnBulkDelete = document.getElementById("btn-bulk-delete");
         const btnBulkTimeline = document.getElementById("btn-bulk-timeline");
-        const btnClearSelection = document.getElementById("btn-clear-selection");
+        const btnClearSelection = document.getElementById(
+          "btn-clear-selection",
+        );
 
         // Seleccionar/Deseleccionar todas
         if (selectAllCheckbox) {
           selectAllCheckbox.addEventListener("change", (e) => {
             const checkboxes = document.querySelectorAll(".cancha-checkbox");
-            checkboxes.forEach(checkbox => {
+            checkboxes.forEach((checkbox) => {
               checkbox.checked = e.target.checked;
               const canchaId = checkbox.dataset.canchaId;
               if (e.target.checked) {
@@ -5371,11 +5436,11 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       // Manejar click en checkbox individual (se agrega después de renderizar)
       function attachCheckboxListeners() {
-        document.querySelectorAll(".cancha-checkbox").forEach(checkbox => {
+        document.querySelectorAll(".cancha-checkbox").forEach((checkbox) => {
           checkbox.addEventListener("change", (e) => {
             const canchaId = e.target.dataset.canchaId;
             const row = e.target.closest("tr");
-            
+
             if (e.target.checked) {
               selectedCanchas.add(canchaId);
               row.classList.add("selected");
@@ -5384,13 +5449,13 @@ import AuthGuard from "../components/AuthGuard.astro";
               row.classList.remove("selected");
               document.getElementById("select-all-checkbox").checked = false;
             }
-            
+
             updateBulkActionsBar();
           });
         });
 
         // Prevenir que el click en checkbox dispare el evento de la fila
-        document.querySelectorAll(".cancha-checkbox").forEach(checkbox => {
+        document.querySelectorAll(".cancha-checkbox").forEach((checkbox) => {
           checkbox.addEventListener("click", (e) => {
             e.stopPropagation();
           });
@@ -5405,8 +5470,8 @@ import AuthGuard from "../components/AuthGuard.astro";
 
         if (count > 0) {
           bulkActionsBar.classList.remove("hidden");
-          selectedCount.textContent = `${count} cancha${count > 1 ? 's' : ''} seleccionada${count > 1 ? 's' : ''}`;
-          
+          selectedCount.textContent = `${count} cancha${count > 1 ? "s" : ""} seleccionada${count > 1 ? "s" : ""}`;
+
           // Mostrar botón de borrar solo si es AngloAmerican
           if (empresaLogueada && empresaLogueada.nombre === "AngloAmerican") {
             btnBulkDelete.classList.remove("hidden");
@@ -5420,7 +5485,7 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       function clearSelection() {
         selectedCanchas.clear();
-        document.querySelectorAll(".cancha-checkbox").forEach(checkbox => {
+        document.querySelectorAll(".cancha-checkbox").forEach((checkbox) => {
           checkbox.checked = false;
           checkbox.closest("tr").classList.remove("selected");
         });
@@ -5432,7 +5497,7 @@ import AuthGuard from "../components/AuthGuard.astro";
         if (selectedCanchas.size === 0) return;
 
         const canchaIds = Array.from(selectedCanchas);
-        
+
         // Si es solo una cancha, usar el modal normal
         if (canchaIds.length === 1) {
           abrirModalBorrar(canchaIds[0]);
@@ -5445,7 +5510,9 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       function abrirModalBorradoMasivo(canchaIds) {
         const modal = document.getElementById("borrar-cancha-modal");
-        const inputConfirmacion = document.getElementById("confirmacion-borrado");
+        const inputConfirmacion = document.getElementById(
+          "confirmacion-borrado",
+        );
         const btnConfirmar = document.getElementById("confirmar-borrado");
         const historialDiv = document.getElementById("historial-borrado");
 
@@ -5454,8 +5521,10 @@ import AuthGuard from "../components/AuthGuard.astro";
         btnConfirmar.disabled = true;
 
         // Mostrar lista de canchas que se borrarán
-        const canchaNames = canchaIds.map(id => {
-          const checkbox = document.querySelector(`.cancha-checkbox[data-cancha-id="${id}"]`);
+        const canchaNames = canchaIds.map((id) => {
+          const checkbox = document.querySelector(
+            `.cancha-checkbox[data-cancha-id="${id}"]`,
+          );
           return checkbox ? checkbox.dataset.canchaNombre : `ID ${id}`;
         });
 
@@ -5463,7 +5532,7 @@ import AuthGuard from "../components/AuthGuard.astro";
           <h4>⚠️ Se eliminarán ${canchaIds.length} canchas:</h4>
           <div class="historial-content" style="max-height: 200px; overflow-y: auto;">
             <ul style="margin: 0; padding-left: 1.5rem;">
-              ${canchaNames.map(name => `<li><strong>${name}</strong></li>`).join('')}
+              ${canchaNames.map((name) => `<li><strong>${name}</strong></li>`).join("")}
             </ul>
             <p style="margin-top: 1rem; color: #e74c3c; font-weight: 600;">
               Se eliminarán todas las validaciones y observaciones asociadas a estas canchas.
@@ -5473,7 +5542,7 @@ import AuthGuard from "../components/AuthGuard.astro";
 
         // Guardar los IDs para el borrado
         modal.dataset.bulkDeleteIds = JSON.stringify(canchaIds);
-        modal.dataset.isBulkDelete = 'true';
+        modal.dataset.isBulkDelete = "true";
 
         // Mostrar modal
         modal.classList.add("show");
@@ -5593,17 +5662,17 @@ import AuthGuard from "../components/AuthGuard.astro";
 
           btnConfirmarBorrado.addEventListener("click", async () => {
             const modal = document.getElementById("borrar-cancha-modal");
-            const isBulkDelete = modal.dataset.isBulkDelete === 'true';
+            const isBulkDelete = modal.dataset.isBulkDelete === "true";
 
             if (isBulkDelete) {
               // Borrado masivo
-              const canchaIds = JSON.parse(modal.dataset.bulkDeleteIds || '[]');
+              const canchaIds = JSON.parse(modal.dataset.bulkDeleteIds || "[]");
               await ejecutarBorradoMasivo(canchaIds);
             } else {
               // Borrado individual
               await ejecutarAccion("borrar_cancha", canchaIdActual, null);
             }
-            
+
             // Limpiar dataset y cerrar modal
             delete modal.dataset.isBulkDelete;
             delete modal.dataset.bulkDeleteIds;
@@ -6029,8 +6098,8 @@ import AuthGuard from "../components/AuthGuard.astro";
           // Mostrar resultado
           if (eliminadas > 0) {
             mostrarMensaje(
-              `✅ ${eliminadas} cancha${eliminadas > 1 ? 's eliminadas' : ' eliminada'} correctamente${errores > 0 ? `. ${errores} error${errores > 1 ? 'es' : ''}` : ''}`,
-              errores > 0 ? "warning" : "success"
+              `✅ ${eliminadas} cancha${eliminadas > 1 ? "s eliminadas" : " eliminada"} correctamente${errores > 0 ? `. ${errores} error${errores > 1 ? "es" : ""}` : ""}`,
+              errores > 0 ? "warning" : "success",
             );
           } else {
             mostrarMensaje("❌ No se pudo eliminar ninguna cancha", "error");
@@ -6047,7 +6116,7 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       // ========== FUNCIONES DEL TIMELINE ==========
-      
+
       // Generar color aleatorio vibrante para cada cancha
       function generateRandomColor() {
         const hue = Math.floor(Math.random() * 360);
@@ -6057,14 +6126,17 @@ import AuthGuard from "../components/AuthGuard.astro";
       // Abrir modal de timeline
       async function openTimelineModal() {
         if (selectedCanchas.size === 0) {
-          mostrarMensaje("Selecciona al menos una cancha para ver el timeline", "warning");
+          mostrarMensaje(
+            "Selecciona al menos una cancha para ver el timeline",
+            "warning",
+          );
           return;
         }
 
         const modal = document.getElementById("timeline-modal");
         const legendContainer = document.getElementById("timeline-legend");
         const eventsContainer = document.getElementById("timeline-events");
-        
+
         modal.style.display = "flex";
 
         try {
@@ -6085,7 +6157,6 @@ import AuthGuard from "../components/AuthGuard.astro";
 
           // Renderizar timeline
           renderTimeline(timelineData, canchaColors, eventsContainer);
-
         } catch (error) {
           console.error("Error cargando timeline:", error);
           mostrarMensaje("Error al cargar el timeline", "error");
@@ -6100,21 +6171,21 @@ import AuthGuard from "../components/AuthGuard.astro";
           try {
             const response = await fetch(`/api/canchas/${id}/timeline`);
             if (!response.ok) throw new Error("Error al obtener timeline");
-            
+
             const data = await response.json();
-            const cancha = todasLasCanchas.find(c => c.id == id);
-            
+            const cancha = todasLasCanchas.find((c) => c.id == id);
+
             return {
               canchaId: id,
               canchaName: cancha?.nombre || `Cancha ${id}`,
-              transiciones: data.transiciones || []
+              transiciones: data.transiciones || [],
             };
           } catch (error) {
             console.error(`Error obteniendo timeline de cancha ${id}:`, error);
             return {
               canchaId: id,
               canchaName: `Cancha ${id}`,
-              transiciones: []
+              transiciones: [],
             };
           }
         });
@@ -6125,42 +6196,47 @@ import AuthGuard from "../components/AuthGuard.astro";
       // Renderizar leyenda de canchas
       function renderLegend(timelineData, canchaColors, container) {
         container.innerHTML = timelineData
-          .map(data => `
+          .map(
+            (data) => `
             <div class="timeline-legend-item">
               <div class="timeline-legend-color" style="background-color: ${canchaColors[data.canchaId]};"></div>
               <span class="timeline-legend-name">${data.canchaName}</span>
             </div>
-          `)
-          .join('');
+          `,
+          )
+          .join("");
       }
 
       // Renderizar timeline visual
       function renderTimeline(timelineData, canchaColors, container) {
-        container.innerHTML = '';
+        container.innerHTML = "";
 
         // Obtener todas las fechas para calcular el rango
         let allDates = [];
         let allTransitions = [];
-        
-        timelineData.forEach(data => {
-          data.transiciones.forEach(t => {
+
+        timelineData.forEach((data) => {
+          data.transiciones.forEach((t) => {
             allDates.push(new Date(t.fecha_transicion));
             allTransitions.push({
               ...t,
               canchaId: data.canchaId,
               canchaName: data.canchaName,
-              color: canchaColors[data.canchaId]
+              color: canchaColors[data.canchaId],
             });
           });
         });
 
         if (allDates.length === 0) {
-          container.innerHTML = '<p style="text-align: center; padding: 2rem; color: #666;">No hay transiciones para mostrar</p>';
+          container.innerHTML =
+            '<p style="text-align: center; padding: 2rem; color: #666;">No hay transiciones para mostrar</p>';
           return;
         }
 
         // Ordenar transiciones por fecha
-        allTransitions.sort((a, b) => new Date(a.fecha_transicion) - new Date(b.fecha_transicion));
+        allTransitions.sort(
+          (a, b) => new Date(a.fecha_transicion) - new Date(b.fecha_transicion),
+        );
 
         const minDate = new Date(Math.min(...allDates));
         const maxDate = new Date(Math.max(...allDates));
@@ -6173,12 +6249,13 @@ import AuthGuard from "../components/AuthGuard.astro";
 
         // Agrupar eventos por posición X para evitar superposición
         const eventsByPosition = {};
-        
+
         allTransitions.forEach((transicion) => {
           const eventDate = new Date(transicion.fecha_transicion);
-          const xPosition = startX + ((eventDate - minDate) / timeRange) * containerWidth;
+          const xPosition =
+            startX + ((eventDate - minDate) / timeRange) * containerWidth;
           const xKey = Math.round(xPosition / 5) * 5; // Agrupar por cada 5px
-          
+
           if (!eventsByPosition[xKey]) {
             eventsByPosition[xKey] = [];
           }
@@ -6186,11 +6263,11 @@ import AuthGuard from "../components/AuthGuard.astro";
         });
 
         // Renderizar cada evento
-        Object.values(eventsByPosition).forEach(events => {
+        Object.values(eventsByPosition).forEach((events) => {
           events.forEach((eventData, stackIndex) => {
             const { transicion, xPosition } = eventData;
             const eventDate = new Date(transicion.fecha_transicion);
-            
+
             // Alternar eventos arriba y abajo de la línea central
             const isTop = stackIndex % 2 === 0;
             const offsetMultiplier = Math.floor(stackIndex / 2) + 1;
@@ -6199,96 +6276,80 @@ import AuthGuard from "../components/AuthGuard.astro";
             const yPosition = isTop ? centerY - yOffset : centerY + yOffset;
 
             // Crear marcador de evento
-            const eventDiv = document.createElement('div');
-            eventDiv.className = 'timeline-event';
-            eventDiv.style.position = 'absolute';
+            const eventDiv = document.createElement("div");
+            eventDiv.className = "timeline-event";
+            eventDiv.style.position = "absolute";
             eventDiv.style.left = `${xPosition}px`;
             eventDiv.style.top = `${centerY}px`;
-            eventDiv.style.width = '0px';
-            eventDiv.style.height = '0px';
+            eventDiv.style.width = "0px";
+            eventDiv.style.height = "0px";
             eventDiv.style.color = transicion.color;
 
             // Línea perpendicular desde el eje hasta el punto
-            const line = document.createElement('div');
-            line.className = 'timeline-line';
-            line.style.position = 'absolute';
+            const line = document.createElement("div");
+            line.className = "timeline-line";
+            line.style.position = "absolute";
             line.style.backgroundColor = transicion.color;
-            line.style.width = '4px';
-            line.style.left = '50%';
-            line.style.transform = 'translateX(-50%)';
-            
+            line.style.width = "4px";
+            line.style.left = "50%";
+            line.style.transform = "translateX(-50%)";
+
             if (isTop) {
               line.style.height = `${yOffset}px`;
-              line.style.bottom = '0px';
+              line.style.bottom = "0px";
             } else {
               line.style.height = `${yOffset}px`;
-              line.style.top = '0px';
+              line.style.top = "0px";
             }
 
             // Punto en el eje
-            const dot = document.createElement('div');
-            dot.className = 'timeline-dot';
+            const dot = document.createElement("div");
+            dot.className = "timeline-dot";
             dot.style.backgroundColor = transicion.color;
-            dot.title = `${transicion.canchaName}\n${transicion.accion}\n${eventDate.toLocaleDateString('es-CL')}`;
+            dot.title = `${transicion.canchaName}\n${transicion.accion}\n${eventDate.toLocaleDateString("es-CL")}`;
 
             // Etiqueta de la acción
-            const label = document.createElement('div');
-            label.className = 'timeline-label';
-            const accionRaw = transicion.accion || 'Sin acción';
-            const accionTexto = accionRaw.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-            
+            const label = document.createElement("div");
+            label.className = "timeline-label";
+            const accionRaw = transicion.accion || "Sin acción";
+            const accionTexto = accionRaw
+              .replace(/_/g, " ")
+              .replace(/\b\w/g, (l) => l.toUpperCase());
+
             if (timelineData.length > 1) {
               // Si hay múltiples canchas, mostrar nombre corto
-              const nombreCorto = transicion.canchaName.length > 20 
-                ? transicion.canchaName.substring(0, 17) + '...' 
-                : transicion.canchaName;
+              const nombreCorto =
+                transicion.canchaName.length > 20
+                  ? transicion.canchaName.substring(0, 17) + "..."
+                  : transicion.canchaName;
               label.innerHTML = `<strong style="color: ${transicion.color};">${nombreCorto}</strong><br/>${accionTexto}`;
             } else {
               label.textContent = accionTexto;
             }
-            
+
             if (isTop) {
               label.style.bottom = `${yOffset + 15}px`;
             } else {
               label.style.top = `${yOffset + 15}px`;
             }
 
+            // Etiqueta de FECHA (Nueva implementación)
+            const dateLabel = document.createElement("div");
+            dateLabel.className = "timeline-event-date";
+            dateLabel.textContent = eventDate.toLocaleDateString("es-CL", {
+              day: "2-digit",
+              month: "short",
+            });
+
+            // Añadir elementos al contenedor del evento
             eventDiv.appendChild(line);
             eventDiv.appendChild(dot);
             eventDiv.appendChild(label);
+            eventDiv.appendChild(dateLabel);
 
             container.appendChild(eventDiv);
           });
         });
-
-        // Agregar marcadores de fecha en el eje
-        renderDateMarkers(minDate, maxDate, timeRange, startX, containerWidth, container, centerY);
-      }
-
-      // Renderizar marcadores de fecha en el eje
-      function renderDateMarkers(minDate, maxDate, timeRange, startX, containerWidth, container, centerY) {
-        const daysDiff = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
-        const markerCount = Math.min(Math.max(daysDiff, 5), 12); // Entre 5 y 12 marcadores
-
-        for (let i = 0; i <= markerCount; i++) {
-          const progress = i / markerCount;
-          const markerDate = new Date(minDate.getTime() + (progress * timeRange));
-          const xPosition = startX + (progress * containerWidth);
-
-          const marker = document.createElement('div');
-          marker.className = 'timeline-date-marker';
-          marker.style.position = 'absolute';
-          marker.style.left = `${xPosition}px`;
-          marker.style.top = `${centerY + 40}px`;
-          marker.style.transform = 'translateX(-50%)';
-          
-          marker.textContent = markerDate.toLocaleDateString('es-CL', { 
-            day: '2-digit', 
-            month: 'short' 
-          });
-
-          container.appendChild(marker);
-        }
       }
 
       // Cerrar modal de timeline
