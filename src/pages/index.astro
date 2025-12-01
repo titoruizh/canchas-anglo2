@@ -2564,10 +2564,48 @@ import AuthGuard from "../components/AuthGuard.astro";
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
 
+      .timeline-legend-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem;
+      }
+
+      .timeline-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 1.25rem;
+        background: #ffffff;
+        border-radius: 50px; /* Pill shape */
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .timeline-legend-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .timeline-legend-dot {
+        display: block; /* Ensure it takes up space */
+        width: 16px; /* Slightly larger */
+        height: 16px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 2px solid white; /* Contrast ring */
+      }
+
       .timeline-legend-name {
-        font-size: 0.875rem;
+        font-size: 0.9rem;
         font-weight: 600;
-        color: #334155;
+        color: #475569;
+        white-space: nowrap;
       }
     </style>
     <style is:global>
@@ -6136,6 +6174,7 @@ import AuthGuard from "../components/AuthGuard.astro";
         const modal = document.getElementById("timeline-modal");
         const legendContainer = document.getElementById("timeline-legend");
         const eventsContainer = document.getElementById("timeline-events");
+        const modalTitle = modal.querySelector("h3"); // Get title element
 
         modal.style.display = "flex";
 
@@ -6145,6 +6184,25 @@ import AuthGuard from "../components/AuthGuard.astro";
           // Obtener transiciones de todas las canchas seleccionadas
           const canchaIds = Array.from(selectedCanchas);
           const timelineData = await fetchTimelineData(canchaIds);
+
+          // === SMART TITLE LOGIC ===
+          if (timelineData.length > 1) {
+            if (timelineData.length <= 3) {
+              // If 2-3 canchas, list their names
+              const names = timelineData
+                .map((d) => d.canchaName.replace(/_/g, " "))
+                .join(" vs ");
+              modalTitle.textContent = `Comparativa: ${names}`;
+            } else {
+              modalTitle.textContent = `Comparativa de ${timelineData.length} Canchas`;
+            }
+          } else if (timelineData.length === 1) {
+            const name = timelineData[0].canchaName;
+            const cleanName = name.replace(/_/g, " ");
+            modalTitle.textContent = `Timeline Cancha: ${cleanName}`;
+          } else {
+            modalTitle.textContent = "Timeline de Canchas";
+          }
 
           // Generar colores para cada cancha
           const canchaColors = {};
@@ -6195,22 +6253,33 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       // Renderizar leyenda de canchas
       function renderLegend(timelineData, canchaColors, container) {
-        container.innerHTML = timelineData
-          .map(
-            (data) => `
-            <div class="timeline-legend-item">
-              <div class="timeline-legend-color" style="background-color: ${canchaColors[data.canchaId]};"></div>
-              <span class="timeline-legend-name">${data.canchaName}</span>
-            </div>
-          `,
-          )
-          .join("");
+        if (!timelineData || timelineData.length === 0) {
+          container.innerHTML = "";
+          return;
+        }
+
+        container.innerHTML =
+          `<div class="timeline-legend-container">` +
+          timelineData
+            .map((data) => {
+              const color = canchaColors[data.canchaId];
+              // Clean up name for display
+              const displayName = data.canchaName.replace(/_/g, " ");
+
+              return `
+              <div class="timeline-legend-item">
+                <span class="timeline-legend-dot" style="background-color: ${color}; box-shadow: 0 0 0 2px ${color}40;"></span>
+                <span class="timeline-legend-name">${displayName}</span>
+              </div>
+            `;
+            })
+            .join("") +
+          `</div>`;
       }
 
       // Renderizar timeline visual
       function renderTimeline(timelineData, canchaColors, container) {
         container.innerHTML = "";
-
         // Obtener todas las fechas para calcular el rango
         let allDates = [];
         let allTransitions = [];
