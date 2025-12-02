@@ -221,6 +221,45 @@ import AuthGuard from "../components/AuthGuard.astro";
         box-shadow: 0 3px 10px rgba(46, 204, 113, 0.3);
       }
 
+      /* === BOTONES ESPECIALES LINKAPSIS === */
+      .header-btn-linkapsis {
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        font-size: 0.9rem;
+        border: none;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .header-btn-linkapsis::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(37, 99, 235, 0.3));
+        transition: left 0.5s ease;
+      }
+
+      .header-btn-linkapsis:hover {
+        background: linear-gradient(135deg, #60a5fa, #3b82f6);
+        transform: translateY(-2px);
+        box-shadow: 
+          0 8px 20px rgba(59, 130, 246, 0.4),
+          0 0 30px rgba(59, 130, 246, 0.2);
+      }
+
+      .header-btn-linkapsis:hover::before {
+        left: 100%;
+      }
+
+      .header-btn-linkapsis:active {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+
       .header-btn-logout {
         background: linear-gradient(135deg, #e74c3c, #c0392b);
         color: white;
@@ -3027,6 +3066,25 @@ import AuthGuard from "../components/AuthGuard.astro";
               class="header-btn header-btn-admin"
               style="display: none;">👥 Gestión Usuarios</a
             >
+            <!-- === BOTONES ESPECIALES PARA LINKAPSIS === -->
+            <!-- 
+              Estos botones solo se muestran cuando el usuario logueado es de Linkapsis.
+              Permiten funcionalidades especiales de carga de datos:
+              - Subir Revanchas: Modal para cargar información de revanchas
+              - Subir Canchas: Modal para cargar información masiva de canchas
+            -->
+            <button
+              id="btn-subir-revanchas"
+              type="button"
+              class="header-btn header-btn-linkapsis"
+              style="display: none;">📤 Subir Revanchas</button
+            >
+            <button
+              id="btn-subir-canchas"
+              type="button"
+              class="header-btn header-btn-linkapsis"
+              style="display: none;">📁 Subir Canchas</button
+            >
             <button
               id="btn-logout"
               type="button"
@@ -3555,6 +3613,77 @@ import AuthGuard from "../components/AuthGuard.astro";
         </div>
       </div>
 
+      <!-- ========================================== -->
+      <!-- MODALES ESPECIALES PARA LINKAPSIS          -->
+      <!-- ========================================== -->
+      <!-- 
+        Estos modales están preparados para funcionalidades especiales de Linkapsis:
+        1. Modal Subir Revanchas: Para cargar información de revanchas
+        2. Modal Subir Canchas: Para carga masiva de canchas
+        
+        ESTADO ACTUAL: Estructura base creada, lista para desarrollo
+        TODO: Implementar formularios y lógica de procesamiento de datos
+      -->
+
+      <!-- Modal para Subir Revanchas (Linkapsis) -->
+      <div id="modal-subir-revanchas" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">📤 Subir Revanchas - Linkapsis</h3>
+            <button class="close-btn">×</button>
+          </div>
+
+          <div class="modal-body">
+            <!-- TODO: Agregar formulario para subir revanchas -->
+            <p style="text-align: center; padding: 2rem; color: #666;">
+              Formulario de carga de revanchas en desarrollo...
+            </p>
+            <!-- 
+              Estructura sugerida:
+              - Selector de archivo (CSV, Excel)
+              - Preview de datos
+              - Validación de formato
+              - Botón de procesamiento
+            -->
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel">Cerrar</button>
+            <!-- <button type="button" class="btn-primary">Procesar Revanchas</button> -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal para Subir Canchas (Linkapsis) -->
+      <div id="modal-subir-canchas" class="modal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">📁 Subir Canchas - Linkapsis</h3>
+            <button class="close-btn">×</button>
+          </div>
+
+          <div class="modal-body">
+            <!-- TODO: Agregar formulario para subir canchas -->
+            <p style="text-align: center; padding: 2rem; color: #666;">
+              Formulario de carga masiva de canchas en desarrollo...
+            </p>
+            <!-- 
+              Estructura sugerida:
+              - Selector de archivo (CSV, Excel, GeoJSON)
+              - Preview de datos con mapa
+              - Validación de geometrías
+              - Asignación de campos
+              - Botón de procesamiento
+            -->
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="btn-cancel">Cerrar</button>
+            <!-- <button type="button" class="btn-primary">Procesar Canchas</button> -->
+          </div>
+        </div>
+      </div>
+
       <!-- Modal de RECEPCIÓN de trabajo para LlayLlay -->
       <div id="recepcion-llayllay-modal" class="modal">
         <div class="modal-content">
@@ -4059,6 +4188,9 @@ import AuthGuard from "../components/AuthGuard.astro";
         // Modal
         configurarModalEventListeners();
 
+        // === EVENT LISTENERS PARA BOTONES ESPECIALES DE LINKAPSIS ===
+        configurarBotonesLinkapsis();
+
         // Crear cancha (si aplica)
         if (btnCrearCancha) {
           console.log("Registrando event listener para btnCrearCancha");
@@ -4287,6 +4419,20 @@ import AuthGuard from "../components/AuthGuard.astro";
             btnAdminUsuarios.style.display = "none";
           }
 
+          // === MOSTRAR BOTONES ESPECIALES PARA LINKAPSIS ===
+          // Linkapsis tiene empresa_nombre === "Linkapsis" (verificar en base de datos)
+          const btnSubirRevanchas = document.getElementById("btn-subir-revanchas");
+          const btnSubirCanchas = document.getElementById("btn-subir-canchas");
+          
+          if (usuario.empresa_nombre === "Linkapsis") {
+            console.log("Mostrando botones especiales para Linkapsis");
+            if (btnSubirRevanchas) btnSubirRevanchas.style.display = "inline-flex";
+            if (btnSubirCanchas) btnSubirCanchas.style.display = "inline-flex";
+          } else {
+            if (btnSubirRevanchas) btnSubirRevanchas.style.display = "none";
+            if (btnSubirCanchas) btnSubirCanchas.style.display = "none";
+          }
+
           // Cargar datos
           await cargarCanchas();
 
@@ -4306,6 +4452,113 @@ import AuthGuard from "../components/AuthGuard.astro";
           LlayLlay: "Validación de densidad",
         };
         return roles[nombreEmpresa] || "Usuario del sistema";
+      }
+
+      // ========================================
+      // FUNCIONES PARA BOTONES LINKAPSIS
+      // ========================================
+      /**
+       * Configurar event listeners para los botones especiales de Linkapsis
+       * - btn-subir-revanchas: Abre modal para cargar información de revanchas
+       * - btn-subir-canchas: Abre modal para carga masiva de canchas
+       */
+      function configurarBotonesLinkapsis() {
+        const btnSubirRevanchas = document.getElementById("btn-subir-revanchas");
+        const btnSubirCanchas = document.getElementById("btn-subir-canchas");
+        
+        // Event listener para Subir Revanchas
+        if (btnSubirRevanchas) {
+          btnSubirRevanchas.addEventListener("click", () => {
+            console.log("Abriendo modal de Subir Revanchas");
+            abrirModalSubirRevanchas();
+          });
+        }
+
+        // Event listener para Subir Canchas
+        if (btnSubirCanchas) {
+          btnSubirCanchas.addEventListener("click", () => {
+            console.log("Abriendo modal de Subir Canchas");
+            abrirModalSubirCanchas();
+          });
+        }
+
+        // Configurar cierre de modales
+        configurarCierreModalesLinkapsis();
+      }
+
+      /**
+       * Abrir modal de Subir Revanchas
+       * TODO: Implementar lógica de carga y procesamiento de revanchas
+       */
+      function abrirModalSubirRevanchas() {
+        const modal = document.getElementById("modal-subir-revanchas");
+        if (modal) {
+          modal.classList.add("show");
+          // TODO: Inicializar formulario, limpiar campos previos
+          // TODO: Configurar validaciones de archivo
+        }
+      }
+
+      /**
+       * Abrir modal de Subir Canchas
+       * TODO: Implementar lógica de carga masiva de canchas
+       */
+      function abrirModalSubirCanchas() {
+        const modal = document.getElementById("modal-subir-canchas");
+        if (modal) {
+          modal.classList.add("show");
+          // TODO: Inicializar formulario, limpiar campos previos
+          // TODO: Configurar validaciones de archivo y geometrías
+        }
+      }
+
+      /**
+       * Configurar event listeners para cerrar modales de Linkapsis
+       * Permite cerrar con:
+       * - Botón X (close-btn)
+       * - Botón Cancelar/Cerrar (btn-cancel)
+       * - Click fuera del modal (backdrop)
+       */
+      function configurarCierreModalesLinkapsis() {
+        const modales = [
+          { id: "modal-subir-revanchas", nombre: "Subir Revanchas" },
+          { id: "modal-subir-canchas", nombre: "Subir Canchas" }
+        ];
+
+        modales.forEach(modalInfo => {
+          const modal = document.getElementById(modalInfo.id);
+          if (!modal) {
+            console.warn(`Modal ${modalInfo.nombre} no encontrado`);
+            return;
+          }
+
+          const closeBtn = modal.querySelector(".close-btn");
+          const cancelBtn = modal.querySelector(".btn-cancel");
+          
+          // Cerrar con botón X
+          if (closeBtn) {
+            closeBtn.addEventListener("click", () => {
+              console.log(`Cerrando modal ${modalInfo.nombre} (botón X)`);
+              modal.classList.remove("show");
+            });
+          }
+          
+          // Cerrar con botón Cancelar/Cerrar
+          if (cancelBtn) {
+            cancelBtn.addEventListener("click", () => {
+              console.log(`Cerrando modal ${modalInfo.nombre} (botón Cancelar)`);
+              modal.classList.remove("show");
+            });
+          }
+          
+          // Cerrar al hacer click en el backdrop (fuera del modal-content)
+          modal.addEventListener("click", (e) => {
+            if (e.target === modal) {
+              console.log(`Cerrando modal ${modalInfo.nombre} (backdrop)`);
+              modal.classList.remove("show");
+            }
+          });
+        });
       }
 
       function cerrarSesion() {
