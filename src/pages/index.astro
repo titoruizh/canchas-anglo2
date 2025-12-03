@@ -3099,6 +3099,68 @@ import AuthGuard from "../components/AuthGuard.astro";
         border-left: 4px solid #3b82f6;
         color: #1e40af;
       }
+
+      /* === ESTILOS PARA FORMULARIO DE SUBIR CANCHAS === */
+      .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+      }
+
+      .form-group label {
+        font-weight: 600;
+        color: #1e293b;
+        font-size: 0.95rem;
+      }
+
+      .form-group input,
+      .form-group select {
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
+
+      .form-group input:disabled,
+      .form-group select:disabled {
+        background: #f1f5f9;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+
+      .form-group small {
+        color: #64748b;
+        font-size: 0.85rem;
+      }
+
+      .form-group input[type="file"] {
+        padding: 0.5rem;
+        cursor: pointer;
+      }
+
+      #preview-foto-cancha {
+        border: 2px dashed #cbd5e1;
+        border-radius: 8px;
+        padding: 1rem;
+        text-align: center;
+        background: #f8fafc;
+      }
     </style>
 
     <!-- SheetJS library para procesar archivos Excel/CSV -->
@@ -3823,30 +3885,141 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       <!-- Modal para Subir Canchas (Linkapsis) -->
       <div id="modal-subir-canchas" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
           <div class="modal-header">
             <h3 class="modal-title">📁 Subir Canchas - Linkapsis</h3>
             <button class="close-btn">×</button>
           </div>
 
           <div class="modal-body">
-            <!-- TODO: Agregar formulario para subir canchas -->
-            <p style="text-align: center; padding: 2rem; color: #666;">
-              Formulario de carga masiva de canchas en desarrollo...
-            </p>
-            <!-- 
-              Estructura sugerida:
-              - Selector de archivo (CSV, Excel, GeoJSON)
-              - Preview de datos con mapa
-              - Validación de geometrías
-              - Asignación de campos
-              - Botón de procesamiento
-            -->
+            <form id="form-subir-canchas">
+              <!-- Fila 1: Muro y Sector -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="muro-cancha">
+                    <strong>Muro *</strong>
+                  </label>
+                  <select id="muro-cancha" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Principal">Principal</option>
+                    <option value="Este">Este</option>
+                    <option value="Oeste">Oeste</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="sector-cancha">
+                    <strong>Sector *</strong>
+                  </label>
+                  <select id="sector-cancha" disabled required>
+                    <option value="">Seleccione muro primero...</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Fila 2: Relleno y Fecha -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="relleno-cancha">
+                    <strong>Relleno *</strong>
+                  </label>
+                  <input
+                    type="text"
+                    id="relleno-cancha"
+                    placeholder="Ingrese nombre del relleno"
+                    required
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="fecha-cancha">
+                    <strong>Fecha *</strong>
+                  </label>
+                  <input type="date" id="fecha-cancha" required />
+                </div>
+              </div>
+
+              <!-- Fila 3: Foto -->
+              <div class="form-group">
+                <label for="foto-cancha">
+                  <strong>Foto</strong>
+                </label>
+                <input type="file" id="foto-cancha" accept="image/*" />
+                <small style="color: #64748b;"
+                  >Formatos: JPG, PNG (máx. 5MB)</small
+                >
+                <div
+                  id="preview-foto-cancha"
+                  style="display:none; margin-top: 1rem;"
+                >
+                  <img
+                    id="img-preview-cancha"
+                    style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                    alt="Preview"
+                  />
+                </div>
+              </div>
+
+              <!-- Fila 4: Archivo -->
+              <div class="form-group">
+                <label for="archivo-cancha">
+                  <strong>Archivo *</strong>
+                </label>
+                <input
+                  type="file"
+                  id="archivo-cancha"
+                  accept=".csv,.xlsx,.asc"
+                  required
+                />
+                <small style="color: #64748b;">Formatos: CSV, XLSX, ASC</small>
+              </div>
+
+              <!-- Fila 5: Responsable y Método -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="responsable-cancha">
+                    <strong>Responsable *</strong>
+                  </label>
+                  <select id="responsable-cancha" required>
+                    <option value="">Cargando...</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="metodo-cancha">
+                    <strong>Método *</strong>
+                  </label>
+                  <select id="metodo-cancha" required>
+                    <option value="">Seleccione...</option>
+                    <option value="Movimiento de Tierra"
+                      >Movimiento de Tierra</option
+                    >
+                    <option value="Hidraulico">Hidráulico</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Fila 6: N° Capas -->
+              <div class="form-group">
+                <label for="capas-cancha">
+                  <strong>N° Capas *</strong>
+                </label>
+                <select id="capas-cancha" required>
+                  <option value="">Seleccione...</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                </select>
+              </div>
+            </form>
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-cancel">Cerrar</button>
-            <!-- <button type="button" class="btn-primary">Procesar Canchas</button> -->
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button type="submit" class="btn-primary" form="form-subir-canchas">
+              Guardar Cancha
+            </button>
           </div>
         </div>
       </div>
@@ -8249,6 +8422,209 @@ import AuthGuard from "../components/AuthGuard.astro";
         document.addEventListener("DOMContentLoaded", inicializarRevanchas);
       } else {
         inicializarRevanchas();
+      }
+
+      // ========================================
+      // FORMULARIO DE SUBIR CANCHAS
+      // ========================================
+
+      // Inicializar funcionalidad de Subir Canchas
+      function inicializarSubirCanchas() {
+        cargarResponsables();
+        configurarSelectorMuro();
+        configurarPreviewFoto();
+        configurarFormularioCanchas();
+      }
+
+      // Configurar selector dinámico de Muro -> Sector
+      function configurarSelectorMuro() {
+        const muroSelect = document.getElementById("muro-cancha");
+        const sectorSelect = document.getElementById("sector-cancha");
+
+        if (!muroSelect || !sectorSelect) return;
+
+        muroSelect.addEventListener("change", (e) => {
+          const muro = e.target.value;
+          sectorSelect.disabled = !muro;
+
+          if (muro === "Principal") {
+            llenarSectores(sectorSelect, 7); // S1-S7
+          } else if (muro === "Este" || muro === "Oeste") {
+            llenarSectores(sectorSelect, 3); // S1-S3
+          } else {
+            sectorSelect.innerHTML =
+              '<option value="">Seleccione muro primero...</option>';
+          }
+        });
+      }
+
+      // Llenar opciones de sector según cantidad
+      function llenarSectores(select, cantidad) {
+        select.innerHTML = '<option value="">Seleccione...</option>';
+        for (let i = 1; i <= cantidad; i++) {
+          const option = document.createElement("option");
+          option.value = `S${i}`;
+          option.textContent = `S${i}`;
+          select.appendChild(option);
+        }
+      }
+
+      // Configurar preview de foto
+      function configurarPreviewFoto() {
+        const fotoInput = document.getElementById("foto-cancha");
+        const previewDiv = document.getElementById("preview-foto-cancha");
+        const imgPreview = document.getElementById("img-preview-cancha");
+
+        if (!fotoInput || !previewDiv || !imgPreview) return;
+
+        fotoInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+
+          if (file && file.type.startsWith("image/")) {
+            // Validar tamaño (5MB máximo)
+            if (file.size > 5 * 1024 * 1024) {
+              alert("La imagen es demasiado grande. Máximo 5MB.");
+              fotoInput.value = "";
+              previewDiv.style.display = "none";
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              imgPreview.src = e.target.result;
+              previewDiv.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+          } else {
+            previewDiv.style.display = "none";
+          }
+        });
+      }
+
+      // Cargar responsables desde la base de datos
+      async function cargarResponsables() {
+        const select = document.getElementById("responsable-cancha");
+        if (!select) return;
+
+        try {
+          const response = await fetch("/api/usuarios");
+
+          if (!response.ok) {
+            throw new Error("Error al cargar usuarios");
+          }
+
+          const data = await response.json();
+
+          // Debug: ver qué datos llegan
+          console.log("Datos recibidos de /api/usuarios:", data);
+
+          if (data.success && data.usuarios) {
+            console.log("Total usuarios:", data.usuarios.length);
+
+            // Ver todos los usuarios y sus empresas
+            data.usuarios.forEach((u) => {
+              console.log(
+                `Usuario: ${u.nombre_completo || u.nombre}, Empresa ID: ${u.empresa_id}, Activo: ${u.activo}`,
+              );
+            });
+
+            // Filtrar solo usuarios de Linkapsis (empresa_id = 3) activos
+            const usuariosLinkapsis = data.usuarios.filter(
+              (usuario) => usuario.empresa_id === 3 && usuario.activo,
+            );
+
+            console.log(
+              "Usuarios de Linkapsis filtrados:",
+              usuariosLinkapsis.length,
+            );
+
+            select.innerHTML = '<option value="">Seleccione...</option>';
+
+            usuariosLinkapsis.forEach((usuario) => {
+              const option = document.createElement("option");
+              option.value = usuario.id;
+              option.textContent = usuario.nombre_completo || usuario.nombre;
+              select.appendChild(option);
+            });
+
+            if (usuariosLinkapsis.length === 0) {
+              select.innerHTML =
+                '<option value="">No hay usuarios de Linkapsis disponibles</option>';
+            }
+          } else {
+            console.log("Error: data.success es false o no hay usuarios");
+            select.innerHTML =
+              '<option value="">Error al cargar usuarios</option>';
+          }
+        } catch (error) {
+          console.error("Error cargando responsables:", error);
+          select.innerHTML =
+            '<option value="">Error al cargar usuarios</option>';
+        }
+      }
+
+      // Configurar manejo del formulario
+      function configurarFormularioCanchas() {
+        const form = document.getElementById("form-subir-canchas");
+        if (!form) return;
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          // Capturar todos los datos del formulario
+          const datos = {
+            muro: document.getElementById("muro-cancha").value,
+            sector: document.getElementById("sector-cancha").value,
+            relleno: document.getElementById("relleno-cancha").value,
+            fecha: document.getElementById("fecha-cancha").value,
+            foto: document.getElementById("foto-cancha").files[0] || null,
+            archivo: document.getElementById("archivo-cancha").files[0],
+            responsable: document.getElementById("responsable-cancha").value,
+            metodo: document.getElementById("metodo-cancha").value,
+            capas: document.getElementById("capas-cancha").value,
+          };
+
+          // Log de datos capturados (sin guardar en backend por ahora)
+          console.log("=== DATOS DE CANCHA CAPTURADOS ===");
+          console.log("Muro:", datos.muro);
+          console.log("Sector:", datos.sector);
+          console.log("Relleno:", datos.relleno);
+          console.log("Fecha:", datos.fecha);
+          console.log(
+            "Foto:",
+            datos.foto ? datos.foto.name : "No seleccionada",
+          );
+          console.log("Archivo:", datos.archivo.name);
+          console.log("Responsable ID:", datos.responsable);
+          console.log("Método:", datos.metodo);
+          console.log("N° Capas:", datos.capas);
+          console.log("===================================");
+
+          // Mostrar mensaje de éxito
+          alert(
+            "✅ Datos capturados correctamente\n\nLos datos han sido registrados en la consola.\n(Sin guardar en base de datos por ahora)",
+          );
+
+          // Resetear formulario
+          form.reset();
+          document.getElementById("preview-foto-cancha").style.display = "none";
+          document.getElementById("sector-cancha").disabled = true;
+          document.getElementById("sector-cancha").innerHTML =
+            '<option value="">Seleccione muro primero...</option>';
+
+          // Cerrar modal
+          const modal = document.getElementById("modal-subir-canchas");
+          if (modal) {
+            modal.style.display = "none";
+          }
+        });
+      }
+
+      // Inicializar Subir Canchas cuando el DOM esté listo
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", inicializarSubirCanchas);
+      } else {
+        inicializarSubirCanchas();
       }
     </script>
   </body>
