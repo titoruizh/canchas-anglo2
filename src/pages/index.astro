@@ -3015,7 +3015,96 @@ import AuthGuard from "../components/AuthGuard.astro";
         opacity: 0 !important;
         visibility: hidden !important;
       }
+
+      /* === ESTILOS PARA MODAL DE REVANCHAS === */
+      .modal-large {
+        max-width: 1200px !important;
+      }
+
+      .tabla-revanchas {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+        background: white;
+      }
+
+      .tabla-revanchas thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+
+      .tabla-revanchas th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 0.75rem 0.5rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+
+      .tabla-revanchas td {
+        padding: 0.6rem 0.5rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #334155;
+      }
+
+      .tabla-revanchas tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      .tabla-revanchas .sector-col {
+        font-weight: 700;
+        color: #1e293b;
+      }
+
+      /* Colores por sector */
+      .tabla-revanchas tr.sector-1 {
+        border-left: 4px solid #ef4444;
+      }
+      .tabla-revanchas tr.sector-2 {
+        border-left: 4px solid #f97316;
+      }
+      .tabla-revanchas tr.sector-3 {
+        border-left: 4px solid #f59e0b;
+      }
+      .tabla-revanchas tr.sector-4 {
+        border-left: 4px solid #84cc16;
+      }
+      .tabla-revanchas tr.sector-5 {
+        border-left: 4px solid #10b981;
+      }
+      .tabla-revanchas tr.sector-6 {
+        border-left: 4px solid #06b6d4;
+      }
+      .tabla-revanchas tr.sector-7 {
+        border-left: 4px solid #3b82f6;
+      }
+
+      .mensaje-error {
+        background: #fee2e2;
+        border-left: 4px solid #ef4444;
+        color: #991b1b;
+      }
+
+      .mensaje-exito {
+        background: #d1fae5;
+        border-left: 4px solid #10b981;
+        color: #065f46;
+      }
+
+      .mensaje-info {
+        background: #dbeafe;
+        border-left: 4px solid #3b82f6;
+        color: #1e40af;
+      }
     </style>
+
+    <!-- SheetJS library para procesar archivos Excel/CSV -->
+    <script
+      src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"
+    ></script>
   </head>
   <body>
     <div class="header">
@@ -3630,29 +3719,104 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       <!-- Modal para Subir Revanchas (Linkapsis) -->
       <div id="modal-subir-revanchas" class="modal">
-        <div class="modal-content">
+        <div class="modal-content modal-large">
           <div class="modal-header">
             <h3 class="modal-title">📤 Subir Revanchas - Linkapsis</h3>
             <button class="close-btn">×</button>
           </div>
 
           <div class="modal-body">
-            <!-- TODO: Agregar formulario para subir revanchas -->
-            <p style="text-align: center; padding: 2rem; color: #666;">
-              Formulario de carga de revanchas en desarrollo...
-            </p>
-            <!-- 
-              Estructura sugerida:
-              - Selector de archivo (CSV, Excel)
-              - Preview de datos
-              - Validación de formato
-              - Botón de procesamiento
-            -->
+            <!-- Selector de Tipo de Muro -->
+            <div class="form-group">
+              <label for="tipo-muro-revanchas">
+                <strong>Tipo de Muro:</strong>
+              </label>
+              <select id="tipo-muro-revanchas" class="form-select">
+                <option value="">Seleccione un muro...</option>
+                <option value="principal">Muro Principal</option>
+                <option value="oeste">Muro Oeste</option>
+                <option value="este">Muro Este</option>
+              </select>
+              <small
+                style="color: #64748b; display: block; margin-top: 0.5rem;"
+              >
+                Seleccione el tipo de muro antes de cargar el archivo
+              </small>
+            </div>
+
+            <!-- Selector de Archivo -->
+            <div class="form-group">
+              <label for="file-revanchas">
+                <strong>Archivo de Revanchas:</strong>
+              </label>
+              <input
+                type="file"
+                id="file-revanchas"
+                accept=".csv,.xlsx,.xls"
+                disabled
+                style="padding: 0.75rem; border: 2px dashed #cbd5e1; border-radius: 8px; background: #f8fafc; cursor: pointer;"
+              />
+              <small
+                style="color: #64748b; display: block; margin-top: 0.5rem;"
+              >
+                Formatos soportados: CSV, XLSX, XLS
+              </small>
+            </div>
+
+            <!-- Mensajes de Error/Info -->
+            <div
+              id="mensaje-revanchas"
+              style="display:none; padding: 1rem; border-radius: 8px; margin: 1rem 0;"
+            >
+            </div>
+
+            <!-- Área de Preview -->
+            <div
+              id="preview-revanchas"
+              style="display:none; margin-top: 1.5rem;"
+            >
+              <h4
+                style="color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path
+                    d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"
+                  ></path>
+                </svg>
+                Vista Previa de Datos
+              </h4>
+              <div
+                id="info-archivo-revanchas"
+                style="background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 4px; margin-bottom: 1rem;"
+              >
+              </div>
+              <div
+                id="tabla-revanchas"
+                style="overflow-x: auto; max-height: 500px; border: 1px solid #e2e8f0; border-radius: 8px;"
+              >
+              </div>
+            </div>
           </div>
 
           <div class="form-actions">
-            <button type="button" class="btn-cancel">Cerrar</button>
-            <!-- <button type="button" class="btn-primary">Procesar Revanchas</button> -->
+            <button type="button" class="btn-cancel">Cancelar</button>
+            <button
+              type="button"
+              id="btn-procesar-revanchas"
+              class="btn-primary"
+              disabled
+              style="opacity: 0.5;"
+            >
+              Procesar Datos
+            </button>
           </div>
         </div>
       </div>
@@ -7679,5 +7843,413 @@ import AuthGuard from "../components/AuthGuard.astro";
         </div>
       </div>
     </div>
+
+    <script>
+      // ========================================
+      // PARSER INTELIGENTE DE REVANCHAS
+      // ========================================
+
+      // Configuraciones específicas por tipo de muro
+      const CONFIGURACIONES_MURO = {
+        principal: {
+          nombre: "Muro Principal",
+          headerRow: 12,
+          dataStartRow: 13,
+          dataEndRow: 85,
+          dateCell: "F6", // Celda combinada F-M, filas 6-7
+          columns: {
+            sector: "A",
+            coronamiento: "C",
+            revancha: "E",
+            lama: "F",
+            ancho: "H",
+            pk: "I",
+            geomembrana: "J",
+            distGeoLama: "K",
+            distGeoCoronamiento: "L",
+          },
+          sectores: [
+            { num: 1, startRow: 13, endRow: 23 },
+            { num: 2, startRow: 24, endRow: 33 },
+            { num: 3, startRow: 34, endRow: 43 },
+            { num: 4, startRow: 44, endRow: 53 },
+            { num: 5, startRow: 54, endRow: 63 },
+            { num: 6, startRow: 64, endRow: 73 },
+            { num: 7, startRow: 74, endRow: 85 },
+          ],
+        },
+        oeste: {
+          nombre: "Muro Oeste",
+          headerRow: 9,
+          dataStartRow: 10,
+          dataEndRow: 45,
+          dateCell: "F6", // Celda combinada F-M, filas 6-7
+          columns: {
+            sector: "A",
+            coronamiento: "B",
+            revancha: "E",
+            lama: "F",
+            ancho: "H",
+            pk: "I",
+            geomembrana: "J",
+            distGeoLama: "K",
+            distGeoCoronamiento: "L",
+          },
+          sectores: [
+            { num: 1, startRow: 10, endRow: 23 },
+            { num: 2, startRow: 24, endRow: 35 },
+            { num: 3, startRow: 36, endRow: 45 },
+          ],
+        },
+        este: {
+          nombre: "Muro Este",
+          headerRow: 12,
+          dataStartRow: 13,
+          dataEndRow: 41,
+          dateCell: "F6", // Celda combinada F-M, filas 6-7
+          columns: {
+            sector: "A",
+            coronamiento: "C",
+            revancha: "E",
+            lama: "F",
+            ancho: "H",
+            pk: "I",
+            geomembrana: "J",
+            distGeoLama: "K",
+            distGeoCoronamiento: "L",
+          },
+          sectores: [
+            { num: 1, startRow: 13, endRow: 22 },
+            { num: 2, startRow: 23, endRow: 32 },
+            { num: 3, startRow: 33, endRow: 41 },
+          ],
+        },
+      };
+
+      // Inicializar funcionalidad de revanchas
+      function inicializarRevanchas() {
+        const tipoMuroSelect = document.getElementById("tipo-muro-revanchas");
+        const fileInput = document.getElementById("file-revanchas");
+        const btnProcesar = document.getElementById("btn-procesar-revanchas");
+
+        // Habilitar input de archivo cuando se selecciona un muro
+        if (tipoMuroSelect) {
+          tipoMuroSelect.addEventListener("change", (e) => {
+            const tipoMuro = e.target.value;
+            if (fileInput) {
+              fileInput.disabled = !tipoMuro;
+              fileInput.value = "";
+            }
+            // Limpiar preview
+            ocultarPreview();
+          });
+        }
+
+        // Procesar archivo cuando se selecciona
+        if (fileInput) {
+          fileInput.addEventListener("change", async (e) => {
+            const file = e.target.files[0];
+            const tipoMuro = tipoMuroSelect?.value;
+
+            if (!file || !tipoMuro) return;
+
+            try {
+              mostrarMensaje("Procesando archivo...", "info");
+              const resultado = await procesarArchivoRevanchas(file, tipoMuro);
+              mostrarPreview(resultado.datos, tipoMuro, resultado.fecha);
+              mostrarMensaje("Archivo procesado correctamente", "exito");
+              if (btnProcesar) {
+                btnProcesar.disabled = false;
+                btnProcesar.style.opacity = "1";
+              }
+            } catch (error) {
+              console.error("Error procesando archivo:", error);
+              mostrarMensaje(error.message, "error");
+              ocultarPreview();
+              if (btnProcesar) {
+                btnProcesar.disabled = true;
+                btnProcesar.style.opacity = "0.5";
+              }
+            }
+          });
+        }
+      }
+
+      // Procesar archivo (CSV o XLSX)
+      async function procesarArchivoRevanchas(file, tipoMuro) {
+        const config = CONFIGURACIONES_MURO[tipoMuro];
+        if (!config) {
+          throw new Error("Tipo de muro no válido");
+        }
+
+        // Leer archivo
+        const data = await file.arrayBuffer();
+        let workbook;
+
+        try {
+          // Intentar leer como Excel/CSV
+          workbook = XLSX.read(data, { type: "array" });
+        } catch (error) {
+          throw new Error(
+            "No se pudo leer el archivo. Asegúrese de que sea un archivo CSV o XLSX válido.",
+          );
+        }
+
+        // Obtener primera hoja
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+
+        // Validar estructura
+        const esValido = validarEstructura(worksheet, config);
+        if (!esValido) {
+          throw new Error(
+            `El archivo no corresponde a ${config.nombre}. Verifique que los headers estén en la fila ${config.headerRow} y que las columnas coincidan.`,
+          );
+        }
+
+        // Extraer fecha del archivo (celda combinada F6-M7)
+        const fechaArchivo = extraerFecha(worksheet, config.dateCell);
+
+        // Extraer datos
+        const datos = extraerDatos(worksheet, config);
+
+        return { datos, fecha: fechaArchivo };
+      }
+
+      // Validar que la estructura del archivo coincida con la configuración del muro
+      function validarEstructura(worksheet, config) {
+        const headerRow = config.headerRow;
+
+        // Verificar algunos headers clave
+        const headersEsperados = [
+          { col: config.columns.sector, nombre: "Sector" },
+          { col: config.columns.coronamiento, nombre: "Coronamiento" },
+          { col: config.columns.revancha, nombre: "Revancha" },
+          { col: config.columns.lama, nombre: "Lama" },
+        ];
+
+        for (const header of headersEsperados) {
+          const cellAddress = header.col + headerRow;
+          const cell = worksheet[cellAddress];
+
+          if (!cell || !cell.v) {
+            console.warn(`Header no encontrado en ${cellAddress}`);
+            return false;
+          }
+
+          const cellValue = String(cell.v).toLowerCase();
+          const expectedValue = header.nombre.toLowerCase();
+
+          if (!cellValue.includes(expectedValue)) {
+            console.warn(
+              `Header incorrecto en ${cellAddress}: esperado "${header.nombre}", encontrado "${cell.v}"`,
+            );
+            return false;
+          }
+        }
+
+        return true;
+      }
+
+      // Extraer datos del worksheet según la configuración
+      function extraerDatos(worksheet, config) {
+        const datos = [];
+
+        // Iterar por cada fila de datos
+        for (let row = config.dataStartRow; row <= config.dataEndRow; row++) {
+          // Determinar el sector según el rango de filas
+          let sectorNum = null;
+          for (const sector of config.sectores) {
+            if (row >= sector.startRow && row <= sector.endRow) {
+              sectorNum = sector.num;
+              break;
+            }
+          }
+
+          // Leer valores de cada columna
+          const fila = {
+            sector: sectorNum,
+            coronamiento: getCellValue(
+              worksheet,
+              config.columns.coronamiento + row,
+            ),
+            revancha: getCellValue(worksheet, config.columns.revancha + row),
+            lama: getCellValue(worksheet, config.columns.lama + row),
+            ancho: getCellValue(worksheet, config.columns.ancho + row),
+            pk: getCellValue(worksheet, config.columns.pk + row),
+            geomembrana: getCellValue(
+              worksheet,
+              config.columns.geomembrana + row,
+            ),
+            distGeoLama: getCellValue(
+              worksheet,
+              config.columns.distGeoLama + row,
+            ),
+            distGeoCoronamiento: getCellValue(
+              worksheet,
+              config.columns.distGeoCoronamiento + row,
+            ),
+          };
+
+          // Solo agregar si tiene al menos un valor
+          if (Object.values(fila).some((v) => v !== null && v !== "")) {
+            datos.push(fila);
+          }
+        }
+
+        return datos;
+      }
+
+      // Obtener valor de una celda
+      function getCellValue(worksheet, cellAddress) {
+        const cell = worksheet[cellAddress];
+        if (!cell || cell.v === undefined || cell.v === null) {
+          return "";
+        }
+        return cell.v;
+      }
+
+      // Extraer fecha de la celda especificada (celda combinada F6-M7)
+      function extraerFecha(worksheet, cellAddress) {
+        const cell = worksheet[cellAddress];
+        if (!cell || !cell.v) {
+          return "Fecha no encontrada";
+        }
+
+        let fechaValue = cell.v;
+
+        // Si es un número de serie de Excel, convertirlo a fecha
+        if (typeof fechaValue === "number") {
+          // Convertir número de serie de Excel a fecha JavaScript
+          const excelEpoch = new Date(1899, 11, 30);
+          const date = new Date(excelEpoch.getTime() + fechaValue * 86400000);
+          fechaValue = date;
+        }
+
+        // Si es una fecha, formatearla como dd-mm-yyyy
+        if (fechaValue instanceof Date) {
+          const day = String(fechaValue.getDate()).padStart(2, "0");
+          const month = String(fechaValue.getMonth() + 1).padStart(2, "0");
+          const year = fechaValue.getFullYear();
+          return `${day}-${month}-${year}`;
+        }
+
+        // Si ya es un string, devolverlo tal cual
+        return String(fechaValue);
+      }
+
+      // Mostrar preview de datos
+      function mostrarPreview(datos, tipoMuro, fecha) {
+        const config = CONFIGURACIONES_MURO[tipoMuro];
+        const previewDiv = document.getElementById("preview-revanchas");
+        const infoDiv = document.getElementById("info-archivo-revanchas");
+        const tablaDiv = document.getElementById("tabla-revanchas");
+
+        if (!previewDiv || !infoDiv || !tablaDiv) return;
+
+        // Mostrar información del archivo incluyendo la fecha
+        infoDiv.innerHTML = `
+          <strong>📊 Archivo procesado:</strong> ${config.nombre}<br>
+          <strong>📈 Total de registros:</strong> ${datos.length}<br>
+          <strong>🎯 Sectores encontrados:</strong> ${config.sectores.length}<br>
+          <strong>📅 Fecha:</strong> ${fecha || "No disponible"}
+        `;
+
+        // Renderizar tabla
+        const tablaHTML = `
+          <table class="tabla-revanchas">
+            <thead>
+              <tr>
+                <th>Sector</th>
+                <th>Coronamiento</th>
+                <th>Revancha</th>
+                <th>Lama</th>
+                <th>Ancho</th>
+                <th>PK</th>
+                <th>Geomembrana</th>
+                <th>Dist Geo-Lama</th>
+                <th>Dist Geo-Coronamiento</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${datos
+                .map(
+                  (row) => `
+                <tr class="sector-${row.sector}">
+                  <td class="sector-col">Sector ${row.sector}</td>
+                  <td>${formatValue(row.coronamiento)}</td>
+                  <td>${formatValue(row.revancha, true)}</td>
+                  <td>${formatValue(row.lama)}</td>
+                  <td>${formatValue(row.ancho)}</td>
+                  <td>${formatValue(row.pk)}</td>
+                  <td>${formatValue(row.geomembrana)}</td>
+                  <td>${formatValue(row.distGeoLama, true)}</td>
+                  <td>${formatValue(row.distGeoCoronamiento, true)}</td>
+                </tr>
+              `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `;
+
+        tablaDiv.innerHTML = tablaHTML;
+        previewDiv.style.display = "block";
+      }
+
+      // Formatear valor para mostrar
+      function formatValue(value, roundToThreeDecimals = false) {
+        if (value === null || value === undefined || value === "") {
+          return '<span style="color: #cbd5e1;">-</span>';
+        }
+
+        // Si es un número y se requiere redondeo a 3 decimales
+        if (roundToThreeDecimals && typeof value === "number") {
+          return value.toFixed(3);
+        }
+
+        // Si es un string que parece número y se requiere redondeo
+        if (roundToThreeDecimals && typeof value === "string") {
+          const num = parseFloat(value);
+          if (!isNaN(num)) {
+            return num.toFixed(3);
+          }
+        }
+
+        return value;
+      }
+
+      // Ocultar preview
+      function ocultarPreview() {
+        const previewDiv = document.getElementById("preview-revanchas");
+        if (previewDiv) {
+          previewDiv.style.display = "none";
+        }
+      }
+
+      // Mostrar mensaje
+      function mostrarMensaje(texto, tipo) {
+        const mensajeDiv = document.getElementById("mensaje-revanchas");
+        if (!mensajeDiv) return;
+
+        mensajeDiv.className = `mensaje-${tipo}`;
+        mensajeDiv.textContent = texto;
+        mensajeDiv.style.display = "block";
+
+        // Auto-ocultar mensajes de éxito e info
+        if (tipo === "exito" || tipo === "info") {
+          setTimeout(() => {
+            mensajeDiv.style.display = "none";
+          }, 3000);
+        }
+      }
+
+      // Inicializar cuando el DOM esté listo
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", inicializarRevanchas);
+      } else {
+        inicializarRevanchas();
+      }
+    </script>
   </body>
 </html>
