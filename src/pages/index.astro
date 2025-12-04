@@ -10,6 +10,12 @@ import AuthGuard from "../components/AuthGuard.astro";
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Sistema de Gestión de Canchas - AngloAmerican</title>
+
+    <!-- Chart.js para gráficos de perfil -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
+    ></script>
+
     <style>
       * {
         margin: 0;
@@ -3258,6 +3264,34 @@ import AuthGuard from "../components/AuthGuard.astro";
         color: #64748b;
         padding-left: 2.5rem !important;
         font-size: 0.9rem;
+      }
+
+      /* === CONTENEDOR DE GRÁFICO DE PERFIL === */
+      .perfil-chart-container {
+        width: 100%;
+        margin-top: 2rem;
+        padding: 1.5rem;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .perfil-chart-title {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 1rem;
+        text-align: center;
+        background: linear-gradient(135deg, #0f766e, #14b8a6);
+        color: white;
+        padding: 0.75rem;
+        border-radius: 6px;
+      }
+
+      .perfil-chart-canvas {
+        position: relative;
+        height: 400px;
+        width: 100%;
       }
       /* === ESTILOS PARA FORMULARIO DE SUBIR CANCHAS === */
       .form-row {
@@ -8747,6 +8781,163 @@ import AuthGuard from "../components/AuthGuard.astro";
           );
         }
         sectoresContainer.innerHTML = tablaSectoresHTML;
+
+        // Crear gráfico de perfil
+        let perfilContainer = document.getElementById("perfil-chart-container");
+        if (!perfilContainer) {
+          perfilContainer = document.createElement("div");
+          perfilContainer.id = "perfil-chart-container";
+          perfilContainer.className = "perfil-chart-container";
+          // Insertar después del contenedor de resumen por sectores
+          sectoresContainer.parentNode.insertBefore(
+            perfilContainer,
+            sectoresContainer.nextSibling,
+          );
+        }
+
+        // Preparar datos para el gráfico
+        const datosOrdenados = [...datos].sort((a, b) => {
+          const pkA = parseFloat(a.pk) || 0;
+          const pkB = parseFloat(b.pk) || 0;
+          return pkA - pkB;
+        });
+
+        const labels = datosOrdenados.map((row) => row.pk);
+        const coronamientoData = datosOrdenados.map((row) =>
+          parseFloat(row.coronamiento),
+        );
+        const geomembranaData = datosOrdenados.map((row) =>
+          parseFloat(row.geomembrana),
+        );
+        const lamaData = datosOrdenados.map((row) => parseFloat(row.lama));
+
+        perfilContainer.innerHTML = `
+          <div class="perfil-chart-title">Perfil de Elevaciones - ${config.nombre} - ${fecha || "Sin fecha"}</div>
+          <div class="perfil-chart-canvas">
+            <canvas id="perfil-canvas"></canvas>
+          </div>
+        `;
+
+        // Crear el gráfico con Chart.js
+        const ctx = document.getElementById("perfil-canvas").getContext("2d");
+
+        // Destruir gráfico anterior si existe
+        if (window.perfilChart) {
+          window.perfilChart.destroy();
+        }
+
+        window.perfilChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: "Coronamiento",
+                data: coronamientoData,
+                borderColor: "#dc2626",
+                backgroundColor: "rgba(220, 38, 38, 0.1)",
+                borderWidth: 2,
+                tension: 0.1,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+              },
+              {
+                label: "Geomembrana",
+                data: geomembranaData,
+                borderColor: "#2563eb",
+                backgroundColor: "rgba(37, 99, 235, 0.1)",
+                borderWidth: 2,
+                tension: 0.1,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+              },
+              {
+                label: "Lama",
+                data: lamaData,
+                borderColor: "#16a34a",
+                backgroundColor: "rgba(22, 163, 74, 0.1)",
+                borderWidth: 2,
+                tension: 0.1,
+                pointRadius: 2,
+                pointHoverRadius: 5,
+              },
+            ],
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+              mode: "index",
+              intersect: false,
+            },
+            plugins: {
+              legend: {
+                display: true,
+                position: "top",
+                labels: {
+                  font: {
+                    size: 12,
+                    weight: "bold",
+                  },
+                  padding: 15,
+                },
+              },
+              tooltip: {
+                backgroundColor: "rgba(0, 0, 0, 0.8)",
+                padding: 12,
+                titleFont: {
+                  size: 14,
+                },
+                bodyFont: {
+                  size: 13,
+                },
+                callbacks: {
+                  label: function (context) {
+                    return (
+                      context.dataset.label +
+                      ": " +
+                      context.parsed.y.toFixed(3) +
+                      " m"
+                    );
+                  },
+                },
+              },
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "PK (Progresiva)",
+                  font: {
+                    size: 14,
+                    weight: "bold",
+                  },
+                },
+                ticks: {
+                  maxRotation: 45,
+                  minRotation: 45,
+                  autoSkip: true,
+                  maxTicksLimit: 20,
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Cota (m)",
+                  font: {
+                    size: 14,
+                    weight: "bold",
+                  },
+                },
+                min: 730,
+                max: 745,
+                ticks: {
+                  stepSize: 1,
+                },
+              },
+            },
+          },
+        });
 
         previewDiv.style.display = "block";
       }
