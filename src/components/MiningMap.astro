@@ -1277,8 +1277,8 @@ console.log("🏗️ MiningMap iniciado con:", {
                 20,
                 5,
               ],
-              "line-opacity": 0.6,
-              "line-blur": 1,
+              "line-opacity": 0.25,
+              "line-blur": 2,
             },
             layout: {
               "line-cap": "round",
@@ -1581,20 +1581,38 @@ console.log("🏗️ MiningMap iniciado con:", {
         try {
           if (!map) return;
 
-          // Remover capas
-          if (map.getLayer("revanchas-labels")) {
-            map.removeLayer("revanchas-labels");
-          }
-          if (map.getLayer("revanchas-circles")) {
-            map.removeLayer("revanchas-circles");
-          }
+          console.log("🔄 Removiendo capas de revanchas...");
 
-          // Remover source
+          // Remover todas las capas en orden inverso a como fueron agregadas
+          const layersToRemove = [
+            "revanchas-labels",
+            "revanchas-glow-inner",
+            "revanchas-pulse-1",
+            "revanchas-pulse-2",
+            "revanchas-pulse-3",
+            "revanchas-pulse-4",
+            "revanchas-connections",
+          ];
+
+          layersToRemove.forEach((layerId) => {
+            if (map.getLayer(layerId)) {
+              map.removeLayer(layerId);
+              console.log(`  ✓ Capa ${layerId} removida`);
+            }
+          });
+
+          // Remover sources
           if (map.getSource("revanchas-source")) {
             map.removeSource("revanchas-source");
+            console.log("  ✓ Source revanchas-source removido");
           }
 
-          console.log("✅ Capas de revanchas removidas");
+          if (map.getSource("revanchas-lines")) {
+            map.removeSource("revanchas-lines");
+            console.log("  ✓ Source revanchas-lines removido");
+          }
+
+          console.log("✅ Todas las capas de revanchas removidas exitosamente");
         } catch (error) {
           console.error("❌ Error al ocultar revanchas:", error);
         }
