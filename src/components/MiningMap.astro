@@ -1531,6 +1531,11 @@ console.log("🏗️ MiningMap iniciado con:", {
             "revanchas-pulse-3",
             "revanchas-pulse-4",
             "revanchas-connections",
+            // Width lines (líneas perpendiculares de ancho)
+            "width-lines-layer",
+            "width-pulse-1",
+            "width-pulse-2",
+            "width-pulse-3",
             // Nombres antiguos por si acaso
             "revanchas-pulse-outer",
             "revanchas-pulse-inner",
@@ -1554,6 +1559,11 @@ console.log("🏗️ MiningMap iniciado con:", {
           if (map.getSource("revanchas-lines")) {
             map.removeSource("revanchas-lines");
             console.log("  ✓ Source revanchas-lines removido");
+          }
+
+          if (map.getSource("width-lines")) {
+            map.removeSource("width-lines");
+            console.log("  ✓ Source width-lines removido");
           }
 
           console.log("✅ Todas las capas de revanchas removidas exitosamente");
