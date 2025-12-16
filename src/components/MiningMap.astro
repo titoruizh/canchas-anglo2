@@ -429,7 +429,7 @@ console.log("🏗️ MiningMap iniciado con:", {
             );
 
             // Usar variable de entorno para tileserver (local: localhost:8081, producción: Render)
-            const tileserverUrl = import.meta.env.PUBLIC_TILESERVER_URL || "http://localhost:8081";
+            const tileserverUrl = (import.meta.env.PUBLIC_TILESERVER_URL || "http://localhost:8081").replace(/\/$/, '');
             const tileUrl = `${tileserverUrl}/data/mapbase/{z}/{x}/{y}.jpg`;
             
             console.log("📡 URL de tiles configurada:", tileUrl);
