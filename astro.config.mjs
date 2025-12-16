@@ -1,13 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import node from '@astrojs/node';
+import vercel from '@astrojs/vercel';
 
 // https://astro.build/config
 export default defineConfig({
   output: 'server',
-  adapter: node({
-    mode: 'standalone'
-  }),
+  adapter: vercel(),
   vite: {
     define: {
       'import.meta.env.SUPABASE_URL': JSON.stringify(process.env.SUPABASE_URL),
