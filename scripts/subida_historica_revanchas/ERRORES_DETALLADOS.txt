@@ -1,0 +1,109 @@
+======================================================================
+REPORTE DE ARCHIVOS CON ERRORES
+======================================================================
+
+Total de errores: 21
+
+
+======================================================================
+PRINCIPAL - 21 errores
+======================================================================
+
+Archivo: Reporte_Rev_MP_230619.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230619.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_230705.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230705.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_230714.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230714.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_230802.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230802.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_230830.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230830.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_230907.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230907.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_230927.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_230927.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_231011.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_231011.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_231025.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_231025.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_231108.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_231108.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_231115.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_231115.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_231122.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_231122.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_231206.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_231206.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_240131.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_240131.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_240206.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_240206.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_240619.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_240619.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_241121.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_241121.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_241202.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_241202.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_250227.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_250227.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_250317.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_250317.xlsx
+----------------------------------------------------------------------
+Archivo: Reporte_Rev_MP_250529.xlsx
+Error:   Error procesando archivo: Faltan columnas requeridas: ['sector']
+Ruta:    E:\TITO\1 Astro\REVANCHAS HISTORICAS\Principal\Reporte_Rev_MP_250529.xlsx
+----------------------------------------------------------------------
+
+======================================================================
+INSTRUCCIONES PARA CORREGIR
+======================================================================
+
+1. Abre cada archivo con error en Excel
+2. Verifica que la celda F6 contenga una fecha válida
+3. Formatos aceptados:
+   - DD/MM/YYYY (ej: 15/12/2024)
+   - DD-MM-YYYY (ej: 15-12-2024)
+   - YYYY-MM-DD (ej: 2024-12-15)
+4. Guarda el archivo
+5. Vuelve a ejecutar: python carga_masiva.py
+

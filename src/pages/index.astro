@@ -24,8 +24,8 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       body {
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-          sans-serif;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         background-color: #f5f7fa;
         color: #333;
         line-height: 1.6;
@@ -3517,12 +3517,147 @@ import AuthGuard from "../components/AuthGuard.astro";
         cursor: pointer;
       }
 
-      #preview-foto-cancha {
+      #preview-foto-cancha,
+      #preview-foto-muestra {
         border: 2px dashed #cbd5e1;
         border-radius: 8px;
         padding: 1rem;
         text-align: center;
         background: #f8fafc;
+      }
+
+      /* === ESTILOS PARA PANTALLA DE SELECCIÓN === */
+      .seleccion-container {
+        padding: 2rem 0;
+      }
+
+      .tipo-opciones {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .tipo-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 2.5rem 2rem;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .tipo-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+      }
+
+      .tipo-card:hover {
+        transform: translateY(-8px);
+        border-color: #3b82f6;
+        box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+      }
+
+      .tipo-card:hover::before {
+        opacity: 0.05;
+      }
+
+      .tipo-card:active {
+        transform: translateY(-4px);
+      }
+
+      .tipo-card > * {
+        position: relative;
+        z-index: 1;
+      }
+
+      .tipo-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+      }
+
+      .tipo-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 1rem 0 0.75rem 0;
+        letter-spacing: 0.5px;
+      }
+
+      .tipo-card p {
+        color: #64748b;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin: 0 0 1.5rem 0;
+        min-height: 3rem;
+      }
+
+      .tipo-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: white;
+        padding: 0.4rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+      }
+
+      /* === BOTÓN VOLVER === */
+      .btn-volver {
+        background: #f1f5f9;
+        color: #475569;
+        border: 1px solid #cbd5e1;
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .btn-volver:hover {
+        background: #e2e8f0;
+        border-color: #94a3b8;
+        color: #334155;
+        transform: translateX(-2px);
+      }
+
+      .btn-volver:active {
+        transform: translateX(0);
+      }
+
+      /* Responsive para móviles */
+      @media (max-width: 768px) {
+        .tipo-opciones {
+          grid-template-columns: 1fr;
+          gap: 1.5rem;
+        }
+
+        .tipo-card {
+          padding: 2rem 1.5rem;
+        }
+
+        .tipo-icon {
+          font-size: 3rem;
+        }
       }
     </style>
 
@@ -4269,7 +4404,7 @@ import AuthGuard from "../components/AuthGuard.astro";
         </div>
       </div>
 
-      <!-- Modal para Subir Canchas (Linkapsis) -->
+      <!-- Modal para Subir Canchas (Linkapsis) - Mejorado con Selección -->
       <div id="modal-subir-canchas" class="modal">
         <div class="modal-content modal-large">
           <div class="modal-header">
@@ -4278,134 +4413,273 @@ import AuthGuard from "../components/AuthGuard.astro";
           </div>
 
           <div class="modal-body">
-            <form id="form-subir-canchas">
-              <!-- Fila 1: Muro y Sector -->
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="muro-cancha">
-                    <strong>Muro *</strong>
-                  </label>
-                  <select id="muro-cancha" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Principal">Principal</option>
-                    <option value="Este">Este</option>
-                    <option value="Oeste">Oeste</option>
-                  </select>
-                </div>
+            <!-- PASO 1: Pantalla de Selección -->
+            <div id="seleccion-tipo" class="seleccion-container">
+              <h2
+                style="text-align: center; color: #2c3e50; margin-bottom: 2rem;"
+              >
+                ¿Qué deseas subir?
+              </h2>
 
-                <div class="form-group">
-                  <label for="sector-cancha">
-                    <strong>Sector *</strong>
-                  </label>
-                  <select id="sector-cancha" disabled required>
-                    <option value="">Seleccione muro primero...</option>
-                  </select>
-                </div>
+              <div class="tipo-opciones">
+                <button type="button" class="tipo-card" data-tipo="cancha">
+                  <div class="tipo-icon">🏗️</div>
+                  <h3>CANCHA</h3>
+                </button>
+
+                <button type="button" class="tipo-card" data-tipo="muestra">
+                  <div class="tipo-icon">🧪</div>
+                  <h3>MUESTRAS</h3>
+                </button>
               </div>
+            </div>
 
-              <!-- Fila 2: Relleno y Fecha -->
-              <div class="form-row">
+            <!-- PASO 2A: Formulario CANCHA (existente) -->
+            <div id="formulario-cancha" style="display: none;">
+              <button type="button" class="btn-volver"
+                >← Volver a selección</button
+              >
+
+              <h3
+                style="color: #2c3e50; margin: 1.5rem 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;"
+              >
+                <span>🏗️</span> Formulario de Cancha
+              </h3>
+
+              <form id="form-subir-canchas">
+                <!-- Fila 1: Muro y Sector -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="muro-cancha">
+                      <strong>Muro *</strong>
+                    </label>
+                    <select id="muro-cancha" required>
+                      <option value="">Seleccione...</option>
+                      <option value="Principal">Principal</option>
+                      <option value="Este">Este</option>
+                      <option value="Oeste">Oeste</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="sector-cancha">
+                      <strong>Sector *</strong>
+                    </label>
+                    <select id="sector-cancha" disabled required>
+                      <option value="">Seleccione muro primero...</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Fila 2: Relleno y Fecha -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="relleno-cancha">
+                      <strong>Relleno *</strong>
+                    </label>
+                    <input
+                      type="text"
+                      id="relleno-cancha"
+                      placeholder="Ingrese nombre del relleno"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="fecha-cancha">
+                      <strong>Fecha *</strong>
+                    </label>
+                    <input type="date" id="fecha-cancha" required />
+                  </div>
+                </div>
+
+                <!-- Fila 3: Foto -->
                 <div class="form-group">
-                  <label for="relleno-cancha">
-                    <strong>Relleno *</strong>
+                  <label for="foto-cancha">
+                    <strong>Foto</strong>
+                  </label>
+                  <input type="file" id="foto-cancha" accept="image/*" />
+                  <small style="color: #64748b;"
+                    >Formatos: JPG, PNG (máx. 5MB)</small
+                  >
+                  <div
+                    id="preview-foto-cancha"
+                    style="display:none; margin-top: 1rem;"
+                  >
+                    <img
+                      id="img-preview-cancha"
+                      style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                      alt="Preview"
+                    />
+                  </div>
+                </div>
+
+                <!-- Fila 4: Archivo -->
+                <div class="form-group">
+                  <label for="archivo-cancha">
+                    <strong>Archivo *</strong>
                   </label>
                   <input
-                    type="text"
-                    id="relleno-cancha"
-                    placeholder="Ingrese nombre del relleno"
+                    type="file"
+                    id="archivo-cancha"
+                    accept=".csv,.xlsx,.asc"
                     required
                   />
+                  <small style="color: #64748b;">Formatos: CSV, XLSX, ASC</small
+                  >
                 </div>
 
+                <!-- Fila 5: Responsable y Método -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="responsable-cancha">
+                      <strong>Responsable *</strong>
+                    </label>
+                    <select id="responsable-cancha" required>
+                      <option value="">Cargando...</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="metodo-cancha">
+                      <strong>Método *</strong>
+                    </label>
+                    <select id="metodo-cancha" required>
+                      <option value="">Seleccione...</option>
+                      <option value="Movimiento de Tierra"
+                        >Movimiento de Tierra</option
+                      >
+                      <option value="Hidraulico">Hidráulico</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Fila 6: N° Capas -->
                 <div class="form-group">
-                  <label for="fecha-cancha">
-                    <strong>Fecha *</strong>
+                  <label for="capas-cancha">
+                    <strong>N° Capas *</strong>
                   </label>
-                  <input type="date" id="fecha-cancha" required />
-                </div>
-              </div>
-
-              <!-- Fila 3: Foto -->
-              <div class="form-group">
-                <label for="foto-cancha">
-                  <strong>Foto</strong>
-                </label>
-                <input type="file" id="foto-cancha" accept="image/*" />
-                <small style="color: #64748b;"
-                  >Formatos: JPG, PNG (máx. 5MB)</small
-                >
-                <div
-                  id="preview-foto-cancha"
-                  style="display:none; margin-top: 1rem;"
-                >
-                  <img
-                    id="img-preview-cancha"
-                    style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
-                    alt="Preview"
-                  />
-                </div>
-              </div>
-
-              <!-- Fila 4: Archivo -->
-              <div class="form-group">
-                <label for="archivo-cancha">
-                  <strong>Archivo *</strong>
-                </label>
-                <input
-                  type="file"
-                  id="archivo-cancha"
-                  accept=".csv,.xlsx,.asc"
-                  required
-                />
-                <small style="color: #64748b;">Formatos: CSV, XLSX, ASC</small>
-              </div>
-
-              <!-- Fila 5: Responsable y Método -->
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="responsable-cancha">
-                    <strong>Responsable *</strong>
-                  </label>
-                  <select id="responsable-cancha" required>
-                    <option value="">Cargando...</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label for="metodo-cancha">
-                    <strong>Método *</strong>
-                  </label>
-                  <select id="metodo-cancha" required>
+                  <select id="capas-cancha" required>
                     <option value="">Seleccione...</option>
-                    <option value="Movimiento de Tierra"
-                      >Movimiento de Tierra</option
-                    >
-                    <option value="Hidraulico">Hidráulico</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
                   </select>
                 </div>
-              </div>
 
-              <!-- Fila 6: N° Capas -->
-              <div class="form-group">
-                <label for="capas-cancha">
-                  <strong>N° Capas *</strong>
-                </label>
-                <select id="capas-cancha" required>
-                  <option value="">Seleccione...</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-              </div>
-            </form>
-          </div>
+                <div class="form-actions">
+                  <button type="button" class="btn-cancel">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    Guardar Cancha
+                  </button>
+                </div>
+              </form>
+            </div>
 
-          <div class="form-actions">
-            <button type="button" class="btn-cancel">Cancelar</button>
-            <button type="submit" class="btn-primary" form="form-subir-canchas">
-              Guardar Cancha
-            </button>
+            <!-- PASO 2B: Formulario MUESTRAS (nuevo) -->
+            <div id="formulario-muestra" style="display: none;">
+              <button type="button" class="btn-volver"
+                >← Volver a selección</button
+              >
+
+              <h3
+                style="color: #2c3e50; margin: 1.5rem 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;"
+              >
+                <span>🧪</span> Formulario de Muestras
+              </h3>
+
+              <form id="form-subir-muestras">
+                <!-- Fila 1: Muro y Sector -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="muro-muestra">
+                      <strong>Muro *</strong>
+                    </label>
+                    <select id="muro-muestra" required>
+                      <option value="">Seleccione...</option>
+                      <option value="Principal">Principal</option>
+                      <option value="Este">Este</option>
+                      <option value="Oeste">Oeste</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="sector-muestra">
+                      <strong>Sector *</strong>
+                    </label>
+                    <select id="sector-muestra" disabled required>
+                      <option value="">Seleccione muro primero...</option>
+                    </select>
+                  </div>
+                </div>
+
+                <!-- Fila 2: Relleno y Fecha -->
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="relleno-muestra">
+                      <strong>Relleno *</strong>
+                    </label>
+                    <input
+                      type="text"
+                      id="relleno-muestra"
+                      placeholder="Ingrese nombre del relleno"
+                      required
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="fecha-muestra">
+                      <strong>Fecha *</strong>
+                    </label>
+                    <input type="date" id="fecha-muestra" required />
+                  </div>
+                </div>
+
+                <!-- Fila 3: Foto -->
+                <div class="form-group">
+                  <label for="foto-muestra">
+                    <strong>Foto</strong>
+                  </label>
+                  <input type="file" id="foto-muestra" accept="image/*" />
+                  <small style="color: #64748b;"
+                    >Formatos: JPG, PNG (máx. 5MB)</small
+                  >
+                  <div
+                    id="preview-foto-muestra"
+                    style="display:none; margin-top: 1rem;"
+                  >
+                    <img
+                      id="img-preview-muestra"
+                      style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                      alt="Preview"
+                    />
+                  </div>
+                </div>
+
+                <!-- Fila 4: Archivo -->
+                <div class="form-group">
+                  <label for="archivo-muestra">
+                    <strong>Archivo *</strong>
+                  </label>
+                  <input
+                    type="file"
+                    id="archivo-muestra"
+                    accept=".csv,.xlsx,.asc"
+                    required
+                  />
+                  <small style="color: #64748b;">Formatos: CSV, XLSX, ASC</small
+                  >
+                </div>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-cancel">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    Guardar Muestra
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       </div>
@@ -4978,10 +5252,12 @@ import AuthGuard from "../components/AuthGuard.astro";
           toggleRevanchas.addEventListener("change", async (e) => {
             const activado = e.target.checked;
             console.log("📊 Revanchas toggle:", activado ? "ON" : "OFF");
-            
-            const mapContainer = document.getElementById("dashboard-map-container");
+
+            const mapContainer = document.getElementById(
+              "dashboard-map-container",
+            );
             const iframe = mapContainer?.querySelector("iframe");
-            
+
             if (!iframe || !iframe.contentWindow) {
               console.log("⚠️ Iframe del mapa no disponible");
               return;
@@ -4990,31 +5266,39 @@ import AuthGuard from "../components/AuthGuard.astro";
             if (activado) {
               try {
                 console.log("🔄 Cargando revanchas georreferenciadas...");
-                
+
                 // Obtener filtro de muro actual
-                const muroFiltro = mapMuroFilter?.value || '';
-                
+                const muroFiltro = mapMuroFilter?.value || "";
+
                 // Construir URL con filtros
-                let apiUrl = '/api/revanchas/georreferenciadas?soloUltimas=true&formato=geojson';
+                let apiUrl =
+                  "/api/revanchas/georreferenciadas?soloUltimas=true&formato=geojson";
                 if (muroFiltro) {
                   apiUrl += `&muro=${muroFiltro}`;
                 }
-                
+
                 // Cargar datos de revanchas georreferenciadas
                 const response = await fetch(apiUrl);
                 if (!response.ok) {
-                  throw new Error(`Error ${response.status}: ${response.statusText}`);
+                  throw new Error(
+                    `Error ${response.status}: ${response.statusText}`,
+                  );
                 }
-                
+
                 const geojsonData = await response.json();
-                console.log(`✅ ${geojsonData.features.length} revanchas georreferenciadas cargadas`);
-                
+                console.log(
+                  `✅ ${geojsonData.features.length} revanchas georreferenciadas cargadas`,
+                );
+
                 // Enviar datos al iframe del mapa
-                iframe.contentWindow.postMessage({
-                  type: 'mostrar-revanchas',
-                  data: geojsonData
-                }, '*');
-                
+                iframe.contentWindow.postMessage(
+                  {
+                    type: "mostrar-revanchas",
+                    data: geojsonData,
+                  },
+                  "*",
+                );
+
                 console.log("📤 Datos de revanchas enviados al mapa");
               } catch (error) {
                 console.error("❌ Error al cargar revanchas:", error);
@@ -5024,9 +5308,12 @@ import AuthGuard from "../components/AuthGuard.astro";
               }
             } else {
               // Ocultar capa de revanchas
-              iframe.contentWindow.postMessage({
-                type: 'ocultar-revanchas'
-              }, '*');
+              iframe.contentWindow.postMessage(
+                {
+                  type: "ocultar-revanchas",
+                },
+                "*",
+              );
               console.log("📤 Comando de ocultar revanchas enviado al mapa");
             }
           });
@@ -7879,43 +8166,43 @@ import AuthGuard from "../components/AuthGuard.astro";
               // AngloAmerican - Botón "CREAR CANCHA"
               crear_cancha: "Creación de Cancha",
               crear_cancha_con_poligono: "Creación de Cancha",
-              
+
               // AngloAmerican - Botón "ENVIAR A BESALCO"
               enviar_besalco: "Envío a Besalco",
-              
+
               // AngloAmerican - Botón "CERRAR CANCHA"
               cerrar_cancha: "Cierre de Cancha",
 
               // Besalco - Botón "RECEPCIONAR TRABAJO"
               recepcionar_besalco: "Trabajo recepcionado por Besalco",
-              
+
               // Besalco - Botón "GESTIONAR" (finalizar y enviar a Linkapsis)
               finalizar_besalco: "Trabajo finalizado por Besalco",
-              
+
               // Besalco - Botón "RECHAZAR"
               rechazar_besalco: "Trabajo rechazado por Besalco",
 
               // Linkapsis - Botón "RECEPCIONAR TRABAJO"
               recepcionar_linkapsis: "Trabajo recepcionado por Linkapsis",
-              
+
               // Linkapsis - Botón "GESTIONAR" (validar espesores y enviar a LlayLlay)
               validar_linkapsis: "Espesores validados por Linkapsis",
-              
+
               // Linkapsis - Botón "RECHAZAR"
               rechazar_linkapsis: "Espesores rechazados por Linkapsis",
 
               // LlayLlay - Botón "RECEPCIONAR TRABAJO"
               recepcionar_llay_llay: "Trabajo recepcionado por LlayLlay",
-              
+
               // LlayLlay - Botón "GESTIONAR" (validar densidad y enviar a AA)
               validar_llay_llay: "Densidad validada por LlayLlay",
-              
+
               // LlayLlay - Botón "RECHAZAR"
               rechazar_llay_llay: "Densidad rechazada por LlayLlay",
 
               // Genérico - Cualquier botón "RECHAZAR"
               rechazar_cancha: "Cancha rechazada",
-              
+
               // Tomar trabajo (si se usa)
               tomar_trabajo: "Trabajo tomado",
             };
@@ -9498,21 +9785,60 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       // ========================================
-      // FORMULARIO DE SUBIR CANCHAS
+      // FORMULARIO DE SUBIR CANCHAS (MEJORADO CON SELECCIÓN)
       // ========================================
 
       // Inicializar funcionalidad de Subir Canchas
       function inicializarSubirCanchas() {
         cargarResponsables();
-        configurarSelectorMuro();
-        configurarPreviewFoto();
+        configurarNavegacionModal();
+        configurarSelectorMuro("cancha");
+        configurarSelectorMuro("muestra");
+        configurarPreviewFoto("cancha");
+        configurarPreviewFoto("muestra");
         configurarFormularioCanchas();
+        configurarFormularioMuestras();
       }
 
-      // Configurar selector dinámico de Muro -> Sector
-      function configurarSelectorMuro() {
-        const muroSelect = document.getElementById("muro-cancha");
-        const sectorSelect = document.getElementById("sector-cancha");
+      // Configurar navegación entre pantallas del modal
+      function configurarNavegacionModal() {
+        const seleccionTipo = document.getElementById("seleccion-tipo");
+        const formularioCancha = document.getElementById("formulario-cancha");
+        const formularioMuestra = document.getElementById("formulario-muestra");
+        const tipoCards = document.querySelectorAll(".tipo-card");
+        const botonesVolver = document.querySelectorAll(".btn-volver");
+
+        // Click en tarjetas de selección
+        tipoCards.forEach((card) => {
+          card.addEventListener("click", () => {
+            const tipo = card.dataset.tipo;
+
+            if (tipo === "cancha") {
+              seleccionTipo.style.display = "none";
+              formularioCancha.style.display = "block";
+              formularioMuestra.style.display = "none";
+            } else if (tipo === "muestra") {
+              seleccionTipo.style.display = "none";
+              formularioCancha.style.display = "none";
+              formularioMuestra.style.display = "block";
+            }
+          });
+        });
+
+        // Click en botones "Volver"
+        botonesVolver.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            seleccionTipo.style.display = "block";
+            formularioCancha.style.display = "none";
+            formularioMuestra.style.display = "none";
+          });
+        });
+      }
+
+      // Configurar selector dinámico de Muro -> Sector (genérico)
+      function configurarSelectorMuro(tipo) {
+        const muroSelect = document.getElementById(`muro-${tipo}`);
+        const sectorSelect = document.getElementById(`sector-${tipo}`);
 
         if (!muroSelect || !sectorSelect) return;
 
@@ -9542,11 +9868,11 @@ import AuthGuard from "../components/AuthGuard.astro";
         }
       }
 
-      // Configurar preview de foto
-      function configurarPreviewFoto() {
-        const fotoInput = document.getElementById("foto-cancha");
-        const previewDiv = document.getElementById("preview-foto-cancha");
-        const imgPreview = document.getElementById("img-preview-cancha");
+      // Configurar preview de foto (genérico)
+      function configurarPreviewFoto(tipo) {
+        const fotoInput = document.getElementById(`foto-${tipo}`);
+        const previewDiv = document.getElementById(`preview-foto-${tipo}`);
+        const imgPreview = document.getElementById(`img-preview-${tipo}`);
 
         if (!fotoInput || !previewDiv || !imgPreview) return;
 
@@ -9588,27 +9914,10 @@ import AuthGuard from "../components/AuthGuard.astro";
 
           const data = await response.json();
 
-          // Debug: ver qué datos llegan
-          console.log("Datos recibidos de /api/usuarios:", data);
-
           if (data.success && data.usuarios) {
-            console.log("Total usuarios:", data.usuarios.length);
-
-            // Ver todos los usuarios y sus empresas
-            data.usuarios.forEach((u) => {
-              console.log(
-                `Usuario: ${u.nombre_completo || u.nombre}, Empresa ID: ${u.empresa_id}, Activo: ${u.activo}`,
-              );
-            });
-
             // Filtrar solo usuarios de Linkapsis (empresa_id = 3) activos
             const usuariosLinkapsis = data.usuarios.filter(
               (usuario) => usuario.empresa_id === 3 && usuario.activo,
-            );
-
-            console.log(
-              "Usuarios de Linkapsis filtrados:",
-              usuariosLinkapsis.length,
             );
 
             select.innerHTML = '<option value="">Seleccione...</option>';
@@ -9625,7 +9934,6 @@ import AuthGuard from "../components/AuthGuard.astro";
                 '<option value="">No hay usuarios de Linkapsis disponibles</option>';
             }
           } else {
-            console.log("Error: data.success es false o no hay usuarios");
             select.innerHTML =
               '<option value="">Error al cargar usuarios</option>';
           }
@@ -9636,7 +9944,7 @@ import AuthGuard from "../components/AuthGuard.astro";
         }
       }
 
-      // Configurar manejo del formulario
+      // Configurar manejo del formulario CANCHA
       function configurarFormularioCanchas() {
         const form = document.getElementById("form-subir-canchas");
         if (!form) return;
@@ -9646,6 +9954,7 @@ import AuthGuard from "../components/AuthGuard.astro";
 
           // Capturar todos los datos del formulario
           const datos = {
+            tipo: "CANCHA",
             muro: document.getElementById("muro-cancha").value,
             sector: document.getElementById("sector-cancha").value,
             relleno: document.getElementById("relleno-cancha").value,
@@ -9657,8 +9966,9 @@ import AuthGuard from "../components/AuthGuard.astro";
             capas: document.getElementById("capas-cancha").value,
           };
 
-          // Log de datos capturados (sin guardar en backend por ahora)
+          // Log de datos capturados
           console.log("=== DATOS DE CANCHA CAPTURADOS ===");
+          console.log("Tipo:", datos.tipo);
           console.log("Muro:", datos.muro);
           console.log("Sector:", datos.sector);
           console.log("Relleno:", datos.relleno);
@@ -9675,22 +9985,89 @@ import AuthGuard from "../components/AuthGuard.astro";
 
           // Mostrar mensaje de éxito
           alert(
-            "✅ Datos capturados correctamente\n\nLos datos han sido registrados en la consola.\n(Sin guardar en base de datos por ahora)",
+            "✅ Datos de CANCHA capturados correctamente\n\nLos datos han sido registrados en la consola.\n(Sin guardar en base de datos por ahora)",
           );
 
-          // Resetear formulario
-          form.reset();
-          document.getElementById("preview-foto-cancha").style.display = "none";
-          document.getElementById("sector-cancha").disabled = true;
-          document.getElementById("sector-cancha").innerHTML =
-            '<option value="">Seleccione muro primero...</option>';
-
-          // Cerrar modal
-          const modal = document.getElementById("modal-subir-canchas");
-          if (modal) {
-            modal.style.display = "none";
-          }
+          // Resetear y volver a selección
+          resetearFormularioYModal("cancha");
         });
+      }
+
+      // Configurar manejo del formulario MUESTRAS
+      function configurarFormularioMuestras() {
+        const form = document.getElementById("form-subir-muestras");
+        if (!form) return;
+
+        form.addEventListener("submit", (e) => {
+          e.preventDefault();
+
+          // Capturar datos del formulario
+          const datos = {
+            tipo: "MUESTRA",
+            muro: document.getElementById("muro-muestra").value,
+            sector: document.getElementById("sector-muestra").value,
+            relleno: document.getElementById("relleno-muestra").value,
+            fecha: document.getElementById("fecha-muestra").value,
+            foto: document.getElementById("foto-muestra").files[0] || null,
+            archivo: document.getElementById("archivo-muestra").files[0],
+          };
+
+          // Log de datos capturados
+          console.log("=== DATOS DE MUESTRA CAPTURADOS ===");
+          console.log("Tipo:", datos.tipo);
+          console.log("Muro:", datos.muro);
+          console.log("Sector:", datos.sector);
+          console.log("Relleno:", datos.relleno);
+          console.log("Fecha:", datos.fecha);
+          console.log(
+            "Foto:",
+            datos.foto ? datos.foto.name : "No seleccionada",
+          );
+          console.log("Archivo:", datos.archivo.name);
+          console.log("===================================");
+
+          // Mostrar mensaje de éxito
+          alert(
+            "✅ Datos de MUESTRA capturados correctamente\n\nLos datos han sido registrados en la consola.\n(Sin guardar en base de datos por ahora)",
+          );
+
+          // Resetear y volver a selección
+          resetearFormularioYModal("muestra");
+        });
+      }
+
+      // Función auxiliar para resetear formulario y volver a selección
+      function resetearFormularioYModal(tipo) {
+        const form = document.getElementById(
+          `form-subir-${tipo === "cancha" ? "canchas" : "muestras"}`,
+        );
+        const seleccionTipo = document.getElementById("seleccion-tipo");
+        const formularioCancha = document.getElementById("formulario-cancha");
+        const formularioMuestra = document.getElementById("formulario-muestra");
+
+        // Resetear formulario
+        if (form) {
+          form.reset();
+        }
+
+        // Resetear previews
+        const previewDiv = document.getElementById(`preview-foto-${tipo}`);
+        if (previewDiv) {
+          previewDiv.style.display = "none";
+        }
+
+        // Resetear selector de sector
+        const sectorSelect = document.getElementById(`sector-${tipo}`);
+        if (sectorSelect) {
+          sectorSelect.disabled = true;
+          sectorSelect.innerHTML =
+            '<option value="">Seleccione muro primero...</option>';
+        }
+
+        // Volver a pantalla de selección
+        seleccionTipo.style.display = "block";
+        formularioCancha.style.display = "none";
+        formularioMuestra.style.display = "none";
       }
 
       // Inicializar Subir Canchas cuando el DOM esté listo

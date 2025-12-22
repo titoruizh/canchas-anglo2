@@ -99,30 +99,33 @@ Integración con servicios externos.
 
 Esquemas, migraciones y queries útiles.
 
-### Scripts SQL
+### Documentación Principal
 
-- **backup-supabase.sql** - Backup completo de la BD
-- **supabase_setup.sql** - Setup inicial de tablas
-- **SISTEMA_PKS_GEORREFERENCIADOS.sql** - Sistema de PKs
-- **migracion_revanchas_COMPLETA_FINAL.sql** - Migración de revanchas
+- **[README.md](database/README.md)** - Índice completo de documentación de base de datos
+  - 15 tablas, 12 vistas, 10 funciones, 8+ triggers
+  - Diagramas ER y relaciones
+  - Queries comunes y ejemplos
 
-### Documentación
+### Sistemas de Datos
 
-- **[DOCUMENTACION_TIMELINE.sql](database/DOCUMENTACION_TIMELINE.sql)**
-  - Sistema de timeline/historial
-  - Triggers automáticos
-  - Queries de auditoría
+- **[Sistema Core](database/schemas/core/)** - Canchas, estados, empresas, historial
+- **[Sistema Usuarios](database/schemas/usuarios/)** - Usuarios y roles
+- **[Sistema Revanchas](database/schemas/revanchas/)** - Mediciones y estadísticas
+- **[Sistema PKs](database/schemas/pks/)** - 138 PKs georreferenciados
 
-### Queries Útiles
+### Recursos
 
-- **[queries_revanchas_utiles.sql](database/queries_revanchas_utiles.sql)**
-  - Consultas frecuentes
-  - Reports y estadísticas
-  - Debugging
+- **[Vistas](database/views/)** - 12 vistas de base de datos
+- **[Funciones](database/functions/)** - Funciones y procedimientos
+- **[Triggers](database/triggers/)** - Triggers automáticos
+- **[Relaciones](database/relationships/DIAGRAM.md)** - Diagrama ER completo
+- **[Queries Útiles](database/queries/common_operations.md)** - Queries frecuentes
+- **[Historial de Migraciones](database/migrations/HISTORY.md)** - Cambios del schema
+- **[Seguridad RLS](database/security/)** - Políticas de seguridad
 
-### Datos
+### Diagnóstico
 
-- **alignment_coordinates.csv** - Coordenadas de alineación
+- **[DIAGNOSTICO_SCHEMA_COMPLETO.sql](database/DIAGNOSTICO_SCHEMA_COMPLETO.sql)** - Queries para extraer schema completo
 
 ---
 

@@ -696,11 +696,140 @@ SELECT calcular_estadisticas_archivo();
 - [x] Validación de fechas (dd-mm-yyyy → yyyy-mm-dd)
 - [x] Manejo de errores (duplicados, validación)
 - [x] Documentación completa
-- [ ] **Próximo:** Georreferenciación de PK
+- [x] **✅ Georreferenciación de PK** (138 PKs con coordenadas)
+- [x] **✅ Vista `vista_revanchas_georreferenciadas`**
+- [x] **✅ Vista `vista_ultimas_revanchas_geo`**
+- [x] **✅ API `/api/revanchas/georreferenciadas`**
+- [x] **✅ Toggle de revanchas en mapa**
+- [x] **✅ Sistema de colores por umbrales**
+- [x] **✅ Carga masiva histórica** (434 archivos 2022-2025)
 - [ ] **Próximo:** Dashboard de comparaciones
 - [ ] **Próximo:** Gráficos de tendencias temporales
 - [ ] **Próximo:** Alertas automáticas por email
 - [ ] **Próximo:** Exportación a PDF
+
+---
+
+## 🗺️ GEORREFERENCIACIÓN DE REVANCHAS
+
+### Descripción
+
+Sistema de georreferenciación que permite visualizar las mediciones de revanchas en un mapa interactivo, asociando cada medición con coordenadas geográficas mediante la tabla `pks_maestro`.
+
+**Documentación completa:** Ver `docs/arquitectura/SISTEMA_MAPA_INDEX.md`
+
+---
+
+### Tabla: `pks_maestro`
+
+Tabla maestra con 138 PKs georreferenciados con coordenadas UTM convertidas a WGS84.
+
+**Distribución de PKs:**
+- **Muro Principal:** 73 PKs (0+000 a 1+434)
+- **Muro Este:** 29 PKs (0+000 a 0+551)
+- **Muro Oeste:** 36 PKs (0+000 a 0+690)
+- **TOTAL:** 138 PKs georreferenciados
+
+---
+
+### Vista: `vista_revanchas_georreferenciadas`
+
+Vista que une `revanchas_mediciones` con `pks_maestro` para obtener coordenadas.
+
+**Columnas adicionales:**
+- `lat`, `lon`, `utm_x`, `utm_y` - Coordenadas desde `pks_maestro`
+- `tiene_coordenadas` - Flag booleano (true/false)
+- `color_revancha`, `color_ancho`, `color_dist_geo` - Clasificación por colores
+
+**Función `normalizar_pk()`:**
+Normaliza PKs con decimales a formato estándar:
+- `'0+000.00'` → `'0+000'`
+- `'0+020.00'` → `'0+020'`
+- `'0+550.80'` → `'0+551'` (redondea)
+
+---
+
+### Vista: `vista_ultimas_revanchas_geo`
+
+Vista que muestra solo las mediciones **más recientes** de cada PK por muro.
+
+**Uso:** Esta vista es la que usa el mapa para evitar duplicados.
+
+---
+
+### Clasificación por Colores
+
+#### Revancha
+- 🟢 **Verde**: ≥ 3.5m (seguro)
+- 🟡 **Amarillo**: 3.0m - 3.5m (precaución)
+- 🔴 **Rojo**: < 3.0m (crítico)
+
+#### Ancho de Cubeta
+- 🟢 **Verde**: ≥ 18m (seguro)
+- 🟡 **Amarillo**: 15m - 18m (precaución)
+- 🔴 **Rojo**: < 15m (crítico)
+
+#### Distancia Geomembrana-Lama
+- 🟢 **Verde**: ≥ 1.0m (seguro)
+- 🟡 **Amarillo**: 0.5m - 1.0m (precaución)
+- 🔴 **Rojo**: < 0.5m (crítico)
+
+---
+
+### API Endpoint: `/api/revanchas/georreferenciadas`
+
+**Método:** GET
+
+**Query Parameters:**
+- `muro` (opcional): 'Principal' | 'Este' | 'Oeste'
+- `soloUltimas` (opcional): 'true' | 'false' (default: false)
+- `formato` (opcional): 'geojson' | 'json' (default: json)
+
+**Ejemplo:**
+```javascript
+const response = await fetch(
+  '/api/revanchas/georreferenciadas?soloUltimas=true&formato=geojson'
+);
+const geojson = await response.json();
+```
+
+---
+
+### Integración con el Mapa
+
+El dashboard (`index.astro`) tiene un toggle "Revanchas" que:
+
+1. **Al activar:** Carga datos georreferenciados y los muestra en el mapa
+2. **Al desactivar:** Oculta la capa de revanchas
+
+**Ver documentación completa:** `docs/arquitectura/SISTEMA_MAPA_INDEX.md`
+
+---
+
+### Troubleshooting
+
+#### Error: "Error al cargar revanchas georreferenciadas"
+
+**Solución:** Ejecutar `scripts/subida_historica_revanchas/CORREGIR_VISTAS_REVANCHAS.sql`
+
+---
+
+## 📝 Historial de Cambios
+
+### 2025-12-22: Georreferenciación y Carga Masiva
+- ✅ Creadas vistas `vista_revanchas_georreferenciadas` y `vista_ultimas_revanchas_geo`
+- ✅ Implementado endpoint `/api/revanchas/georreferenciadas`
+- ✅ Integrado toggle de revanchas en dashboard
+- ✅ Sistema de colores por umbrales de seguridad
+- ✅ Carga masiva de 434 archivos históricos (2022-2025)
+- ✅ Script de corrección de vistas SQL
+
+### 2025-12-05: Sistema Inicial
+- ✅ Tablas `revanchas_archivos`, `revanchas_mediciones`, `revanchas_estadisticas`
+- ✅ Triggers automáticos para estadísticas
+- ✅ API CRUD completa
+- ✅ Modal de subida en dashboard
+- ✅ Sistema de comparación entre fechas
 
 ---
 

@@ -1,0 +1,25 @@
+# Logs y reportes generados
+reporte_carga_masiva.json
+*.log
+
+# Archivos de entorno
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
