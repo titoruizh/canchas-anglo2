@@ -185,43 +185,6 @@ Endpoints organizados por dominio:
 
 ---
 
-## 🛠️ Desarrollo y Setup
-
-### Prerequisitos
-```bash
-Node.js 18+
-pnpm 8+
-PostgreSQL 15+ (o cuenta Supabase)
-Docker (opcional, para TileServer local)
-```
-
-### Instalación
-
-```bash
-# Clonar repositorio
-git clone https://github.com/titoruizh/Full-Stack-Sistema-Integral-Canchas-AngloAmerican-Tortolas.git
-cd Full-Stack-Sistema-Integral-Canchas-AngloAmerican-Tortolas
-
-# Instalar dependencias
-pnpm install
-
-# Configurar variables de entorno
-cp .env.example .env
-# Editar .env con tus credenciales
-
-# Ejecutar en desarrollo
-pnpm dev
-```
-
-### Scripts Disponibles
-```bash
-pnpm dev      # Desarrollo con hot-reload (localhost:4321)
-pnpm build    # Build optimizado para producción
-pnpm preview  # Preview del build de producción
-```
-
----
-
 ## 📈 Métricas del Proyecto
 
 - **~15,000 líneas de código** (TypeScript + SQL + Astro)
@@ -235,7 +198,6 @@ pnpm preview  # Preview del build de producción
 
 ---
 
-## 🎓 Habilidades Demostradas
 
 ### Full-Stack Development
 - ✅ Arquitectura de sistemas complejos multi-actor
@@ -290,4 +252,3 @@ Este proyecto fue desarrollado como solución interna para AngloAmerican. El có
 
 ---
 
-> 💡 **Nota para Reclutadores**: Este proyecto demuestra experiencia real en desarrollo full-stack con tecnologías modernas, resolución de problemas complejos de negocio, y capacidad para arquitecturar sistemas escalables y mantenibles.
