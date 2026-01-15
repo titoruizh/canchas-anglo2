@@ -21,7 +21,7 @@ const logosMap = {
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Login - Sistema Canchas AngloAmerican</title>
-        <style>
+        <style is:global>
             * {
                 margin: 0;
                 padding: 0;
@@ -105,33 +105,38 @@ const logosMap = {
             .companies-row {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
-                gap: 8rem; /* Separación grande entre columnas */
-                padding: 4rem 2rem;
+                gap: 3rem; /* Menor separación */
+                padding: 2rem;
                 margin: 0 auto;
-                max-width: 1200px;
+                max-width: 1000px;
                 width: 100%;
                 align-items: center;
+                justify-items: center;
             }
 
             .company-card {
                 background: rgba(255, 255, 255, 0.8);
                 backdrop-filter: blur(12px);
                 border: 1px solid rgba(255, 255, 255, 0.8);
-                border-radius: 24px;
-                padding: 2rem;
+                border-radius: 20px;
+                padding: 1.5rem;
                 width: 100%;
-                max-width: 320px;
-                height: 280px;
+                max-width: 400px; /* Más ancho */
+                height: 180px; /* Más rectangular (menos alto) */
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
                 cursor: pointer;
-                transition: all 0.3s ease-out;
+                transition:
+                    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    background-color 0.3s ease,
+                    border-color 0.3s ease,
+                    box-shadow 0.3s ease;
                 position: relative;
                 box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.1);
                 z-index: 10;
-                margin: 0 auto;
+                margin: 0;
             }
 
             .company-card::before {
@@ -152,21 +157,28 @@ const logosMap = {
                 z-index: -1;
             }
 
-            /* Hover forzado con !important */
+            /* Hover refinado y elegante */
             .company-card:hover {
-                transform: translateY(-20px) scale(1.05) !important;
-                background: #ffffff;
-                border-color: #3b82f6;
-                box-shadow: 0 30px 60px -12px rgba(59, 130, 246, 0.4);
+                transform: translateY(-8px) scale(1.02);
+                background-color: rgba(255, 255, 255, 0.95);
+                border-color: rgba(59, 130, 246, 0.5);
+                box-shadow:
+                    0 20px 40px -12px rgba(59, 130, 246, 0.25),
+                    0 0 0 1px rgba(59, 130, 246, 0.1); /* Borde sutil */
                 z-index: 100;
             }
 
             .company-card:hover::before {
                 opacity: 1;
+                background: linear-gradient(
+                    135deg,
+                    rgba(59, 130, 246, 0.08) 0%,
+                    rgba(255, 255, 255, 0) 60%
+                );
             }
 
             .company-logo-container {
-                height: 140px;
+                height: 100%;
                 width: 100%;
                 display: flex;
                 align-items: center;

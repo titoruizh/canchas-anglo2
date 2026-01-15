@@ -90,7 +90,12 @@ Clase dedicada a dibujar y animar el canvas del fondo.
 
 ### Estilos (CSS)
 
+- **Hover Effect Refinado**: Se busca una sensación "premium" y sutil.
+  - Elevación suave: `translateY(-8px)` (en lugar de saltos bruscos).
+  - Escala ligera: `scale(1.02)`.
+  - Sombras multicapa: Combinación de sombra difusa y borde sutil (`0 0 0 1px`).
 - **Backdrop Filter**: Se usa `backdrop-filter: blur(12px)` para el efecto de vidrio en las tarjetas.
+- **Layout**: Diseño Grid responsive que se adapta para mostrar tarjetas rectangulares (aprox 2:1 ratio) optimizando el espacio vertical.
 - **Gradientes**: Uso extensivo de gradientes sutiles para fondos y borders.
 - **Animaciones Keyframes**:
   - `fadeIn`: Entrada suave de elementos.
