@@ -302,6 +302,11 @@ Datos Persistentes
 - **Mapas**: [MAPBOX_INTEGRATION.md](integraciones/MAPBOX_INTEGRATION.md), [mapbox-utils.md](componentes/mapbox-utils.md), [mapbox-window.astro](componentes/paginas.md#-mapbox-windowastro)
 - **PKs**: [PKS_GEORREFERENCIADOS](diseno/PKS_GEORREFERENCIADOS_README.md), [SISTEMA_PKS](database/SISTEMA_PKS_GEORREFERENCIADOS.sql)
 - **Revanchas**: [SISTEMA_REVANCHAS](arquitectura/SISTEMA_REVANCHAS_COMPLETO.md), [INSTRUCCIONES](instrucciones/INSTRUCCIONES_REVANCHAS.md)
+- **Creación de Canchas**: [CREAR_CANCHA.md](funcionalidades/CREAR_CANCHA.md)
+- **Gestión de Usuarios**: [GESTION_USUARIOS.md](funcionalidades/GESTION_USUARIOS.md)
+- **Subir Revanchas (Linkapsis)**: [SUBIR_REVANCHAS.md](funcionalidades/SUBIR_REVANCHAS.md)
+- [📥 Subir Canchas (Linkapsis)](./funcionalidades/SUBIR_CANCHAS.md)
+- [📊 Filtros y Estadísticas](./funcionalidades/FILTROS_Y_ESTADISTICAS.md)
 - **Base de Datos**: [database/](database/), [ARCHITECTURE.md](ARCHITECTURE.md#-base-de-datos)
 - **API**: [ARCHITECTURE.md](ARCHITECTURE.md#-apis-y-endpoints)
 

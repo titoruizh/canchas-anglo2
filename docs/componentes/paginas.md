@@ -606,3 +606,32 @@ Ver: [docs/integraciones/TILESERVER_DEPLOY.md](../integraciones/TILESERVER_DEPLO
 Para documentaciÃ³n de componentes especÃ­ficos, ver:
 - [AuthGuard.astro](AuthGuard.md)
 - [MiningMap.astro](MiningMap.md)
+
+### src/pages/admin/usuarios.astro - Gestión de Usuarios
+
+Página administrativa para la gestión de cuentas de usuario.
+
+- **Funcionalidades:**
+    - Listado de usuarios con filtros por empresa y estado.
+    - Creación, edición y desactivación de usuarios.
+    - Asignación de roles y empresas.
+- **Seguridad:** Protegida por el componente <AuthGuard />.
+- **UI:** Mantiene la consistencia visual con el resto de la aplicación (header con partículas, tablas estilizadas).
+- **Documentación Detallada:** Ver [Gestión de Usuarios](../funcionalidades/GESTION_USUARIOS.md).
+
+
+
+## Funcionalidades Linkapsis (en index.astro)
+
+###  Subir Revanchas
+Permite la carga masiva de revanchas mediante Excel.
+- **Modal**: #modal-subir-revanchas
+- **Ver más**: [SUBIR_REVANCHAS.md](../funcionalidades/SUBIR_REVANCHAS.md)
+
+###  Subir Canchas
+Permite la carga masiva/manual de canchas y muestras.
+- **Modal**: #modal-subir-canchas
+- **Ver más**: [SUBIR_CANCHAS.md](../funcionalidades/SUBIR_CANCHAS.md)
+
+### Componentes de Filtros y EstadÃ­sticas
+Para detalles sobre la implementaciÃ³n de filtros (fecha, estados) y KPIs, ver [FILTROS_Y_ESTADISTICAS.md](../funcionalidades/FILTROS_Y_ESTADISTICAS.md)
