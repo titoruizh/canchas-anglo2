@@ -26,9 +26,18 @@ import AuthGuard from "../components/AuthGuard.astro";
       body {
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-        background-color: #f5f7fa;
         color: #333;
         line-height: 1.6;
+        /* Fondo personalizado con superposición tenue (70%) */
+        background:
+          linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.75)),
+          url("/img/fondo-dashboard.jpg");
+        background-repeat: no-repeat;
+        /* Scroll con contenido y centrado ajustado (ver más cielo/drones) */
+        background-size: cover;
+        background-attachment: scroll;
+        background-position: center 20%;
+        background-color: #f5f7fa; /* Fallback */
       }
 
       .header {
@@ -4412,7 +4421,8 @@ import AuthGuard from "../components/AuthGuard.astro";
 
             <!-- Sección de Foto de Respaldo -->
             <div class="form-group foto-upload-section">
-              <label for="linkapsis-foto">📸 Foto de Respaldo (opcional):</label>
+              <label for="linkapsis-foto">📸 Foto de Respaldo (opcional):</label
+              >
               <div class="foto-upload-container" id="linkapsis-foto-container">
                 <input
                   type="file"
@@ -4420,14 +4430,25 @@ import AuthGuard from "../components/AuthGuard.astro";
                   accept="image/jpeg,image/png,image/webp"
                   class="foto-input"
                 />
-                <div class="foto-upload-placeholder" id="linkapsis-foto-placeholder">
+                <div
+                  class="foto-upload-placeholder"
+                  id="linkapsis-foto-placeholder"
+                >
                   <span class="foto-icon">📷</span>
                   <span class="foto-text">Click para agregar foto</span>
                   <span class="foto-hint">JPG, PNG o WebP (máx. 5MB)</span>
                 </div>
-                <div class="foto-preview" id="linkapsis-foto-preview" style="display: none;">
+                <div
+                  class="foto-preview"
+                  id="linkapsis-foto-preview"
+                  style="display: none;"
+                >
                   <img id="linkapsis-foto-img" src="" alt="Preview" />
-                  <button type="button" class="foto-remove-btn" data-target="linkapsis">✕</button>
+                  <button
+                    type="button"
+                    class="foto-remove-btn"
+                    data-target="linkapsis">✕</button
+                  >
                 </div>
               </div>
             </div>
@@ -5011,14 +5032,25 @@ import AuthGuard from "../components/AuthGuard.astro";
                   accept="image/jpeg,image/png,image/webp"
                   class="foto-input"
                 />
-                <div class="foto-upload-placeholder" id="llayllay-foto-placeholder">
+                <div
+                  class="foto-upload-placeholder"
+                  id="llayllay-foto-placeholder"
+                >
                   <span class="foto-icon">📷</span>
                   <span class="foto-text">Click para agregar foto</span>
                   <span class="foto-hint">JPG, PNG o WebP (máx. 5MB)</span>
                 </div>
-                <div class="foto-preview" id="llayllay-foto-preview" style="display: none;">
+                <div
+                  class="foto-preview"
+                  id="llayllay-foto-preview"
+                  style="display: none;"
+                >
                   <img id="llayllay-foto-img" src="" alt="Preview" />
-                  <button type="button" class="foto-remove-btn" data-target="llayllay">✕</button>
+                  <button
+                    type="button"
+                    class="foto-remove-btn"
+                    data-target="llayllay">✕</button
+                  >
                 </div>
               </div>
             </div>
@@ -5067,13 +5099,17 @@ import AuthGuard from "../components/AuthGuard.astro";
                  - Tags/chips para selección múltiple
             -->
             <div class="form-group">
-              <label for="besalco-maquinarias">🚜 Maquinaria(s) Utilizada(s):</label>
+              <label for="besalco-maquinarias"
+                >🚜 Maquinaria(s) Utilizada(s):</label
+              >
               <input
                 type="text"
                 id="besalco-maquinarias"
                 placeholder="ej: Rodillo CAT-001, Motoniveladora MN-15"
               />
-              <small>Ingresa las maquinarias utilizadas separadas por coma</small>
+              <small
+                >Ingresa las maquinarias utilizadas separadas por coma</small
+              >
             </div>
 
             <!-- Sección de Foto de Respaldo -->
@@ -5086,14 +5122,25 @@ import AuthGuard from "../components/AuthGuard.astro";
                   accept="image/jpeg,image/png,image/webp"
                   class="foto-input"
                 />
-                <div class="foto-upload-placeholder" id="besalco-foto-placeholder">
+                <div
+                  class="foto-upload-placeholder"
+                  id="besalco-foto-placeholder"
+                >
                   <span class="foto-icon">📷</span>
                   <span class="foto-text">Click para agregar foto</span>
                   <span class="foto-hint">JPG, PNG o WebP (máx. 5MB)</span>
                 </div>
-                <div class="foto-preview" id="besalco-foto-preview" style="display: none;">
+                <div
+                  class="foto-preview"
+                  id="besalco-foto-preview"
+                  style="display: none;"
+                >
                   <img id="besalco-foto-img" src="" alt="Preview" />
-                  <button type="button" class="foto-remove-btn" data-target="besalco">✕</button>
+                  <button
+                    type="button"
+                    class="foto-remove-btn"
+                    data-target="besalco">✕</button
+                  >
                 </div>
               </div>
             </div>
@@ -7686,70 +7733,85 @@ import AuthGuard from "../components/AuthGuard.astro";
       }
 
       // === FUNCIONES PARA MANEJO DE FOTOS ===
-      
+
       // Variable para almacenar fotos seleccionadas temporalmente
       let fotosSeleccionadas = {
         besalco: null,
         linkapsis: null,
-        llayllay: null
+        llayllay: null,
       };
 
       function configurarInputsFotos() {
-        const empresas = ['besalco', 'linkapsis', 'llayllay'];
-        
-        empresas.forEach(empresa => {
+        const empresas = ["besalco", "linkapsis", "llayllay"];
+
+        empresas.forEach((empresa) => {
           const input = document.getElementById(`${empresa}-foto`);
-          const container = document.getElementById(`${empresa}-foto-container`);
-          const placeholder = document.getElementById(`${empresa}-foto-placeholder`);
+          const container = document.getElementById(
+            `${empresa}-foto-container`,
+          );
+          const placeholder = document.getElementById(
+            `${empresa}-foto-placeholder`,
+          );
           const preview = document.getElementById(`${empresa}-foto-preview`);
           const img = document.getElementById(`${empresa}-foto-img`);
-          
+
           if (!input || !container) return;
-          
+
           // Manejar cambio de archivo
-          input.addEventListener('change', function(e) {
+          input.addEventListener("change", function (e) {
             const file = e.target.files[0];
-            
+
             if (!file) {
               limpiarFotoPreview(empresa);
               return;
             }
-            
+
             // Validar tipo de archivo
-            const tiposPermitidos = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+            const tiposPermitidos = [
+              "image/jpeg",
+              "image/jpg",
+              "image/png",
+              "image/webp",
+            ];
             if (!tiposPermitidos.includes(file.type)) {
-              mostrarMensaje('Tipo de archivo no permitido. Use JPG, PNG o WebP.', 'error');
+              mostrarMensaje(
+                "Tipo de archivo no permitido. Use JPG, PNG o WebP.",
+                "error",
+              );
               limpiarFotoPreview(empresa);
               return;
             }
-            
+
             // Validar tamaño (5MB máximo)
             if (file.size > 5 * 1024 * 1024) {
-              mostrarMensaje('La imagen excede el tamaño máximo de 5MB.', 'error');
+              mostrarMensaje(
+                "La imagen excede el tamaño máximo de 5MB.",
+                "error",
+              );
               limpiarFotoPreview(empresa);
               return;
             }
-            
+
             // Guardar archivo en memoria
             fotosSeleccionadas[empresa] = file;
-            
+
             // Mostrar preview
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
               if (img) img.src = e.target.result;
-              if (placeholder) placeholder.style.display = 'none';
-              if (preview) preview.style.display = 'flex';
-              if (container) container.classList.add('has-photo');
+              if (placeholder) placeholder.style.display = "none";
+              if (preview) preview.style.display = "flex";
+              if (container) container.classList.add("has-photo");
             };
             reader.readAsDataURL(file);
-            
+
             console.log(`📸 Foto seleccionada para ${empresa}:`, file.name);
           });
         });
-        
+
         // Manejar botones de eliminar foto
-        document.querySelectorAll('.foto-remove-btn').forEach(btn => {
-          btn.addEventListener('click', function(e) {
+        document.querySelectorAll(".foto-remove-btn").forEach((btn) => {
+          btn.addEventListener("click", function (e) {
             e.preventDefault();
             e.stopPropagation();
             const empresa = this.dataset.target;
@@ -7761,22 +7823,24 @@ import AuthGuard from "../components/AuthGuard.astro";
       function limpiarFotoPreview(empresa) {
         const input = document.getElementById(`${empresa}-foto`);
         const container = document.getElementById(`${empresa}-foto-container`);
-        const placeholder = document.getElementById(`${empresa}-foto-placeholder`);
+        const placeholder = document.getElementById(
+          `${empresa}-foto-placeholder`,
+        );
         const preview = document.getElementById(`${empresa}-foto-preview`);
         const img = document.getElementById(`${empresa}-foto-img`);
-        
-        if (input) input.value = '';
-        if (img) img.src = '';
-        if (placeholder) placeholder.style.display = 'flex';
-        if (preview) preview.style.display = 'none';
-        if (container) container.classList.remove('has-photo');
-        
+
+        if (input) input.value = "";
+        if (img) img.src = "";
+        if (placeholder) placeholder.style.display = "flex";
+        if (preview) preview.style.display = "none";
+        if (container) container.classList.remove("has-photo");
+
         fotosSeleccionadas[empresa] = null;
         console.log(`🗑️ Foto eliminada para ${empresa}`);
       }
 
       function limpiarTodasLasFotos() {
-        ['besalco', 'linkapsis', 'llayllay'].forEach(empresa => {
+        ["besalco", "linkapsis", "llayllay"].forEach((empresa) => {
           limpiarFotoPreview(empresa);
         });
       }
@@ -7784,39 +7848,45 @@ import AuthGuard from "../components/AuthGuard.astro";
       // Subir foto a la validación después de crearla
       async function subirFotoValidacion(validacionId, empresa, canchaId) {
         const foto = fotosSeleccionadas[empresa.toLowerCase()];
-        
+
         if (!foto) {
           console.log(`📷 No hay foto para subir de ${empresa}`);
           return null;
         }
-        
+
         try {
           console.log(`📤 Subiendo foto para validación ${validacionId}...`);
-          
+
           const formData = new FormData();
-          formData.append('fotos', foto);
-          
-          const response = await fetch(`/api/validaciones/${validacionId}/fotos`, {
-            method: 'POST',
-            body: formData
-          });
-          
+          formData.append("fotos", foto);
+
+          const response = await fetch(
+            `/api/validaciones/${validacionId}/fotos`,
+            {
+              method: "POST",
+              body: formData,
+            },
+          );
+
           if (!response.ok) {
             const errorData = await response.json();
-            console.error('❌ Error subiendo foto:', errorData);
-            throw new Error(errorData.error || 'Error al subir foto');
+            console.error("❌ Error subiendo foto:", errorData);
+            throw new Error(errorData.error || "Error al subir foto");
           }
-          
+
           const result = await response.json();
-          console.log('✅ Foto subida exitosamente:', result);
-          
+          console.log("✅ Foto subida exitosamente:", result);
+
           // Limpiar la foto después de subirla
           limpiarFotoPreview(empresa.toLowerCase());
-          
+
           return result;
         } catch (error) {
-          console.error('❌ Error al subir foto:', error);
-          mostrarMensaje(`Advertencia: No se pudo subir la foto. ${error.message}`, 'warning');
+          console.error("❌ Error al subir foto:", error);
+          mostrarMensaje(
+            `Advertencia: No se pudo subir la foto. ${error.message}`,
+            "warning",
+          );
           return null;
         }
       }
@@ -7880,8 +7950,9 @@ import AuthGuard from "../components/AuthGuard.astro";
 
         // TODO: Campo de maquinarias - preparado para futura implementación
         // Por ahora se guarda como texto libre en las mediciones
-        const maquinarias = document.getElementById("besalco-maquinarias")?.value.trim() || null;
-        
+        const maquinarias =
+          document.getElementById("besalco-maquinarias")?.value.trim() || null;
+
         // Construir mediciones con maquinarias si están presentes
         const mediciones = maquinarias ? { maquinarias: maquinarias } : null;
 
@@ -7891,13 +7962,17 @@ import AuthGuard from "../components/AuthGuard.astro";
           observaciones,
           mediciones,
         );
-        
+
         if (resultado && resultado.success) {
           // Si hay foto seleccionada, subirla
-          if (resultado.validacionId && fotosSeleccionadas['besalco']) {
-            await subirFotoValidacion(resultado.validacionId, 'Besalco', canchaIdActual);
+          if (resultado.validacionId && fotosSeleccionadas["besalco"]) {
+            await subirFotoValidacion(
+              resultado.validacionId,
+              "Besalco",
+              canchaIdActual,
+            );
           }
-          
+
           cerrarTodosLosModales();
           mostrarMensaje(`Acción completada exitosamente`, "success");
           await cargarCanchas();
@@ -7946,7 +8021,9 @@ import AuthGuard from "../components/AuthGuard.astro";
         );
 
         // Recopilar tipo de depósito
-        const depositoHidraulico = document.getElementById("deposito-hidraulico");
+        const depositoHidraulico = document.getElementById(
+          "deposito-hidraulico",
+        );
         const depositoMecanico = document.getElementById("deposito-mecanico");
         let tipoDeposito = null;
         if (depositoHidraulico && depositoHidraulico.checked) {
@@ -8008,13 +8085,17 @@ import AuthGuard from "../components/AuthGuard.astro";
           observaciones,
           mediciones,
         );
-        
+
         if (resultado && resultado.success) {
           // Si hay foto seleccionada, subirla
-          if (resultado.validacionId && fotosSeleccionadas['linkapsis']) {
-            await subirFotoValidacion(resultado.validacionId, 'Linkapsis', canchaIdActual);
+          if (resultado.validacionId && fotosSeleccionadas["linkapsis"]) {
+            await subirFotoValidacion(
+              resultado.validacionId,
+              "Linkapsis",
+              canchaIdActual,
+            );
           }
-          
+
           cerrarTodosLosModales();
           mostrarMensaje(`Acción completada exitosamente`, "success");
           await cargarCanchas();
@@ -8043,7 +8124,9 @@ import AuthGuard from "../components/AuthGuard.astro";
         let mediciones = null;
         if (espesor) {
           // Recopilar tipo de depósito si está marcado
-          const depositoHidraulico = document.getElementById("deposito-hidraulico");
+          const depositoHidraulico = document.getElementById(
+            "deposito-hidraulico",
+          );
           const depositoMecanico = document.getElementById("deposito-mecanico");
           let tipoDeposito = null;
           if (depositoHidraulico && depositoHidraulico.checked) {
@@ -8113,13 +8196,17 @@ import AuthGuard from "../components/AuthGuard.astro";
           observaciones,
           mediciones,
         );
-        
+
         if (resultado && resultado.success) {
           // Si hay foto seleccionada, subirla
-          if (resultado.validacionId && fotosSeleccionadas['linkapsis']) {
-            await subirFotoValidacion(resultado.validacionId, 'Linkapsis', canchaIdActual);
+          if (resultado.validacionId && fotosSeleccionadas["linkapsis"]) {
+            await subirFotoValidacion(
+              resultado.validacionId,
+              "Linkapsis",
+              canchaIdActual,
+            );
           }
-          
+
           cerrarTodosLosModales();
           mostrarMensaje(`Acción completada exitosamente`, "success");
           await cargarCanchas();
@@ -8135,7 +8222,8 @@ import AuthGuard from "../components/AuthGuard.astro";
         const densidad = parseFloat(
           document.getElementById("llayllay-densidad").value,
         );
-        const numeroFicha = document.getElementById("llayllay-ficha")?.value.trim() || null;
+        const numeroFicha =
+          document.getElementById("llayllay-ficha")?.value.trim() || null;
 
         if (!observaciones || !densidad) {
           mostrarMensaje(
@@ -8161,13 +8249,17 @@ import AuthGuard from "../components/AuthGuard.astro";
           observaciones,
           mediciones,
         );
-        
+
         if (resultado && resultado.success) {
           // Si hay foto seleccionada, subirla
-          if (resultado.validacionId && fotosSeleccionadas['llayllay']) {
-            await subirFotoValidacion(resultado.validacionId, 'LlayLlay', canchaIdActual);
+          if (resultado.validacionId && fotosSeleccionadas["llayllay"]) {
+            await subirFotoValidacion(
+              resultado.validacionId,
+              "LlayLlay",
+              canchaIdActual,
+            );
           }
-          
+
           cerrarTodosLosModales();
           mostrarMensaje(`Acción completada exitosamente`, "success");
           await cargarCanchas();
@@ -8183,7 +8275,8 @@ import AuthGuard from "../components/AuthGuard.astro";
         const densidad = parseFloat(
           document.getElementById("llayllay-densidad").value,
         );
-        const numeroFicha = document.getElementById("llayllay-ficha")?.value.trim() || null;
+        const numeroFicha =
+          document.getElementById("llayllay-ficha")?.value.trim() || null;
 
         if (!observaciones) {
           mostrarMensaje(
@@ -8209,13 +8302,17 @@ import AuthGuard from "../components/AuthGuard.astro";
           observaciones,
           mediciones,
         );
-        
+
         if (resultado && resultado.success) {
           // Si hay foto seleccionada, subirla
-          if (resultado.validacionId && fotosSeleccionadas['llayllay']) {
-            await subirFotoValidacion(resultado.validacionId, 'LlayLlay', canchaIdActual);
+          if (resultado.validacionId && fotosSeleccionadas["llayllay"]) {
+            await subirFotoValidacion(
+              resultado.validacionId,
+              "LlayLlay",
+              canchaIdActual,
+            );
           }
-          
+
           cerrarTodosLosModales();
           mostrarMensaje(`Acción completada exitosamente`, "success");
           await cargarCanchas();
@@ -8277,7 +8374,7 @@ import AuthGuard from "../components/AuthGuard.astro";
           }
 
           const resultado = await response.json();
-          
+
           // Retornar el resultado para que las funciones puedan usar validacionId
           return resultado;
         } catch (error) {

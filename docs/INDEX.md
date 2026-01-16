@@ -312,6 +312,7 @@ Datos Persistentes
 - [🗺️ Vista de Mapa y Georreferencia](./funcionalidades/VISTA_MAPA.md)
 - [🔐 Sistema de Autenticación](./funcionalidades/AUTENTICACION.md)
 - [🌍 Utilidades GIS y Mapbox](./funcionalidades/GIS_UTILS.md)
+- [🎨 Personalización Visual](./PERSONALIZACION_DASHBOARD.md)
 - **Base de Datos**: [database/](database/), [ARCHITECTURE.md](ARCHITECTURE.md#-base-de-datos)
 - **API**: [ARCHITECTURE.md](ARCHITECTURE.md#-apis-y-endpoints)
 
