@@ -307,6 +307,11 @@ Datos Persistentes
 - **Subir Revanchas (Linkapsis)**: [SUBIR_REVANCHAS.md](funcionalidades/SUBIR_REVANCHAS.md)
 - [📥 Subir Canchas (Linkapsis)](./funcionalidades/SUBIR_CANCHAS.md)
 - [📊 Filtros y Estadísticas](./funcionalidades/FILTROS_Y_ESTADISTICAS.md)
+- [📋 Tabla de Canchas](./funcionalidades/TABLA_CANCHAS.md)
+- [🔵 Widgets de Estado](./funcionalidades/WIDGETS_ESTADO.md)
+- [🗺️ Vista de Mapa y Georreferencia](./funcionalidades/VISTA_MAPA.md)
+- [🔐 Sistema de Autenticación](./funcionalidades/AUTENTICACION.md)
+- [🌍 Utilidades GIS y Mapbox](./funcionalidades/GIS_UTILS.md)
 - **Base de Datos**: [database/](database/), [ARCHITECTURE.md](ARCHITECTURE.md#-base-de-datos)
 - **API**: [ARCHITECTURE.md](ARCHITECTURE.md#-apis-y-endpoints)
 

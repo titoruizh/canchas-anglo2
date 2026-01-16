@@ -635,3 +635,16 @@ Permite la carga masiva/manual de canchas y muestras.
 
 ### Componentes de Filtros y Estadísticas
 Para detalles sobre la implementación de filtros (fecha, estados) y KPIs, ver [FILTROS_Y_ESTADISTICAS.md](../funcionalidades/FILTROS_Y_ESTADISTICAS.md)
+
+### Componente Tabla de Canchas
+Para detalles sobre la renderización de la tabla, columnas y botones de acción, ver [TABLA_CANCHAS.md](../funcionalidades/TABLA_CANCHAS.md)
+
+### Widgets de Estado (Dashboard)
+Para detalles sobre los widgets circulares y el filtrado por estado, ver [WIDGETS_ESTADO.md](../funcionalidades/WIDGETS_ESTADO.md)
+
+### Componente de Mapa y Georreferencia
+Para detalles sobre la integración de Mapbox, ortomosaicos y visualización de revanchas, ver [VISTA_MAPA.md](../funcionalidades/VISTA_MAPA.md)
+
+### Documentación Técnica Adicional
+- [ Autenticación y Seguridad](../funcionalidades/AUTENTICACION.md)
+- [ Utilidades GIS y Mapbox](../funcionalidades/GIS_UTILS.md)
