@@ -1,14 +1,20 @@
 ---
-import MiningMap from '../components/MiningMap.astro'
+import MiningMap from "../components/MiningMap.astro";
 
 // Obtener los parámetros de la URL
-const url = Astro.url
-const muro = url.searchParams.get('muro')
-const drawing = url.searchParams.get('drawing') === 'true'
-const canchaId = url.searchParams.get('canchaId')
-const dashboardMode = url.searchParams.get('dashboardMode') === 'true'
-const canchaIds = url.searchParams.get('canchaIds')
-console.log('🔧 Parámetros recibidos:', { muro, drawing, canchaId, dashboardMode, canchaIds })
+const url = Astro.url;
+const muro = url.searchParams.get("muro");
+const drawing = url.searchParams.get("drawing") === "true";
+const canchaId = url.searchParams.get("canchaId");
+const dashboardMode = url.searchParams.get("dashboardMode") === "true";
+const canchaIds = url.searchParams.get("canchaIds");
+console.log("🔧 Parámetros recibidos:", {
+  muro,
+  drawing,
+  canchaId,
+  dashboardMode,
+  canchaIds,
+});
 ---
 
 <!doctype html>
@@ -16,20 +22,27 @@ console.log('🔧 Parámetros recibidos:', { muro, drawing, canchaId, dashboardM
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Visor Mapbox - {drawing ? 'Modo Dibujo' : 'Integración'}</title>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css" rel="stylesheet" />
-    {drawing && (
-      <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-draw/v1.4.3/mapbox-gl-draw.css" />
-    )}
+    <title>Visor Mapbox - {drawing ? "Modo Dibujo" : "Integración"}</title>
+    <link
+      href="https://api.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css"
+      rel="stylesheet"
+    />
     <style>
-      html,body{height:100%;margin:0;padding:0}
-      body{font-family:Inter,Arial,Helvetica,sans-serif}
-      
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: Inter, Arial, Helvetica, sans-serif;
+      }
+
       /* Estilos específicos para el modo dibujo */
       .drawing-mode .map-controls {
         top: 70px; /* Espacio para los controles de dibujo */
       }
-      
+
       .drawing-instructions {
         position: absolute;
         top: 16px;
@@ -45,39 +58,47 @@ console.log('🔧 Parámetros recibidos:', { muro, drawing, canchaId, dashboardM
         max-width: 200px;
         backdrop-filter: blur(10px);
       }
-      
+
       .drawing-mode-indicator {
         display: flex;
         align-items: center;
         gap: 0.5rem;
         font-size: 0.85rem;
       }
-      
+
       /* Personalizar controles de Mapbox GL Draw */
       .mapbox-gl-draw_ctrl-draw-btn {
         background-color: #3b82f6;
         color: white;
       }
-      
+
       .mapbox-gl-draw_ctrl-draw-btn:hover {
         background-color: #2563eb;
       }
-      
+
       .mapbox-gl-draw_ctrl-draw-btn.mapbox-gl-draw_active {
         background-color: #1d4ed8;
       }
     </style>
   </head>
-  <body class={drawing ? 'drawing-mode' : ''}>
-    {drawing && (
-      <div class="drawing-instructions">
-        <span class="drawing-mode-indicator">🎨 Modo Dibujo</span>
-      </div>
-    )}
-    
+  <body class={drawing ? "drawing-mode" : ""}>
+    {
+      drawing && (
+        <div class="drawing-instructions">
+          <span class="drawing-mode-indicator">🎨 Modo Dibujo</span>
+        </div>
+      )
+    }
+
     <!-- Render the MiningMap component -->
     <main>
-      <MiningMap muroFilter={muro || undefined} drawingMode={drawing} canchaId={canchaId || undefined} dashboardMode={dashboardMode} canchaIds={canchaIds || undefined} />
+      <MiningMap
+        muroFilter={muro || undefined}
+        drawingMode={drawing}
+        canchaId={canchaId || undefined}
+        dashboardMode={dashboardMode}
+        canchaIds={canchaIds || undefined}
+      />
     </main>
   </body>
 </html>

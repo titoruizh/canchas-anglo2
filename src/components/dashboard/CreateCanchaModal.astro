@@ -1,0 +1,334 @@
+---
+
+---
+
+<div id="createCanchaModal" class="map-modal">
+    <div class="map-modal-content create-cancha-modal-content">
+        <div class="map-modal-header">
+            <h3 class="map-modal-title">Crear Nueva Cancha</h3>
+            <button id="createCanchaCloseBtn" class="map-close-btn"
+                >&times;</button
+            >
+        </div>
+        <div class="create-cancha-container">
+            <!-- Panel izquierdo: Formulario -->
+            <div class="create-cancha-form">
+                <h4 class="form-section-title">📋 Datos de la Cancha</h4>
+                <div class="form-group">
+                    <label for="muro-select">Muro:</label>
+                    <select id="muro-select" required>
+                        <option value="">Seleccionar Muro</option>
+                        <option value="MP">MP</option>
+                        <option value="ME">ME</option>
+                        <option value="MO">MO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="sector-select">Sector:</label>
+                    <select id="sector-select" disabled required>
+                        <option value="">Selecciona un muro primero</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="nombre-detalle-input">Nombre Detalle:</label>
+                    <input
+                        type="text"
+                        id="nombre-detalle-input"
+                        placeholder="ej: TEST1"
+                        required
+                    />
+                </div>
+                <div class="form-actions">
+                    <button id="open-drawing-btn" class="btn-primary" disabled
+                        >🗺️ Dibujar Área en Mapa</button
+                    >
+                    <button id="create-cancha-btn" class="btn-success" disabled
+                        >✅ Crear Cancha</button
+                    >
+                </div>
+                <div id="drawing-status" class="drawing-status"></div>
+            </div>
+
+            <!-- Panel derecho: Mapa -->
+            <div class="create-cancha-map-panel">
+                <div class="map-panel-header">
+                    <h4 class="map-panel-title">🗺️ Área de Trabajo</h4>
+                    <p class="map-panel-subtitle">
+                        Dibuja el polígono que define el área de la cancha
+                    </p>
+                </div>
+                <div id="drawingMapContainer" class="drawing-map-container">
+                    <!-- El mapa de dibujo se cargará aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos específicos para el modal de crear cancha - Extraído de index.astro */
+    .create-cancha-modal-content {
+        max-width: 1600px !important;
+        width: 95vw;
+        height: 90vh;
+        max-height: 90vh;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .create-cancha-container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+        height: 600px;
+    }
+
+    /* Panel Izquierdo: Formulario */
+    .create-cancha-form {
+        width: 350px;
+        padding: 1.5rem;
+        background-color: #f8fafc;
+        border-right: 1px solid #e1e8ed;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        overflow-y: auto;
+    }
+
+    .form-section-title {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e1e8ed;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Panel Derecho: Mapa */
+    .create-cancha-map-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background-color: white;
+    }
+
+    .map-panel-header {
+        padding: 1rem 1.5rem;
+        background-color: white;
+        border-bottom: 1px solid #e1e8ed;
+    }
+
+    .map-panel-title {
+        font-size: 1.1rem;
+        color: #2c3e50;
+        margin: 0;
+    }
+
+    .map-panel-subtitle {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin: 0.25rem 0 0 0;
+    }
+
+    .drawing-map-container {
+        flex: 1;
+        background-color: #f1f5f9;
+        position: relative;
+        min-height: 400px;
+    }
+
+    /* Status box */
+    .drawing-status {
+        margin-top: 1rem;
+        padding: 0.75rem;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        transition: all 0.3s ease;
+    }
+
+    .drawing-status.info {
+        background-color: #e0f2fe;
+        color: #0369a1;
+        border: 1px solid #bae6fd;
+    }
+
+    .drawing-status.success {
+        background-color: #dcfce7;
+        color: #15803d;
+        border: 1px solid #bbf7d0;
+    }
+
+    /* Form groups */
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .form-group label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: #475569;
+    }
+
+    .form-group input,
+    .form-group select {
+        padding: 0.75rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Actions */
+    .form-actions {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-primary,
+    .btn-success {
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+
+    .btn-primary {
+        background-color: #3b82f6;
+        color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+        background-color: #2563eb;
+    }
+
+    .btn-success {
+        background-color: #22c55e;
+        color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+        background-color: #16a34a;
+    }
+
+    button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        filter: grayscale(1);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .create-cancha-container {
+            flex-direction: column;
+            height: auto;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .create-cancha-form {
+            width: 100%;
+            border-right: none;
+            border-bottom: 1px solid #e1e8ed;
+            max-height: none;
+        }
+
+        .create-cancha-map-panel {
+            height: 400px;
+        }
+    }
+
+    /* Modal Base Styles (Si no se heredan globalmente) */
+    .map-modal {
+        display: none;
+        position: fixed;
+        z-index: 2000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .map-modal.show {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 1;
+    }
+
+    .map-modal-content {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .map-modal-header {
+        background: linear-gradient(to right, #f8fafc, #fff);
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #e1e8ed;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .map-modal-title {
+        margin: 0;
+        color: #1e293b;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
+
+    .map-close-btn {
+        background: transparent;
+        border: none;
+        font-size: 2rem;
+        line-height: 1;
+        color: #94a3b8;
+        cursor: pointer;
+        padding: 0;
+        transition: color 0.2s;
+    }
+
+    .map-close-btn:hover {
+        color: #475569;
+    }
+</style>
+
+<script>
+    import { CreateCanchaManager } from "../../utils/CreateCanchaManager";
+
+    // Initialize manager when the component loads
+    document.addEventListener("DOMContentLoaded", () => {
+        // Check if instance already exists to avoid duplicates
+        if (!window.createCanchaManager) {
+            window.createCanchaManager = new CreateCanchaManager();
+            console.log("CreateCanchaManager initialized");
+        }
+    });
+</script>

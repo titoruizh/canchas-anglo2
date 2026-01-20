@@ -1,5 +1,6 @@
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
+import "@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css";
 import {
     POLYGON_STYLES,
     convertGeometry,
@@ -446,19 +447,34 @@ export class MapManager {
 
     private async setupDrawingTools() {
         if (!this.map) return;
-        const MapboxDraw = (await import("@mapbox/mapbox-gl-draw")).default;
-        const draw = new MapboxDraw({
-            displayControlsDefault: false,
-            controls: { polygon: true, trash: true },
-            defaultMode: "draw_polygon",
-        });
-        this.map.addControl(draw, "top-left");
-        this.map.on("draw.create", (e: any) => {
-            const coordinates = e.features[0].geometry.coordinates[0];
-            if (window.parent) {
-                window.parent.postMessage({ type: "polygon-drawn", coordinates }, "*");
-            }
-        });
+        try {
+            console.log("🎨 Setting up drawing tools...");
+            const MapboxDraw = (await import("@mapbox/mapbox-gl-draw")).default;
+
+            const draw = new MapboxDraw({
+                displayControlsDefault: false,
+                controls: { polygon: true, trash: true },
+                defaultMode: "draw_polygon",
+            });
+
+            this.map.addControl(draw, "top-left");
+            console.log("✅ Drawing tools added to map");
+
+            this.map.on("draw.create", (e: any) => {
+                const coordinates = e.features[0].geometry.coordinates[0];
+                if (window.parent) {
+                    window.parent.postMessage({ type: "polygon-drawn", coordinates }, "*");
+                }
+            });
+
+            this.map.on("draw.delete", () => {
+                if (window.parent) {
+                    window.parent.postMessage({ type: "polygon-deleted" }, "*");
+                }
+            });
+        } catch (e) {
+            console.error("❌ Error setting up drawing tools:", e);
+        }
     }
 
     private getStateColors(estadoId: number) {

@@ -66,6 +66,18 @@ export const POST: APIRoute = async ({ request }) => {
       })
     }
   } catch (error: any) {
+    console.error("🔥 Error en API POST /api/canchas:", error);
+
+    // Handle duplicate key error (Postgres code 23505)
+    if (error.code === '23505' || (error.message && error.message.includes('unique constraint'))) {
+      return new Response(JSON.stringify({
+        message: 'Ya existe una cancha con este nombre. Intente con un nombre de detalle distinto.'
+      }), {
+        status: 409,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+
     return new Response(JSON.stringify({ message: error.message }), {
       status: 500,
       headers: {

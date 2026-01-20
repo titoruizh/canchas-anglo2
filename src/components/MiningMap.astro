@@ -53,7 +53,7 @@ console.log("🏗️ MiningMap (New) iniciado con:", {
   <div id="map"></div>
 
   <!-- UI Components -->
-  <MapControls muroFilter={muroFilter} />
+  {!drawingMode && <MapControls muroFilter={muroFilter} />}
   <MapLoader />
 </div>
 

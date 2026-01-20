@@ -1,5 +1,6 @@
 ﻿---
 import AuthGuard from "../components/AuthGuard.astro";
+import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
 ---
 
 <AuthGuard />
@@ -5547,10 +5548,15 @@ import AuthGuard from "../components/AuthGuard.astro";
           console.log("No se encontró btnCrearCancha");
         }
 
-        // Botón para abrir modal de crear cancha con polígono
         if (btnAbrirModalCrear) {
           console.log("Registrando event listener para btnAbrirModalCrear");
-          btnAbrirModalCrear.addEventListener("click", abrirModalCrearCancha);
+          btnAbrirModalCrear.addEventListener("click", () => {
+            if (window.createCanchaManager) {
+              window.createCanchaManager.openModal();
+            } else {
+              console.error("CreateCanchaManager not initialized");
+            }
+          });
         } else {
           console.log("No se encontró btnAbrirModalCrear");
         }
@@ -5567,6 +5573,15 @@ import AuthGuard from "../components/AuthGuard.astro";
         // Inicializar slider de filtros
         setTimeout(updateSliderPosition, 100);
         window.addEventListener("resize", updateSliderPosition);
+
+        // Listener para evento personalizado de creación de cancha
+        window.addEventListener("cancha-created", async (event) => {
+          console.log("✨ Evento cancha-created recibido:", event.detail);
+          await cargarCanchas();
+          if (event.detail && event.detail.message) {
+            mostrarMensaje(event.detail.message, "success");
+          }
+        });
       }
 
       // Configurar controles del header del mapa
@@ -9107,368 +9122,15 @@ import AuthGuard from "../components/AuthGuard.astro";
 
       // =====================================================
       // FUNCIONES PARA CREAR CANCHA CON POLÍGONO
+      // (Migrado a CreateCanchaManager.ts)
       // =====================================================
-
-      // Variable global para almacenar las coordenadas del polígono dibujado
-      let poligonoCoordinadas = null;
-
-      // Función para abrir el modal de crear cancha
-      function abrirModalCrearCancha() {
-        console.log("🏗️ Abriendo modal de crear cancha...");
-        const modal = document.getElementById("createCanchaModal");
-        const closeBtn = document.getElementById("createCanchaCloseBtn");
-
-        // Resetear formulario
-        document.getElementById("muro-select").value = "";
-        document.getElementById("sector-select").value = "";
-        document.getElementById("nombre-detalle-input").value = "";
-        document.getElementById("open-drawing-btn").disabled = true;
-        document.getElementById("create-cancha-btn").disabled = true;
-        document.getElementById("drawing-status").innerHTML = "";
-        document.getElementById("drawingMapContainer").style.display = "none";
-        poligonoCoordinadas = null;
-
-        // Inicializar estado del selector de sector
-        const sectorSelect = document.getElementById("sector-select");
-        sectorSelect.disabled = true;
-        sectorSelect.innerHTML =
-          '<option value="">Selecciona un muro primero</option>';
-
-        // Agregar event listeners
-        closeBtn.addEventListener("click", cerrarModalCrearCancha);
-        document
-          .getElementById("open-drawing-btn")
-          .addEventListener("click", abrirMapaDibujo);
-        document
-          .getElementById("create-cancha-btn")
-          .addEventListener("click", crearCanchaConPoligono);
-
-        // Agregar listeners para validar formulario
-        document
-          .getElementById("muro-select")
-          .addEventListener("change", validarFormularioCreacion);
-        document
-          .getElementById("sector-select")
-          .addEventListener("change", validarFormularioCreacion);
-        document
-          .getElementById("nombre-detalle-input")
-          .addEventListener("input", validarFormularioCreacion);
-
-        modal.classList.add("show");
-
-        // Agregar evento para cerrar con Escape
-        document.addEventListener("keydown", handleEscapeKeyCrear);
-      }
-
-      // Función para cerrar el modal de crear cancha
-      function cerrarModalCrearCancha() {
-        console.log("❌ Cerrando modal de crear cancha...");
-        const modal = document.getElementById("createCanchaModal");
-        const closeBtn = document.getElementById("createCanchaCloseBtn");
-
-        modal.classList.remove("show");
-
-        // Remover event listeners
-        document.removeEventListener("keydown", handleEscapeKeyCrear);
-        window.removeEventListener("message", handleDrawingMessage);
-        closeBtn.removeEventListener("click", cerrarModalCrearCancha);
-        document
-          .getElementById("open-drawing-btn")
-          .removeEventListener("click", abrirMapaDibujo);
-        document
-          .getElementById("create-cancha-btn")
-          .removeEventListener("click", crearCanchaConPoligono);
-        document
-          .getElementById("muro-select")
-          .removeEventListener("change", validarFormularioCreacion);
-        document
-          .getElementById("sector-select")
-          .removeEventListener("change", validarFormularioCreacion);
-        document
-          .getElementById("nombre-detalle-input")
-          .removeEventListener("input", validarFormularioCreacion);
-
-        // Limpiar el contenido del mapa de dibujo
-        setTimeout(() => {
-          document.getElementById("drawingMapContainer").innerHTML = "";
-        }, 300);
-      }
-
-      // Función para validar el formulario y habilitar botones
-      function validarFormularioCreacion() {
-        const muro = document.getElementById("muro-select").value;
-        const sector = document.getElementById("sector-select").value;
-        const nombreDetalle = document
-          .getElementById("nombre-detalle-input")
-          .value.trim();
-
-        // Solo actualizar opciones de sector si el muro cambió
-        const sectorSelect = document.getElementById("sector-select");
-        if (sectorSelect.dataset.ultimoMuro !== muro) {
-          actualizarOpcionesSector(muro);
-          sectorSelect.dataset.ultimoMuro = muro;
-        }
-
-        const formularioCompleto = muro && sector && nombreDetalle;
-        document.getElementById("open-drawing-btn").disabled =
-          !formularioCompleto;
-
-        // Solo habilitar crear cancha si también hay polígono dibujado
-        const puedeCrear = formularioCompleto && poligonoCoordinadas;
-        document.getElementById("create-cancha-btn").disabled = !puedeCrear;
-
-        console.log("🔍 Validación formulario:", {
-          muro,
-          sector,
-          nombreDetalle,
-          formularioCompleto,
-          puedeCrear,
-        });
-      }
-
-      // Función para actualizar las opciones del selector de sector
-      function actualizarOpcionesSector(muro) {
-        const sectorSelect = document.getElementById("sector-select");
-
-        if (!muro) {
-          sectorSelect.disabled = true;
-          sectorSelect.innerHTML =
-            '<option value="">Selecciona un muro primero</option>';
-          return;
-        }
-
-        // Guardar la selección actual antes de regenerar
-        const seleccionActual = sectorSelect.value;
-
-        sectorSelect.disabled = false;
-
-        // Determinar el rango de sectores según el muro
-        let maxSector = 3; // Por defecto para MO y ME
-        if (muro === "MP") {
-          maxSector = 7;
-        }
-
-        // Generar opciones dinámicamente
-        let opciones = '<option value="">Selecciona un sector</option>';
-        for (let i = 1; i <= maxSector; i++) {
-          opciones += `<option value="S${i}">S${i}</option>`;
-        }
-
-        sectorSelect.innerHTML = opciones;
-
-        // Restaurar la selección anterior si es válida
-        if (seleccionActual && seleccionActual.match(/^S[1-9]$/)) {
-          const numeroSector = parseInt(seleccionActual.substring(1));
-          if (numeroSector <= maxSector) {
-            sectorSelect.value = seleccionActual;
-          }
-        }
-
-        console.log(
-          `📍 Muro ${muro} seleccionado - Sectores disponibles: S1 a S${maxSector}`,
-        );
-      }
-
-      // Función para abrir el mapa de dibujo
-      function abrirMapaDibujo() {
-        console.log("🗺️ Abriendo mapa de dibujo...");
-        const muro = document.getElementById("muro-select").value;
-        const drawingContainer = document.getElementById("drawingMapContainer");
-        const statusDiv = document.getElementById("drawing-status");
-
-        // Mostrar status de carga
-        statusDiv.innerHTML = "🔄 Cargando mapa de dibujo...";
-        statusDiv.className = "drawing-status info";
-
-        // Mostrar el contenedor del mapa
-        drawingContainer.style.display = "block";
-
-        // Crear iframe con el mapa de dibujo
-        setTimeout(() => {
-          const iframe = document.createElement("iframe");
-          iframe.src = `/mapbox-window?muro=${encodeURIComponent(muro)}&drawing=true`;
-          iframe.style.width = "100%";
-          iframe.style.height = "100%";
-          iframe.style.border = "none";
-
-          // Limpiar listener anterior si existe
-          window.removeEventListener("message", handleDrawingMessage);
-
-          // Agregar listener para mensajes del iframe
-          window.addEventListener("message", handleDrawingMessage);
-
-          drawingContainer.innerHTML = "";
-          drawingContainer.appendChild(iframe);
-
-          statusDiv.innerHTML = "🎨 Herramientas de dibujo activas";
-          statusDiv.className = "drawing-status info";
-        }, 300);
-      }
-
-      // Función para manejar mensajes del iframe de dibujo
-      function handleDrawingMessage(event) {
-        if (event.data.type === "polygon-drawn") {
-          poligonoCoordinadas = event.data.coordinates;
-          console.log("✅ Polígono recibido del iframe:", poligonoCoordinadas);
-
-          const statusDiv = document.getElementById("drawing-status");
-          statusDiv.innerHTML = `✅ ¡Área dibujada correctamente! (${poligonoCoordinadas.length} puntos) Ahora puedes crear la cancha.`;
-          statusDiv.className = "drawing-status success";
-
-          // Validar formulario nuevamente para habilitar el botón de crear
-          validarFormularioCreacion();
-        } else if (event.data.type === "polygon-deleted") {
-          poligonoCoordinadas = null;
-          console.log("🗑️ Polígono eliminado del iframe");
-
-          const statusDiv = document.getElementById("drawing-status");
-          statusDiv.innerHTML = "🎨 Dibuja un nuevo área de trabajo en el mapa";
-          statusDiv.className = "drawing-status info";
-
-          // Validar formulario nuevamente para deshabilitar el botón de crear
-          validarFormularioCreacion();
-        }
-      }
-
-      // Función para crear la cancha con polígono
-      async function crearCanchaConPoligono() {
-        console.log("🚀 Creando cancha con polígono...");
-
-        const muro = document.getElementById("muro-select").value;
-        const sector = document.getElementById("sector-select").value;
-        const nombreDetalle = document
-          .getElementById("nombre-detalle-input")
-          .value.trim();
-
-        if (!muro || !sector || !nombreDetalle || !poligonoCoordinadas) {
-          alert(
-            "Por favor completa todos los campos y dibuja el área en el mapa",
-          );
-          return;
-        }
-
-        try {
-          // Deshabilitar botón mientras se crea
-          document.getElementById("create-cancha-btn").disabled = true;
-          document.getElementById("create-cancha-btn").textContent =
-            "Creando...";
-
-          const response = await fetch("/api/canchas", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              muro,
-              sector,
-              nombreDetalle,
-              poligonoCoordinadas,
-            }),
-          });
-
-          if (!response.ok) {
-            throw new Error("Error al crear la cancha");
-          }
-
-          const nuevaCancha = await response.json();
-          console.log("✅ Cancha creada exitosamente:", nuevaCancha);
-
-          // Cerrar modal
-          cerrarModalCrearCancha();
-
-          // Recargar la lista de canchas
-          await cargarCanchas();
-
-          // Mostrar mensaje de éxito
-          mostrarMensaje(
-            `Cancha ${nuevaCancha.nombre} creada exitosamente con área dibujada`,
-            "success",
-          );
-        } catch (error) {
-          console.error("❌ Error al crear cancha:", error);
-          alert("Error al crear la cancha: " + error.message);
-        } finally {
-          // Restaurar botón
-          document.getElementById("create-cancha-btn").disabled = false;
-          document.getElementById("create-cancha-btn").textContent =
-            "Crear Cancha";
-        }
-      }
-
-      // Manejar tecla Escape para cerrar modal de crear cancha
-      function handleEscapeKeyCrear(e) {
-        if (e.key === "Escape") {
-          cerrarModalCrearCancha();
-        }
-      }
 
       // Inicializar la aplicación
       inicializar();
     </script>
 
     <!-- Modal para Crear Cancha (solo AngloAmerican) -->
-    <div id="createCanchaModal" class="map-modal">
-      <div class="map-modal-content create-cancha-modal-content">
-        <div class="map-modal-header">
-          <h3 class="map-modal-title">Crear Nueva Cancha</h3>
-          <button id="createCanchaCloseBtn" class="map-close-btn"
-            >&times;</button
-          >
-        </div>
-        <div class="create-cancha-container">
-          <!-- Panel izquierdo: Formulario -->
-          <div class="create-cancha-form">
-            <h4 class="form-section-title">📋 Datos de la Cancha</h4>
-            <div class="form-group">
-              <label for="muro-select">Muro:</label>
-              <select id="muro-select" required>
-                <option value="">Seleccionar Muro</option>
-                <option value="MP">MP</option>
-                <option value="ME">ME</option>
-                <option value="MO">MO</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="sector-select">Sector:</label>
-              <select id="sector-select" disabled required>
-                <option value="">Selecciona un muro primero</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="nombre-detalle-input">Nombre Detalle:</label>
-              <input
-                type="text"
-                id="nombre-detalle-input"
-                placeholder="ej: TEST1"
-                required
-              />
-            </div>
-            <div class="form-actions">
-              <button id="open-drawing-btn" class="btn-primary" disabled
-                >🗺️ Dibujar Área en Mapa</button
-              >
-              <button id="create-cancha-btn" class="btn-success" disabled
-                >✅ Crear Cancha</button
-              >
-            </div>
-            <div id="drawing-status" class="drawing-status"></div>
-          </div>
-
-          <!-- Panel derecho: Mapa -->
-          <div class="create-cancha-map-panel">
-            <div class="map-panel-header">
-              <h4 class="map-panel-title">🗺️ Área de Trabajo</h4>
-              <p class="map-panel-subtitle">
-                Dibuja el polígono que define el área de la cancha
-              </p>
-            </div>
-            <div id="drawingMapContainer" class="drawing-map-container">
-              <!-- El mapa de dibujo se cargará aquí -->
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <CreateCanchaModal />
 
     <!-- Modal para el Mapa -->
     <div id="mapModal" class="map-modal">

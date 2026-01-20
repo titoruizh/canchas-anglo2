@@ -153,7 +153,8 @@ sequenceDiagram
     participant DB as Supabase
 
     U->>FE: Click "Nueva Cancha"
-    FE->>FE: Validar Formulario (HTML5)
+    FE->>FE: Validar Formulario (HTML5 + TS)
+    FE->>FE: Validar Coordenadas (Mapbox Draw)
     U->>FE: Submit
     FE->>API: POST /api/canchas/create (JSON)
     activate API
@@ -167,8 +168,8 @@ sequenceDiagram
     
     API-->>FE: 200 OK + Cancha Objeto
     deactivate API
-    FE->>FE: Actualizar Tabla (DOM)
-    FE->>FE: Cerrar Modal & Toast Success
+    FE->>FE: Actualizar Tabla (DOM / Custom Event)
+    FE->>FE: Cerrar Modal & Mostrar Toast (Custom UI)
 ```
 
 ### 6.2 Flujo de Visualización Mapa (Revanchas)
