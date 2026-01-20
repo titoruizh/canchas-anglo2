@@ -4,6 +4,42 @@ Este documento mantiene un registro histórico de las "fragmentaciones" (refacto
 
 ---
 
+## 📅 20 de Enero, 2026: Corrección y Ajuste de Widgets y Filtros
+
+**Responsable:** Agente / TITO
+**Estado:** ✅ Completado (Funcionalidad Estabilizada)
+
+### 🎯 Objetivo
+Corregir errores críticos en la visualización y actualización de los Widgets de Estado y el Slider de Filtros que impedían una experiencia de usuario correcta, preparando el terreno para una futura refactorización completa.
+
+### 🛠️ Cambios Realizados
+
+#### 1. Corrección de Lógica UI (`index.astro` y `FilterManager.ts`)
+Se implementaron funciones robustas para actualizar los contadores de los widgets y KPIs.
+
+- **Nuevas Funciones en `index.astro`:**
+    - `actualizarWidgetsEstado(canchas)`: Calcula y anima los contadores de cada widget circular.
+    - `actualizarResumenWidgets(canchas, total)`: Actualiza los KPIs laterales (Total y Acciones Disponibles).
+    - `animateWidgetNumber(...)`: Utilidad para transiciones numéricas suaves (renombrada para evitar colisiones).
+
+#### 2. Fix de Slider de Filtros (`FilterManager.ts`)
+Se corrigió un bug donde el `FilterManager` buscaba IDs incorrectos (`vista-acciones` vs `btn-vista-acciones`), lo que impedía que el slider visual ("Mis Acciones" / "Ver Histórico") se moviera.
+
+- **Archivo:** `src/utils/FilterManager.ts`
+- **Cambio:** Actualización de selectores `getElementById` en `updateVistaUI`.
+
+#### 3. Estabilización de Dependencias
+Se resolvieron conflictos de nombres (duplicate declaration) en funciones utilitarias.
+
+### 📊 Archivos Afectados
+
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/pages/index.astro` | 🔧 Mejora | Implementación de `animateWidgetNumber` y lógica de widgets. |
+| `src/utils/FilterManager.ts` | 🐞 Bugfix | Corrección de IDs para el slider de vista. |
+
+---
+
 ## 📅 16 de Enero, 2026: Fragmentación de `CreateCancha`
 
 **Responsable:** Agente / TITO
@@ -150,4 +186,4 @@ Se encapsularon las operaciones CRUD y de filtrado.
 
 ## 📅 [Próxima Refactorización]
 
-*Espacio reservado para futura fragmentación (ej. Login, Gestión de Usuarios, etc.)*
+*Espacio reservado para futura fragmentación*

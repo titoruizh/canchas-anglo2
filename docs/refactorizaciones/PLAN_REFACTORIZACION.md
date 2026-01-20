@@ -3,7 +3,7 @@
 Este documento rastrea el estado global de la migración desde un `index.astro` monolítico hacia una arquitectura modular basada en Managers y Componentes.
 
 ## 📊 Estado General
-- **Progreso:** 40% Completado
+- **Progreso:** 45% Completado
 - **Objetivo:** Eliminar toda lógica de negocio compleja de `src/pages/index.astro`.
 
 ---
@@ -28,6 +28,15 @@ Estos módulos ya fueron extraídos, tienen su propio Manager y están registrad
   - **Código:** `src/utils/CreateCanchaManager.ts`
   - **Fecha:** 16 Ene 2026
 
+- [x] **API Cancha Endpoint**
+  - **Código:** `src/pages/api/canchas.ts`
+  - **Fecha:** 16 Ene 2026
+
+- [x] **Widgets y Filtros (Estabilización)**
+  - **Código:** `src/utils/FilterManager.ts` (Correcciones) y `src/pages/index.astro` (UI Logic)
+  - **Fecha:** 20 Ene 2026
+  - *Nota:* Funcionalidad estable. Pendiente refactorización de UI a componente aislado.
+
 ---
 
 ## 🔴 Pendiente (Prioridad Alta)
@@ -40,9 +49,9 @@ Estas funcionalidades siguen "viviendo" dentro de `src/pages/index.astro` y debe
   - **Meta:** Crear componente `<CanchasTable />` y `TableManager.ts` para paginación y renderizado.
 
 ### 2. Filtros y Control
-- [ ] **Filtros y Estadísticas** (`FilterManager`)
-  - **Estado Actual:** Lógica difusa de filtros de fecha, estado y empresa en index.astro.
-  - **Meta:** Centralizar en `FilterManager.ts` que comunique los filtros activos a la Tabla y al Mapa.
+- [ ] **Filtros y Estadísticas (Refactor UI Complleto)** (`FilterManager`)
+  - **Estado Actual:** Lógica de negocio en `FilterManager` (OK), pero actualización de UI todavía en `index.astro` (`actualizarWidgetsEstado`).
+  - **Meta:** Mover lógica de UI a un componente Dashboard dedicado (ej: `WidgetsEstados.astro`).
   - **Incluye:** Widgets de Estado (contadores circulares).
 
 ### 3. Importación de Datos

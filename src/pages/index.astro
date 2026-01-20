@@ -16,6 +16,9 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
     <script
       src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"
     ></script>
+    <script
+      src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"
+    ></script>
 
     <style>
       * {
@@ -5288,7 +5291,9 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
       </div>
     </div>
 
-    <script type="module">
+    <script>
+      import { FilterManager } from "/src/utils/FilterManager.ts";
+
       // ========== ANIMACIÓN DE PARTÍCULAS EN HEADER ==========
       function initParticles() {
         const canvas = document.getElementById("particles-canvas");
@@ -5445,6 +5450,7 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
       let filtroFecha = "all";
       let todasLasCanchas = [];
       let canchasFiltradas = [];
+      let filterManager;
 
       // Variables de paginación
       let paginaActual = 1;
@@ -5480,6 +5486,9 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
       // Cargar datos iniciales
       async function inicializar() {
         try {
+          // Inicializar managers
+          initManagers();
+
           configurarEventListeners();
 
           // Esperar a que el AuthGuard termine de verificar
@@ -5571,8 +5580,11 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
         configurarControlesMapa();
 
         // Inicializar slider de filtros
-        setTimeout(updateSliderPosition, 100);
-        window.addEventListener("resize", updateSliderPosition);
+        // Inicializar slider de filtros
+        setTimeout(() => filterManager?.updateSliderPosition(), 100);
+        window.addEventListener("resize", () =>
+          filterManager?.updateSliderPosition(),
+        );
 
         // Listener para evento personalizado de creación de cancha
         window.addEventListener("cancha-created", async (event) => {
@@ -5904,6 +5916,11 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
             nombre: usuario.empresa_nombre,
           };
 
+          // Actualizar empresa en FilterManager
+          if (filterManager) {
+            filterManager.setEmpresa(empresaLogueada);
+          }
+
           // Actualizar UI del header
           userName.textContent = usuario.nombre_completo;
           userRole.textContent = `${usuario.rol_nombre} - ${usuario.empresa_nombre}`;
@@ -6110,371 +6127,204 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
         mostrarMensaje("Sesión cerrada correctamente", "success");
       }
 
-      // === FUNCIONES DE CARGA DE DATOS ===
+      /* === FUNCIONES DE ACTUALIZACIÓN DE WIDGETS Y KPIs === */
 
-      // === FUNCIONES DE FILTROS ===
-      function cambiarVista(nuevaVista) {
-        console.log("Cambiando vista a:", nuevaVista);
-        vistaActual = nuevaVista;
+      // Función de animación para números
+      function animateWidgetNumber(element, start, end, duration = 1000) {
+        if (start === end) return;
+        const range = end - start;
+        let current = start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / range));
 
-        // Actualizar botones
-        btnVistaAcciones.classList.toggle("active", nuevaVista === "acciones");
-        btnVistaHistorico.classList.toggle(
-          "active",
-          nuevaVista === "historico",
-        );
+        // Si el paso es muy rápido, usar requestAnimationFrame en su lugar (simplificado aquí)
+        // Para cambios grandes, simplemente saltar
+        if (Math.abs(range) > 100) {
+          element.textContent = end;
+          return;
+        }
 
-        // Aplicar filtros
-        aplicarFiltros();
-
-        // Actualizar slider
-        updateSliderPosition();
+        const timer = setInterval(
+          () => {
+            current += increment;
+            element.textContent = current;
+            if (current == end) {
+              clearInterval(timer);
+            }
+          },
+          Math.max(stepTime, 20),
+        ); // Mínimo 20ms para evitar bloqueo
       }
 
-      function updateSliderPosition() {
-        const container = document.querySelector(".toggle-container");
-        const activeBtn = container?.querySelector(".active");
-        const slider = container?.querySelector(".toggle-slider");
+      function actualizarContadorResultados(canchas, total) {
+        // 1. Actualizar Widgets de Resumen (Sidebar)
+        actualizarResumenWidgets(canchas, total);
 
-        if (activeBtn && slider && container) {
-          // Calcular posición relativa al contenedor
-          const containerRect = container.getBoundingClientRect();
-          const btnRect = activeBtn.getBoundingClientRect();
+        // 2. Actualizar Widgets de Estado (Circular)
+        actualizarWidgetsEstado(canchas);
+      }
 
-          const left = btnRect.left - containerRect.left;
-          const width = btnRect.width;
+      function actualizarResumenWidgets(canchas, total) {
+        // Actualizar KPI: Total de Canchas
+        const statTotal = document.getElementById("stat-total");
+        if (statTotal) {
+          // Si total es undefined (filtrado inicial), usar canchas.length o 0
+          const totalValue = total !== undefined ? total : 0;
+          animateWidgetNumber(
+            statTotal,
+            parseInt(statTotal.textContent) || 0,
+            totalValue,
+          );
+        }
 
-          slider.style.transform = `translateX(${left}px)`;
-          slider.style.width = `${width}px`;
+        // Actualizar KPI: Acciones Disponibles / Canchas Listadas
+        const statAcciones = document.getElementById("stat-acciones");
+        const labelAcciones =
+          statAcciones?.parentElement?.querySelector(".stat-label");
+
+        if (statAcciones) {
+          // En vista "acciones", esto representa las disponibles.
+          // En vista "historico", representa las encontradas.
+          // Para simplificar, mostramos siempre la cantidad filtrada actual.
+          animateWidgetNumber(
+            statAcciones,
+            parseInt(statAcciones.textContent) || 0,
+            canchas.length,
+          );
+
+          // Opcional: Actualizar etiqueta según vista
+          if (labelAcciones) {
+            if (
+              typeof vistaActual !== "undefined" &&
+              vistaActual === "historico"
+            ) {
+              labelAcciones.textContent = "Canchas Encontradas";
+            } else {
+              labelAcciones.textContent = "Acciones Disponibles";
+            }
+          }
         }
       }
 
-      function manejarCambioFiltroFecha() {
-        filtroFecha = filtroFechaSelect.value;
+      function actualizarWidgetsEstado(canchas) {
+        // Contadores iniciales
+        const conteo = {
+          creada: 0,
+          "en-espera": 0,
+          "en-proceso": 0,
+          validada: 0,
+          "rechazada-en-espera": 0,
+          cerrada: 0,
+        };
 
-        if (filtroFecha === "custom") {
+        // Iterar canchas y clasificar
+        canchas.forEach((c) => {
+          // Intentar obtener el nombre del estado (puede venir en diferentes propiedades según backend)
+          const estado = (c.estado_nombre || c.estado_actual || "")
+            .toLowerCase()
+            .trim();
+
+          if (estado.includes("creada")) {
+            conteo["creada"]++;
+          } else if (
+            estado.includes("en espera") &&
+            !estado.includes("rechazada")
+          ) {
+            conteo["en-espera"]++;
+          } else if (estado.includes("proceso")) {
+            conteo["en-proceso"]++;
+          } else if (
+            estado.includes("validada") ||
+            estado.includes("validación")
+          ) {
+            conteo["validada"]++;
+          } else if (estado.includes("rechazada")) {
+            conteo["rechazada-en-espera"]++;
+          } else if (
+            estado.includes("cerrada") ||
+            estado.includes("finalizada")
+          ) {
+            conteo["cerrada"]++;
+          }
+        });
+
+        // Actualizar el DOM para cada widget
+        Object.keys(conteo).forEach((key) => {
+          const el = document.getElementById(`count-${key}`);
+          const widget = document.querySelector(
+            `.estado-widget[data-estado="${key}"]`,
+          );
+
+          if (el) {
+            animateWidgetNumber(el, parseInt(el.textContent) || 0, conteo[key]);
+          }
+
+          // Visualmente deshabilitar widgets con 0
+          if (widget) {
+            if (conteo[key] === 0) {
+              widget.classList.add("dimmed");
+            } else {
+              widget.classList.remove("dimmed");
+            }
+          }
+        });
+      }
+
+      function initManagers() {
+        // Inicializar FilterManager con callbacks para actualizar UI
+        filterManager = new FilterManager({
+          onFilterUpdate: (canchas) => {
+            console.log(
+              "🔄 FilterManager: Actualizando UI con",
+              canchas.length,
+              "canchas",
+            );
+            // 1. Actualizar Tabla
+            renderizarCanchas(canchas);
+            // 2. Actualizar Mapa
+            actualizarMapaDashboard(canchas);
+          },
+          onStatsUpdate: (canchas, total) => {
+            // 3. Actualizar KPIs y Widgets
+            actualizarContadorResultados(canchas, total);
+          },
+        });
+
+        // Configurar datos iniciales si ya existen
+        if (empresaLogueada) {
+          filterManager.setEmpresa(empresaLogueada);
+        }
+      }
+
+      function cambiarVista(nuevaVista) {
+        filterManager.setVista(nuevaVista);
+      }
+
+      function manejarCambioFiltroFecha() {
+        const tipo = filtroFechaSelect.value;
+        if (tipo === "custom") {
           rangoFechas.classList.remove("hidden");
         } else {
           rangoFechas.classList.add("hidden");
-          aplicarFiltros();
+          filterManager.setFecha(tipo);
         }
       }
 
       function aplicarRangoFechas() {
         const desde = fechaDesde.value;
         const hasta = fechaHasta.value;
-
         if (!desde || !hasta) {
           mostrarMensaje("Por favor selecciona ambas fechas", "error");
           return;
         }
-
-        aplicarFiltros();
+        filterManager.setFecha("custom", desde, hasta);
       }
 
-      function aplicarFiltros() {
-        if (!empresaLogueada || !todasLasCanchas.length) return;
-
-        canchasFiltradas = [...todasLasCanchas];
-        console.log("Aplicando filtros, vista actual:", vistaActual);
-        console.log("Total canchas antes del filtro:", canchasFiltradas.length);
-
-        // Filtro por vista (acciones vs histórico)
-        if (vistaActual === "acciones") {
-          canchasFiltradas = filtrarPorAccionesDisponibles(canchasFiltradas);
-          console.log(
-            "Canchas después del filtro de acciones:",
-            canchasFiltradas.length,
-          );
-        }
-
-        // Filtro por fecha
-        canchasFiltradas = filtrarPorFecha(canchasFiltradas);
-
-        // Filtro por estado desde widgets circulares
-        if (filtroEstadoActivo) {
-          canchasFiltradas = canchasFiltradas.filter(
-            (cancha) => cancha.estado_actual === filtroEstadoActivo,
-          );
-          console.log(
-            "Canchas después del filtro de estado:",
-            canchasFiltradas.length,
-          );
-        }
-
-        // Reiniciar a la primera página al aplicar filtros
-        paginaActual = 1;
-
-        // Mostrar resultados
-        mostrarCanchas(canchasFiltradas);
-        actualizarContadorResultados(
-          canchasFiltradas.length,
-          todasLasCanchas.length,
-        );
-      }
-
-      function filtrarPorAccionesDisponibles(canchas) {
-        const empresaId = empresaLogueada.id;
-        const empresaNombre = empresaLogueada.nombre;
-
-        console.log("Filtrando para empresa:", empresaNombre);
-
-        return canchas.filter((cancha) => {
-          const estado = cancha.estado_actual;
-          const empresaActual = cancha.empresa_actual;
-
-          console.log(
-            `Cancha ${cancha.nombre}: estado="${estado}", empresa="${empresaActual}"`,
-          );
-
-          let tieneAccion = false;
-
-          switch (empresaNombre) {
-            case "AngloAmerican":
-              // AngloAmerican puede actuar cuando:
-              // - Cancha creada (enviar a Besalco)
-              // - Cancha validada (cerrar)
-              tieneAccion = estado === "Creada" || estado === "Validada";
-              break;
-
-            case "Besalco":
-              // Besalco puede actuar cuando:
-              // - Está en espera (recién asignada o rechazada)
-              // - Está en proceso (trabajando activamente)
-              tieneAccion =
-                (estado === "En Espera" && empresaActual === "Besalco") ||
-                (estado === "En Proceso" && empresaActual === "Besalco") ||
-                (estado === "Rechazada, en Espera" &&
-                  empresaActual === "Besalco");
-              break;
-
-            case "Linkapsis":
-              // Linkapsis puede actuar cuando está en espera o en proceso
-              tieneAccion =
-                (estado === "En Espera" && empresaActual === "Linkapsis") ||
-                (estado === "En Proceso" && empresaActual === "Linkapsis");
-              break;
-
-            case "LlayLlay":
-              // LlayLlay puede actuar cuando está en espera o en proceso
-              tieneAccion =
-                (estado === "En Espera" && empresaActual === "LlayLlay") ||
-                (estado === "En Proceso" && empresaActual === "LlayLlay");
-              break;
-
-            default:
-              tieneAccion = false;
-          }
-
-          console.log(`-> Tiene acción: ${tieneAccion}`);
-          return tieneAccion;
-        });
-      }
-
-      function filtrarPorFecha(canchas) {
-        if (filtroFecha === "all") return canchas;
-
-        const ahora = new Date();
-        const hoy = new Date(
-          ahora.getFullYear(),
-          ahora.getMonth(),
-          ahora.getDate(),
-        );
-
-        return canchas.filter((cancha) => {
-          const fechaCancha = new Date(cancha.created_at);
-
-          switch (filtroFecha) {
-            case "today":
-              return fechaCancha >= hoy;
-            case "week":
-              const semanaAtras = new Date(
-                hoy.getTime() - 7 * 24 * 60 * 60 * 1000,
-              );
-              return fechaCancha >= semanaAtras;
-            case "month":
-              const mesAtras = new Date(
-                hoy.getTime() - 30 * 24 * 60 * 60 * 1000,
-              );
-              return fechaCancha >= mesAtras;
-            case "custom":
-              if (!fechaDesde.value || !fechaHasta.value) return true;
-              const desde = new Date(fechaDesde.value);
-              const hasta = new Date(fechaHasta.value + "T23:59:59");
-              return fechaCancha >= desde && fechaCancha <= hasta;
-            default:
-              return true;
-          }
-        });
-      }
-
-      // Actualizar dashboard de estados con contadores
-      function actualizarContadorResultados(mostradas, total) {
-        // === ACTUALIZAR WIDGETS ORIGINALES (SIDEBAR) ===
-        // Contar acciones disponibles para la empresa logueada
-        const accionesDisponibles = canchasFiltradas.filter((cancha) => {
-          const estado = cancha.estado_actual;
-          const empresaActual = cancha.empresa_actual;
-
-          if (!empresaLogueada) return false;
-
-          let tieneAccion = false;
-          const empresaNombre = empresaLogueada.nombre;
-
-          switch (empresaNombre) {
-            case "AngloAmerican":
-              // AngloAmerican puede actuar cuando:
-              // - Cancha creada (enviar a Besalco)
-              // - Cancha validada (cerrar)
-              tieneAccion = estado === "Creada" || estado === "Validada";
-              break;
-            case "Besalco":
-              // Besalco puede actuar cuando:
-              // - Está en espera (recién asignada o rechazada)
-              // - Está en proceso (trabajando activamente)
-              tieneAccion =
-                (estado === "En Espera" && empresaActual === "Besalco") ||
-                (estado === "En Proceso" && empresaActual === "Besalco") ||
-                (estado === "Rechazada, en Espera" &&
-                  empresaActual === "Besalco");
-              break;
-            case "Linkapsis":
-              // Linkapsis puede actuar cuando está en espera o en proceso
-              tieneAccion =
-                (estado === "En Espera" && empresaActual === "Linkapsis") ||
-                (estado === "En Proceso" && empresaActual === "Linkapsis");
-              break;
-            case "LlayLlay":
-              // LlayLlay puede actuar cuando está en espera o en proceso
-              tieneAccion =
-                (estado === "En Espera" && empresaActual === "LlayLlay") ||
-                (estado === "En Proceso" && empresaActual === "LlayLlay");
-              break;
-            default:
-              tieneAccion = false;
-          }
-          return tieneAccion;
-        }).length;
-
-        // Actualizar contadores del sidebar
-        const statAcciones = document.getElementById("stat-acciones");
-        const statTotal = document.getElementById("stat-total");
-
-        if (statAcciones) {
-          animateNumber(
-            statAcciones,
-            parseInt(statAcciones.textContent) || 0,
-            accionesDisponibles,
-          );
-        }
-
-        if (statTotal) {
-          animateNumber(statTotal, parseInt(statTotal.textContent) || 0, total);
-        }
-
-        // === ACTUALIZAR WIDGETS CIRCULARES (DASHBOARD DE ESTADOS) ===
-        // Contar canchas por estado
-        const contadores = {
-          Creada: 0,
-          "En Espera": 0,
-          "En Proceso": 0,
-          Validada: 0,
-          "Rechazada, en Espera": 0,
-          Cerrada: 0,
-        };
-
-        // Contar las canchas filtradas por estado
-        canchasFiltradas.forEach((cancha) => {
-          const estado = cancha.estado_actual;
-          if (contadores.hasOwnProperty(estado)) {
-            contadores[estado]++;
-          }
-        });
-
-        // Actualizar los widgets circulares con animación
-        animateNumber(
-          document.getElementById("count-creada"),
-          parseInt(document.getElementById("count-creada").textContent) || 0,
-          contadores["Creada"],
-        );
-
-        animateNumber(
-          document.getElementById("count-en-espera"),
-          parseInt(document.getElementById("count-en-espera").textContent) || 0,
-          contadores["En Espera"],
-        );
-
-        animateNumber(
-          document.getElementById("count-en-proceso"),
-          parseInt(document.getElementById("count-en-proceso").textContent) ||
-            0,
-          contadores["En Proceso"],
-        );
-
-        animateNumber(
-          document.getElementById("count-validada"),
-          parseInt(document.getElementById("count-validada").textContent) || 0,
-          contadores["Validada"],
-        );
-
-        animateNumber(
-          document.getElementById("count-rechazada-en-espera"),
-          parseInt(
-            document.getElementById("count-rechazada-en-espera").textContent,
-          ) || 0,
-          contadores["Rechazada, en Espera"],
-        );
-
-        animateNumber(
-          document.getElementById("count-cerrada"),
-          parseInt(document.getElementById("count-cerrada").textContent) || 0,
-          contadores["Cerrada"],
-        );
-
-        // Actualizar subtítulo del mapa
-        actualizarSubtituloMapa(mostradas);
-      }
-
-      // Manejar doble click en widgets de estado para filtrar
       function filtrarPorEstadoWidget(estadoNombre) {
-        const widgets = document.querySelectorAll(".estado-widget");
-
-        // Si se clickea el mismo estado, desactivar filtro
-        if (filtroEstadoActivo === estadoNombre) {
-          filtroEstadoActivo = null;
-          widgets.forEach((w) => {
-            w.classList.remove("selected");
-            w.classList.remove("dimmed");
-          });
-        } else {
-          // Activar nuevo filtro
-          filtroEstadoActivo = estadoNombre;
-
-          // Actualizar clases de selección y dimmed
-          widgets.forEach((widget) => {
-            const estadoWidget = widget.getAttribute("data-estado");
-            const estadoMap = {
-              creada: "Creada",
-              "en-espera": "En Espera",
-              "en-proceso": "En Proceso",
-              validada: "Validada",
-              "rechazada-en-espera": "Rechazada, en Espera",
-              cerrada: "Cerrada",
-            };
-
-            if (estadoMap[estadoWidget] === estadoNombre) {
-              widget.classList.add("selected");
-              widget.classList.remove("dimmed");
-            } else {
-              widget.classList.remove("selected");
-              widget.classList.add("dimmed");
-            }
-          });
-        }
-
-        // Re-aplicar filtros
-        aplicarFiltros();
+        filterManager.toggleEstadoWidget(estadoNombre);
       }
+
+      // The legacy functions (aplicarFiltros, filtrarPorAccionesDisponibles, filtrarPorFecha) are REMOVED.
 
       // Actualizar subtítulo del mapa según filtros activos
       function actualizarSubtituloMapa(cantidadCanchas) {
@@ -6630,15 +6480,18 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
           }
 
           todasLasCanchas = await response.json();
-          console.log("🗂️ Datos de canchas cargados:", todasLasCanchas);
-          if (todasLasCanchas.length > 0) {
-            console.log("🔍 Primer cancha ejemplo:", todasLasCanchas[0]);
-            console.log(
-              "🏷️ Campos disponibles:",
-              Object.keys(todasLasCanchas[0]),
-            );
+          console.log("🗂️ Datos de canchas cargados:", todasLasCanchas.length);
+
+          // Actualizar FilterManager con los nuevos datos
+          if (filterManager) {
+            filterManager.setCanchas(todasLasCanchas);
+          } else {
+            console.warn("FilterManager no inicializado al cargar canchas");
+            // Fallback: Si initManagers aún no corrió, initManagers lo tomará de todasLasCanchas
+            // pero initManagers corre en DOMContentLoaded, y esto corre después de auth.
+            // Debería estar bien si auth es rápido, pero por si acaso, si no está init,
+            // initManagers se encargará al iniciar.
           }
-          aplicarFiltros();
         } catch (error) {
           console.error("Error al cargar canchas:", error);
           mostrarMensaje("Error al cargar las canchas", "error");
@@ -10368,7 +10221,9 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
 
       // Inicializar Subir Canchas cuando el DOM esté listo
       if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", inicializarSubirCanchas);
+        document.addEventListener("DOMContentLoaded", () => {
+          inicializarSubirCanchas();
+        });
       } else {
         inicializarSubirCanchas();
       }
