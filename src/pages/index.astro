@@ -3,6 +3,7 @@ import AuthGuard from "../components/AuthGuard.astro";
 import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
 import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
 import CanchasTable from "../components/dashboard/CanchasTable.astro";
+import SubirCanchasModal from "../components/linkapsis/SubirCanchasModal.astro";
 ---
 
 <AuthGuard />
@@ -4649,286 +4650,6 @@ import CanchasTable from "../components/dashboard/CanchasTable.astro";
         </div>
       </div>
 
-      <!-- Modal para Subir Canchas (Linkapsis) - Mejorado con Selección -->
-      <div id="modal-subir-canchas" class="modal">
-        <div class="modal-content modal-large">
-          <div class="modal-header">
-            <h3 class="modal-title">📁 Subir Canchas - Linkapsis</h3>
-            <button class="close-btn">×</button>
-          </div>
-
-          <div class="modal-body">
-            <!-- PASO 1: Pantalla de Selección -->
-            <div id="seleccion-tipo" class="seleccion-container">
-              <h2
-                style="text-align: center; color: #2c3e50; margin-bottom: 2rem;"
-              >
-                ¿Qué deseas subir?
-              </h2>
-
-              <div class="tipo-opciones">
-                <button type="button" class="tipo-card" data-tipo="cancha">
-                  <div class="tipo-icon">🏗️</div>
-                  <h3>CANCHA</h3>
-                </button>
-
-                <button type="button" class="tipo-card" data-tipo="muestra">
-                  <div class="tipo-icon">🧪</div>
-                  <h3>MUESTRAS</h3>
-                </button>
-              </div>
-            </div>
-
-            <!-- PASO 2A: Formulario CANCHA (existente) -->
-            <div id="formulario-cancha" style="display: none;">
-              <button type="button" class="btn-volver"
-                >← Volver a selección</button
-              >
-
-              <h3
-                style="color: #2c3e50; margin: 1.5rem 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;"
-              >
-                <span>🏗️</span> Formulario de Cancha
-              </h3>
-
-              <form id="form-subir-canchas">
-                <!-- Fila 1: Muro y Sector -->
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="muro-cancha">
-                      <strong>Muro *</strong>
-                    </label>
-                    <select id="muro-cancha" required>
-                      <option value="">Seleccione...</option>
-                      <option value="Principal">Principal</option>
-                      <option value="Este">Este</option>
-                      <option value="Oeste">Oeste</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="sector-cancha">
-                      <strong>Sector *</strong>
-                    </label>
-                    <select id="sector-cancha" disabled required>
-                      <option value="">Seleccione muro primero...</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Fila 2: Relleno y Fecha -->
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="relleno-cancha">
-                      <strong>Relleno *</strong>
-                    </label>
-                    <input
-                      type="text"
-                      id="relleno-cancha"
-                      placeholder="Ingrese nombre del relleno"
-                      required
-                    />
-                  </div>
-
-                  <div class="form-group">
-                    <label for="fecha-cancha">
-                      <strong>Fecha *</strong>
-                    </label>
-                    <input type="date" id="fecha-cancha" required />
-                  </div>
-                </div>
-
-                <!-- Fila 3: Foto -->
-                <div class="form-group">
-                  <label for="foto-cancha">
-                    <strong>Foto</strong>
-                  </label>
-                  <input type="file" id="foto-cancha" accept="image/*" />
-                  <small style="color: #64748b;"
-                    >Formatos: JPG, PNG (máx. 5MB)</small
-                  >
-                  <div
-                    id="preview-foto-cancha"
-                    style="display:none; margin-top: 1rem;"
-                  >
-                    <img
-                      id="img-preview-cancha"
-                      style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
-                      alt="Preview"
-                    />
-                  </div>
-                </div>
-
-                <!-- Fila 4: Archivo -->
-                <div class="form-group">
-                  <label for="archivo-cancha">
-                    <strong>Archivo *</strong>
-                  </label>
-                  <input
-                    type="file"
-                    id="archivo-cancha"
-                    accept=".csv,.xlsx,.asc"
-                    required
-                  />
-                  <small style="color: #64748b;">Formatos: CSV, XLSX, ASC</small
-                  >
-                </div>
-
-                <!-- Fila 5: Responsable y Método -->
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="responsable-cancha">
-                      <strong>Responsable *</strong>
-                    </label>
-                    <select id="responsable-cancha" required>
-                      <option value="">Cargando...</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="metodo-cancha">
-                      <strong>Método *</strong>
-                    </label>
-                    <select id="metodo-cancha" required>
-                      <option value="">Seleccione...</option>
-                      <option value="Movimiento de Tierra"
-                        >Movimiento de Tierra</option
-                      >
-                      <option value="Hidraulico">Hidráulico</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Fila 6: N° Capas -->
-                <div class="form-group">
-                  <label for="capas-cancha">
-                    <strong>N° Capas *</strong>
-                  </label>
-                  <select id="capas-cancha" required>
-                    <option value="">Seleccione...</option>
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="3">3</option>
-                    <option value="4">4</option>
-                  </select>
-                </div>
-
-                <div class="form-actions">
-                  <button type="button" class="btn-cancel">Cancelar</button>
-                  <button type="submit" class="btn-primary">
-                    Guardar Cancha
-                  </button>
-                </div>
-              </form>
-            </div>
-
-            <!-- PASO 2B: Formulario MUESTRAS (nuevo) -->
-            <div id="formulario-muestra" style="display: none;">
-              <button type="button" class="btn-volver"
-                >← Volver a selección</button
-              >
-
-              <h3
-                style="color: #2c3e50; margin: 1.5rem 0 1rem 0; display: flex; align-items: center; gap: 0.5rem;"
-              >
-                <span>🧪</span> Formulario de Muestras
-              </h3>
-
-              <form id="form-subir-muestras">
-                <!-- Fila 1: Muro y Sector -->
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="muro-muestra">
-                      <strong>Muro *</strong>
-                    </label>
-                    <select id="muro-muestra" required>
-                      <option value="">Seleccione...</option>
-                      <option value="Principal">Principal</option>
-                      <option value="Este">Este</option>
-                      <option value="Oeste">Oeste</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="sector-muestra">
-                      <strong>Sector *</strong>
-                    </label>
-                    <select id="sector-muestra" disabled required>
-                      <option value="">Seleccione muro primero...</option>
-                    </select>
-                  </div>
-                </div>
-
-                <!-- Fila 2: Relleno y Fecha -->
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="relleno-muestra">
-                      <strong>Relleno *</strong>
-                    </label>
-                    <input
-                      type="text"
-                      id="relleno-muestra"
-                      placeholder="Ingrese nombre del relleno"
-                      required
-                    />
-                  </div>
-
-                  <div class="form-group">
-                    <label for="fecha-muestra">
-                      <strong>Fecha *</strong>
-                    </label>
-                    <input type="date" id="fecha-muestra" required />
-                  </div>
-                </div>
-
-                <!-- Fila 3: Foto -->
-                <div class="form-group">
-                  <label for="foto-muestra">
-                    <strong>Foto</strong>
-                  </label>
-                  <input type="file" id="foto-muestra" accept="image/*" />
-                  <small style="color: #64748b;"
-                    >Formatos: JPG, PNG (máx. 5MB)</small
-                  >
-                  <div
-                    id="preview-foto-muestra"
-                    style="display:none; margin-top: 1rem;"
-                  >
-                    <img
-                      id="img-preview-muestra"
-                      style="max-width: 200px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
-                      alt="Preview"
-                    />
-                  </div>
-                </div>
-
-                <!-- Fila 4: Archivo -->
-                <div class="form-group">
-                  <label for="archivo-muestra">
-                    <strong>Archivo *</strong>
-                  </label>
-                  <input
-                    type="file"
-                    id="archivo-muestra"
-                    accept=".csv,.xlsx,.asc"
-                    required
-                  />
-                  <small style="color: #64748b;">Formatos: CSV, XLSX, ASC</small
-                  >
-                </div>
-
-                <div class="form-actions">
-                  <button type="button" class="btn-cancel">Cancelar</button>
-                  <button type="submit" class="btn-primary">
-                    Guardar Muestra
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Modal de RECEPCIÓN de trabajo para LlayLlay -->
       <div id="recepcion-llayllay-modal" class="modal">
         <div class="modal-content">
@@ -5283,6 +5004,9 @@ import CanchasTable from "../components/dashboard/CanchasTable.astro";
       </div>
     </div>
 
+    <!-- Componente Refactorizado: Subir Canchas (Linkapsis) -->
+    <SubirCanchasModal />
+
     <script>
       import { FilterManager } from "../utils/FilterManager";
       import { TableManager } from "../utils/TableManager";
@@ -5446,6 +5170,7 @@ import CanchasTable from "../components/dashboard/CanchasTable.astro";
       let canchasFiltradas = [];
       let filterManager;
       let tableManager;
+      let subirCanchasManager: any;
       let selectedCanchas = new Set(); // Set global para compatibilidad
 
       // Variables de paginación
@@ -6048,15 +5773,14 @@ import CanchasTable from "../components/dashboard/CanchasTable.astro";
       }
 
       /**
-       * Abrir modal de Subir Canchas
-       * TODO: Implementar lógica de carga masiva de canchas
+       * Abrir modal de Subir Canchas (Refactorizado)
+       * Ahora usa SubirCanchasManager
        */
       function abrirModalSubirCanchas() {
-        const modal = document.getElementById("modal-subir-canchas");
-        if (modal) {
-          modal.classList.add("show");
-          // TODO: Inicializar formulario, limpiar campos previos
-          // TODO: Configurar validaciones de archivo y geometrías
+        if (subirCanchasManager) {
+          subirCanchasManager.open();
+        } else {
+          console.warn("SubirCanchasManager no está inicializado aún");
         }
       }
 
@@ -6323,10 +6047,15 @@ import CanchasTable from "../components/dashboard/CanchasTable.astro";
           }
         }
 
-        // Configurar vista inicial por defecto a "Mis Acciones"
+        // Configurar vista inicial por defecto a "M Acciones"
         setTimeout(() => {
           cambiarVista("acciones");
         }, 100);
+
+        // Inicializar SubirCanchasManager (Linkapsis)
+        import("../utils/SubirCanchasManager").then((module) => {
+          subirCanchasManager = new module.SubirCanchasManager();
+        });
       }
 
       function cambiarVista(nuevaVista) {
