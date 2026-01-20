@@ -37,10 +37,45 @@ Se resolvieron conflictos de nombres (duplicate declaration) en funciones utilit
 |---------|---------------|-------------|
 | `src/pages/index.astro` | 🔧 Mejora | Implementación de `animateWidgetNumber` y lógica de widgets. |
 | `src/utils/FilterManager.ts` | 🐞 Bugfix | Corrección de IDs para el slider de vista. |
+| `src/utils/FilterManager.ts` | 🐞 Bugfix | Corrección de mapeo slug-nombre en `toggleEstadoWidget`. |
 
 ---
 
-## 📅 16 de Enero, 2026: Fragmentación de `CreateCancha`
+## 📅 20 de Enero, 2026: Refactorización Modular de Widgets de Estado
+
+**Responsable:** Agente / TITO
+**Estado:** ✅ Completado
+
+### 🎯 Objetivo
+Extraer completamente la interfaz y la lógica de los widgets de estado ("bolitas" con contadores) desde `index.astro` hacia un componente independiente `WidgetsEstados.astro`, reduciendo la complejidad del archivo principal y mejorando la modularidad.
+
+### 🛠️ Cambios Realizados
+
+#### 1. Creación del Componente `WidgetsEstados.astro`
+- **Ubicación:** `src/components/dashboard/WidgetsEstados.astro`
+- **Contenido:**
+    - HTML de la sección `.dashboard-estados-section`.
+    - CSS encapsulado (scoped) para los widgets.
+    - Lógica JS interna para animaciones (`animateWidgetNumber`) y cálculo de totales (`actualizarWidgetsEstado` ahora interna).
+- **Interacción:**
+    - Escucha eventos `update-widget-stats` para actualizar sus números.
+    - Emite eventos `filter-widget-request` al hacer doble click.
+
+#### 2. Limpieza de `index.astro`
+- Se reemplazaron ~60 líneas de HTML con el tag `<WidgetsEstados />`.
+- Se eliminaron funciones legadas de cálculo UI.
+- `actualizarContadorResultados` ahora delega la actualización vía eventos custom `window.dispatchEvent`, desacoplando la lógica.
+- Se agregó un listener limpio en `initManagers` para conectar el componente con `FilterManager`.
+
+### 📊 Archivos Afectados
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/components/dashboard/WidgetsEstados.astro` | ✨ Nuevo | Componente encapsulado. |
+| `src/pages/index.astro` | 📉 Reducción | Delegación de responsabilidades. |
+
+---
+
+## 📅 20 de Enero, 2026: Corrección y Ajuste de Widgets y Filtros
 
 **Responsable:** Agente / TITO
 **Estado:** ✅ Completado

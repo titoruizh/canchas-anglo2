@@ -1,6 +1,7 @@
 ﻿---
 import AuthGuard from "../components/AuthGuard.astro";
 import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
+import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
 ---
 
 <AuthGuard />
@@ -4095,55 +4096,7 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
       </div>
 
       <!-- === DASHBOARD DE ESTADOS === -->
-      <div class="dashboard-estados-section">
-        <div class="dashboard-estados-header">
-          <h3 class="dashboard-estados-title">📊 Estados de Canchas</h3>
-        </div>
-        <div class="dashboard-estados">
-          <div class="estado-widget" data-estado="creada">
-            <div class="widget-circle widget-creada">
-              <span class="widget-number" id="count-creada">0</span>
-            </div>
-            <div class="widget-label">Creada</div>
-          </div>
-
-          <div class="estado-widget" data-estado="en-espera">
-            <div class="widget-circle widget-en-espera">
-              <span class="widget-number" id="count-en-espera">0</span>
-            </div>
-            <div class="widget-label">En Espera</div>
-          </div>
-
-          <div class="estado-widget" data-estado="en-proceso">
-            <div class="widget-circle widget-en-proceso">
-              <span class="widget-number" id="count-en-proceso">0</span>
-            </div>
-            <div class="widget-label">En Proceso</div>
-          </div>
-
-          <div class="estado-widget" data-estado="validada">
-            <div class="widget-circle widget-validada">
-              <span class="widget-number" id="count-validada">0</span>
-            </div>
-            <div class="widget-label">Validada</div>
-          </div>
-
-          <div class="estado-widget" data-estado="rechazada-en-espera">
-            <div class="widget-circle widget-rechazada-en-espera">
-              <span class="widget-number" id="count-rechazada-en-espera">0</span
-              >
-            </div>
-            <div class="widget-label">Rechazada, en Espera</div>
-          </div>
-
-          <div class="estado-widget" data-estado="cerrada">
-            <div class="widget-circle widget-cerrada">
-              <span class="widget-number" id="count-cerrada">0</span>
-            </div>
-            <div class="widget-label">Cerrada</div>
-          </div>
-        </div>
-      </div>
+      <WidgetsEstados />
 
       <!-- === MAPA DASHBOARD === -->
       <div class="dashboard-map-section">
@@ -6160,8 +6113,10 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
         // 1. Actualizar Widgets de Resumen (Sidebar)
         actualizarResumenWidgets(canchas, total);
 
-        // 2. Actualizar Widgets de Estado (Circular)
-        actualizarWidgetsEstado(canchas);
+        // 2. Notificar actualización a WidgetsEstados (Componente)
+        window.dispatchEvent(
+          new CustomEvent("update-widget-stats", { detail: { canchas } }),
+        );
       }
 
       function actualizarResumenWidgets(canchas, total) {
@@ -6206,70 +6161,6 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
         }
       }
 
-      function actualizarWidgetsEstado(canchas) {
-        // Contadores iniciales
-        const conteo = {
-          creada: 0,
-          "en-espera": 0,
-          "en-proceso": 0,
-          validada: 0,
-          "rechazada-en-espera": 0,
-          cerrada: 0,
-        };
-
-        // Iterar canchas y clasificar
-        canchas.forEach((c) => {
-          // Intentar obtener el nombre del estado (puede venir en diferentes propiedades según backend)
-          const estado = (c.estado_nombre || c.estado_actual || "")
-            .toLowerCase()
-            .trim();
-
-          if (estado.includes("creada")) {
-            conteo["creada"]++;
-          } else if (
-            estado.includes("en espera") &&
-            !estado.includes("rechazada")
-          ) {
-            conteo["en-espera"]++;
-          } else if (estado.includes("proceso")) {
-            conteo["en-proceso"]++;
-          } else if (
-            estado.includes("validada") ||
-            estado.includes("validación")
-          ) {
-            conteo["validada"]++;
-          } else if (estado.includes("rechazada")) {
-            conteo["rechazada-en-espera"]++;
-          } else if (
-            estado.includes("cerrada") ||
-            estado.includes("finalizada")
-          ) {
-            conteo["cerrada"]++;
-          }
-        });
-
-        // Actualizar el DOM para cada widget
-        Object.keys(conteo).forEach((key) => {
-          const el = document.getElementById(`count-${key}`);
-          const widget = document.querySelector(
-            `.estado-widget[data-estado="${key}"]`,
-          );
-
-          if (el) {
-            animateWidgetNumber(el, parseInt(el.textContent) || 0, conteo[key]);
-          }
-
-          // Visualmente deshabilitar widgets con 0
-          if (widget) {
-            if (conteo[key] === 0) {
-              widget.classList.add("dimmed");
-            } else {
-              widget.classList.remove("dimmed");
-            }
-          }
-        });
-      }
-
       function initManagers() {
         // Inicializar FilterManager con callbacks para actualizar UI
         filterManager = new FilterManager({
@@ -6288,6 +6179,14 @@ import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
             // 3. Actualizar KPIs y Widgets
             actualizarContadorResultados(canchas, total);
           },
+        });
+
+        // Escuchar solicitudes de filtro desde WidgetsEstados
+        window.addEventListener("filter-widget-request", (e) => {
+          if (filterManager && e.detail && e.detail.estado) {
+            console.log("Filter request received for:", e.detail.estado);
+            filterManager.toggleEstadoWidget(e.detail.estado);
+          }
         });
 
         // Configurar datos iniciales si ya existen

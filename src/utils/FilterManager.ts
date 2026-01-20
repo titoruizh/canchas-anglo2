@@ -59,34 +59,44 @@ export class FilterManager {
         this.aplicarFiltros();
     }
 
-    public toggleEstadoWidget(estado: string) {
+    public toggleEstadoWidget(estadoSlug: string) {
         const widgets = document.querySelectorAll(".estado-widget");
 
-        if (this.state.estadoActivo === estado) {
+        // Mapeo: Slug -> Nombre Real (BD)
+        const estadoMap: Record<string, string> = {
+            "creada": "Creada",
+            "en-espera": "En Espera",
+            "en-proceso": "En Proceso",
+            "validada": "Validada",
+            "rechazada-en-espera": "Rechazada, en Espera",
+            "cerrada": "Cerrada",
+        };
+
+        const estadoReal = estadoMap[estadoSlug];
+        if (!estadoReal) {
+            console.warn("FilterManager: Estado desconocido:", estadoSlug);
+            return;
+        }
+
+        if (this.state.estadoActivo === estadoReal) {
+            // Desactivar filtro
             this.state.estadoActivo = null;
             widgets.forEach((w) => {
                 w.classList.remove("selected");
                 w.classList.remove("dimmed");
             });
         } else {
-            this.state.estadoActivo = estado;
+            // Activar nuevo filtro
+            this.state.estadoActivo = estadoReal;
             widgets.forEach((widget) => {
-                const estadoWidget = widget.getAttribute("data-estado");
-                // Mapeo simple reverso para coincidir con el DOM
-                // idealmente esto deberia ser mas robusto
-                const estadoMap: Record<string, string> = {
-                    "creada": "Creada",
-                    "en-espera": "En Espera",
-                    "en-proceso": "En Proceso",
-                    "validada": "Validada",
-                    "rechazada-en-espera": "Rechazada, en Espera",
-                    "cerrada": "Cerrada",
-                };
+                const widgetSlug = widget.getAttribute("data-estado");
 
-                if (estadoMap[estadoWidget!] === estado) {
+                if (widgetSlug === estadoSlug) {
+                    // Es el seleccionado
                     widget.classList.add("selected");
                     widget.classList.remove("dimmed");
                 } else {
+                    // No es el seleccionado -> Opacar
                     widget.classList.remove("selected");
                     widget.classList.add("dimmed");
                 }

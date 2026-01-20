@@ -32,10 +32,10 @@ Estos módulos ya fueron extraídos, tienen su propio Manager y están registrad
   - **Código:** `src/pages/api/canchas.ts`
   - **Fecha:** 16 Ene 2026
 
-- [x] **Widgets y Filtros (Estabilización)**
-  - **Código:** `src/utils/FilterManager.ts` (Correcciones) y `src/pages/index.astro` (UI Logic)
-  - **Fecha:** 20 Ene 2026
-  - *Nota:* Funcionalidad estable. Pendiente refactorización de UI a componente aislado.
+  - [x] **Widgets y Filtros (Estabilización)**
+    - **Código:** `src/utils/FilterManager.ts`, `src/components/dashboard/WidgetsEstados.astro`
+    - **Fecha:** 20 Ene 2026
+    - **Estado:** ✅ Completado y Optimizado.
 
 ---
 

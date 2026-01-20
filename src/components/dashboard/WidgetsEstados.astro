@@ -1,0 +1,381 @@
+---
+
+---
+
+<div class="dashboard-estados-section">
+    <div class="dashboard-estados-header">
+        <h3 class="dashboard-estados-title">📊 Estados de Canchas</h3>
+    </div>
+    <div class="dashboard-estados">
+        <div class="estado-widget" data-estado="creada">
+            <div class="widget-circle widget-creada">
+                <span class="widget-number" id="count-creada">0</span>
+            </div>
+            <div class="widget-label">Creada</div>
+        </div>
+
+        <div class="estado-widget" data-estado="en-espera">
+            <div class="widget-circle widget-en-espera">
+                <span class="widget-number" id="count-en-espera">0</span>
+            </div>
+            <div class="widget-label">En Espera</div>
+        </div>
+
+        <div class="estado-widget" data-estado="en-proceso">
+            <div class="widget-circle widget-en-proceso">
+                <span class="widget-number" id="count-en-proceso">0</span>
+            </div>
+            <div class="widget-label">En Proceso</div>
+        </div>
+
+        <div class="estado-widget" data-estado="validada">
+            <div class="widget-circle widget-validada">
+                <span class="widget-number" id="count-validada">0</span>
+            </div>
+            <div class="widget-label">Validada</div>
+        </div>
+
+        <div class="estado-widget" data-estado="rechazada-en-espera">
+            <div class="widget-circle widget-rechazada-en-espera">
+                <span class="widget-number" id="count-rechazada-en-espera"
+                    >0</span
+                >
+            </div>
+            <div class="widget-label">Rechazada, en Espera</div>
+        </div>
+
+        <div class="estado-widget" data-estado="cerrada">
+            <div class="widget-circle widget-cerrada">
+                <span class="widget-number" id="count-cerrada">0</span>
+            </div>
+            <div class="widget-label">Cerrada</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Helper for animations
+    function animateWidgetNumber(element, start, end, duration = 1000) {
+        if (start === end) return;
+        const range = end - start;
+        let current = start;
+        const increment = end > start ? 1 : -1;
+        const stepTime = Math.abs(Math.floor(duration / range));
+
+        if (Math.abs(range) > 100) {
+            element.textContent = end.toString();
+            return;
+        }
+
+        const timer = setInterval(
+            () => {
+                current += increment;
+                element.textContent = current.toString();
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            },
+            Math.max(stepTime, 20),
+        );
+    }
+
+    function actualizarWidgetsEstado(canchas) {
+        // Contadores iniciales
+        const conteo = {
+            creada: 0,
+            "en-espera": 0,
+            "en-proceso": 0,
+            validada: 0,
+            "rechazada-en-espera": 0,
+            cerrada: 0,
+        };
+
+        // Iterar canchas y clasificar
+        canchas.forEach((c) => {
+            const estado = (c.estado_nombre || c.estado_actual || "")
+                .toLowerCase()
+                .trim();
+
+            if (estado.includes("creada")) {
+                conteo["creada"]++;
+            } else if (
+                estado.includes("en espera") &&
+                !estado.includes("rechazada")
+            ) {
+                conteo["en-espera"]++;
+            } else if (estado.includes("proceso")) {
+                conteo["en-proceso"]++;
+            } else if (
+                estado.includes("validada") ||
+                estado.includes("validación")
+            ) {
+                conteo["validada"]++;
+            } else if (estado.includes("rechazada")) {
+                conteo["rechazada-en-espera"]++;
+            } else if (
+                estado.includes("cerrada") ||
+                estado.includes("finalizada")
+            ) {
+                conteo["cerrada"]++;
+            }
+        });
+
+        // Actualizar el DOM para cada widget
+        Object.keys(conteo).forEach((key) => {
+            const el = document.getElementById(`count-${key}`);
+            const widget = document.querySelector(
+                `.estado-widget[data-estado="${key}"]`,
+            );
+
+            if (el) {
+                const startVal = parseInt(el.textContent || "0");
+                animateWidgetNumber(el, startVal, conteo[key]);
+            }
+
+            // Visualmente deshabilitar widgets con 0
+            if (widget) {
+                if (conteo[key] === 0) {
+                    widget.classList.add("dimmed");
+                } else {
+                    widget.classList.remove("dimmed");
+                }
+            }
+        });
+    }
+
+    // Setup Event Listeners
+    document.addEventListener("DOMContentLoaded", () => {
+        const widgets = document.querySelectorAll(".estado-widget");
+
+        // Click handler for filtering
+        widgets.forEach((widget) => {
+            widget.addEventListener("dblclick", () => {
+                const estado = widget.getAttribute("data-estado");
+                // Emit custom event to request filtering
+                console.log("WidgetsEstados: Requesting filter for", estado);
+                window.dispatchEvent(
+                    new CustomEvent("filter-widget-request", {
+                        detail: { estado },
+                    }),
+                );
+            });
+        });
+
+        // Listener for external updates
+        window.addEventListener("update-widget-stats", ((e: CustomEvent) => {
+            if (e.detail && e.detail.canchas) {
+                actualizarWidgetsEstado(e.detail.canchas);
+            }
+        }) as EventListener);
+    });
+</script>
+
+<style>
+    /* === DASHBOARD DE ESTADOS === */
+    .dashboard-estados-section {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        box-shadow:
+            0 1px 3px 0 rgba(0, 0, 0, 0.1),
+            0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    }
+
+    .dashboard-estados-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .dashboard-estados-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0;
+    }
+
+    .dashboard-estados {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
+        padding: 1rem 0;
+        min-width: 700px;
+    }
+
+    .estado-widget {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
+        min-width: 0;
+        transition: transform 0.3s ease;
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .estado-widget:hover {
+        transform: translateY(-4px);
+    }
+
+    /* No hover para widgets dimmed */
+    .estado-widget.dimmed:hover {
+        transform: none;
+    }
+
+    /* Note: .selected class management logic might need to be passed down or handled via class tokens 
+     However, the original logic modified classList directly. 
+     We rely on the FilterManager to update the UI via callbacks, but here we just handle initial CSS.
+     The visual 'active' state logic needs to be verified. 
+  */
+
+    .estado-widget.selected .widget-circle {
+        transform: scale(1.2);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+        border-width: 6px;
+    }
+
+    .estado-widget.selected .widget-label {
+        font-weight: 700;
+        color: #1f2937;
+    }
+
+    /* Widgets no seleccionados cuando hay uno activo */
+    .estado-widget.dimmed .widget-circle {
+        opacity: 0.3 !important;
+        filter: grayscale(100%) !important;
+        transform: scale(1) !important;
+    }
+
+    .estado-widget.dimmed:hover .widget-circle {
+        opacity: 0.3 !important;
+        filter: grayscale(100%) !important;
+        transform: scale(1) !important;
+    }
+
+    .estado-widget.dimmed .widget-label {
+        opacity: 0.4;
+        color: #9ca3af;
+    }
+
+    .widget-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        border: 4px solid;
+        position: relative;
+    }
+
+    .estado-widget:not(.dimmed):hover .widget-circle {
+        transform: scale(1.1);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .widget-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: white;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    .widget-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #475569;
+        text-align: center;
+        line-height: 1.2;
+        text-transform: capitalize;
+    }
+
+    /* Colores específicos por estado */
+    .widget-creada {
+        background: #3b82f6; /* Azul */
+        border-color: #2563eb; /* Azul oscuro */
+    }
+
+    .widget-en-espera {
+        background: #fbbf24; /* Amarillo */
+        border-color: #f59e0b; /* Amarillo oscuro */
+    }
+
+    .widget-en-proceso {
+        background: #fbbf24; /* Amarillo */
+        border-color: #10b981; /* Verde - diferenciador */
+    }
+
+    .widget-validada {
+        background: #10b981; /* Verde */
+        border-color: #fbbf24; /* Amarillo - diferenciador */
+    }
+
+    .widget-rechazada-en-espera {
+        background: #ef4444; /* Rojo */
+        border-color: #fbbf24; /* Amarillo */
+    }
+
+    .widget-cerrada {
+        background: #10b981; /* Verde */
+        border-color: #059669; /* Verde oscuro */
+    }
+
+    @media (max-width: 1200px) {
+        .dashboard-estados {
+            min-width: unset;
+            gap: 1.2rem;
+        }
+
+        .widget-circle {
+            width: 70px;
+            height: 70px;
+        }
+
+        .widget-number {
+            font-size: 1.75rem;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-estados {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .estado-widget {
+            flex: 0 0 auto;
+            min-width: 90px;
+        }
+
+        .widget-circle {
+            width: 75px;
+            height: 75px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .dashboard-estados {
+            gap: 1rem;
+        }
+
+        .widget-circle {
+            width: 65px;
+            height: 65px;
+        }
+
+        .widget-number {
+            font-size: 1.5rem;
+        }
+
+        .widget-label {
+            font-size: 0.75rem;
+        }
+    }
+</style>
