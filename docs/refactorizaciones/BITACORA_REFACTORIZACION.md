@@ -1,0 +1,153 @@
+# 📜 Bitácora de Refactorización y Fragmentación
+
+Este documento mantiene un registro histórico de las "fragmentaciones" (refactorizaciones modulares) realizadas en el proyecto. Su objetivo es rastrear la evolución del código monolítico hacia una arquitectura basada en componentes y managers.
+
+---
+
+## 📅 16 de Enero, 2026: Fragmentación de `CreateCancha`
+
+**Responsable:** Agente / TITO
+**Estado:** ✅ Completado
+
+### 🎯 Objetivo
+Extraer la lógica de creación de canchas, que estaba hardcodeada masivamente dentro de `src/pages/index.astro` (aprox. 300 líneas), hacia un modelo modular y mantenible.
+
+### 🛠️ Cambios Realizados
+
+#### 1. Creación del Manager (`CreateCanchaManager`)
+Se implementó el patrón **Manager** para encapsular toda la lógica de negocio y UI relacionada con el modal de creación.
+
+- **Nuevo Archivo:** `src/utils/CreateCanchaManager.ts`
+- **Responsabilidades:**
+    - Manejo del DOM del modal (abrir/cerrar).
+    - Validación del formulario (Nombre, Muro, Sector).
+    - Lógica de negocio específica (MP hasta S7, ME hasta S3).
+    - Comunicación con el iframe de Mapbox (recepción de polígonos).
+    - Envío de datos a la API (`POST /api/canchas`).
+    - Feedback al usuario (Notificaciones Toast).
+
+#### 2. Componentización de la UI
+Se movió el HTML del modal fuera de `index.astro`.
+
+- **Nuevo Componente:** `src/components/dashboard/CreateCanchaModal.astro`
+- **Mejoras:**
+    - Estilos encapsulados.
+    - Ancho aumentado a `95vw` para mejor experiencia de dibujo.
+    - ids únicos para evitar colisiones.
+
+#### 3. Limpieza de `index.astro`
+- **Antes:** Código mezclado con cientos de líneas de lógica de mapa, formulario y fetch.
+- **Ahora:** Inicialización limpia en una sola línea:
+  ```typescript
+  const createCanchaManager = new CreateCanchaManager();
+  ```
+
+#### 4. Mejoras de UX/UI Adicionales
+- **Toast Notifications:** Reemplazo de `alert()` por notificaciones visuales personalizadas.
+- **Validación Robusta:** Manejo de errores de servidor (ej. nombres duplicados) y cliente.
+- **Interacción Mapa:** Corrección del modo dibujo (`drawing=true`) y filtros.
+
+### 📊 Archivos Afectados
+
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/pages/index.astro` | 📉 Eliminación | Se eliminaron ~300 líneas de código legacy. |
+| `src/utils/CreateCanchaManager.ts` | ✨ Nuevo | Lógica centralizada. |
+| `src/components/dashboard/CreateCanchaModal.astro` | ✨ Nuevo | UI del modal. |
+| `src/pages/api/canchas.ts` | 🔧 Modificación | Mejor manejo de errores (409 Conflict). |
+
+---
+
+## 📅 14 de Enero, 2026: Fragmentación de `MiningMap` (Vista de Mapa)
+
+**Responsable:** Agente / TITO
+**Estado:** ✅ Completado
+
+### 🎯 Objetivo
+Desacoplar la lógica de visualización de mapas y geoespacial del componente `MiningMap.astro`, que manejaba demasiadas responsabilidades (UI, Datos, Eventos, Mapbox).
+
+### 🛠️ Cambios Realizados
+
+#### 1. Separación de Lógica (`MapManager.ts`)
+Se extrajo toda la lógica de interacción con Mapbox GL JS a una clase dedicada.
+
+- **Nuevo Archivo:** `src/components/map/MapManager.ts`
+- **Responsabilidades:**
+    - Inicialización del mapa y TileServer.
+    - Gestión de capas (Raster y Vectoriales).
+    - Manejo de popups e interacciones.
+    - Filtrado de datos visuales (`show/hide`).
+
+#### 2. Componentización de UI
+Se crearon componentes específicos para los controles del mapa.
+
+- `src/components/map/MapControls.astro`: Botonera y filtros.
+- `src/components/map/MapLegend.astro`: Leyenda de colores/estados.
+- `src/components/map/MapLoader.astro`: Spinner de carga.
+
+### 📊 Archivos Afectados
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/components/MiningMap.astro` | 📉 Reducción | Pasó a ser un contenedor "tonto". |
+| `src/components/map/MapManager.ts` | ✨ Nuevo | Cerebro del mapa. |
+
+---
+
+## 📅 10 de Enero, 2026: Fragmentación de `login.astro`
+
+**Responsable:** Agente / TITO
+**Estado:** ✅ Completado
+
+### 🎯 Objetivo
+Modularizar la página de inicio de sesión para mejorar la seguridad, el manejo de estados de autenticación y la mantenibilidad.
+
+### 🛠️ Cambios Realizados
+
+#### 1. Creación de Componentes UI
+Se dividió la interfaz en piezas reutilizables.
+
+- `src/components/login/LoginForm.astro`
+- `src/components/login/LoginHeader.astro`
+- `src/components/login/WelcomeModal.astro`
+
+#### 2. Lógica de Negocio (`LoginManager.ts`)
+Se centralizó la lógica de autenticación (Supabase Auth) y validación.
+
+- **Nuevo Archivo:** `src/components/login/LoginManager.ts`
+- **Funciones:** Login, Logout, Selección de Empresa, Manejo de Errores.
+
+### 📊 Archivos Afectados
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/pages/login.astro` | 📉 Reducción | Orquestador principal únicamente. |
+| `src/components/login/*` | ✨ Nuevos | Componentes UI y Manager. |
+
+---
+
+## 📅 8 de Enero, 2026: Fragmentación de `Gestión de Usuarios`
+
+**Responsable:** Agente / TITO
+**Estado:** ✅ Completado
+
+### 🎯 Objetivo
+Separar la lógica de administración de usuarios de la interfaz en `src/pages/admin/usuarios.astro`.
+
+### 🛠️ Cambios Realizados
+
+#### 1. Lógica de Negocio (`UsuarioManager.ts`)
+Se encapsularon las operaciones CRUD y de filtrado.
+
+- **Nuevo Archivo:** `src/utils/UsuarioManager.ts`
+- **Funciones:** Cargar usuarios, Filtrar por empresa/estado, Crear/Editar Usuario (Modales).
+
+### 📊 Archivos Afectados
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/pages/admin/usuarios.astro` | 📉 Reducción | Eliminación de scripts inline. |
+| `src/utils/UsuarioManager.ts` | ✨ Nuevo | Controlador de lógica. |
+
+---
+
+## 📅 [Próxima Refactorización]
+
+*Espacio reservado para futura fragmentación (ej. Login, Gestión de Usuarios, etc.)*

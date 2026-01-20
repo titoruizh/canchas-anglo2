@@ -7,15 +7,15 @@ Bienvenido a la documentación completa del Sistema de Gestión de Canchas Georr
 Si eres nuevo en el proyecto, empieza aquí:
 
 1. **[README.md](../README.md)** - Visión general del proyecto
-2. **[ARCHITECTURE.md](ARCHITECTURE.md)** - Entender la arquitectura
-3. **[CODE_STANDARDS.md](CODE_STANDARDS.md)** - Estándares de código
+2. **[ARCHITECTURE.md](arquitectura/ARCHITECTURE.md)** - Entender la arquitectura
+3. **[CODE_STANDARDS.md](general/CODE_STANDARDS.md)** - Estándares de código
 4. **[CONTRIBUTING.md](../CONTRIBUTING.md)** - Cómo contribuir
 
 ### 🤖 Trabajando con IA
 
 Si usas herramientas de IA (Copilot, ChatGPT, Claude):
 
-- **[AI_GUIDE.md](AI_GUIDE.md)** - Guía completa para trabajar con IA en este proyecto
+- **[AI_GUIDE.md](general/AI_GUIDE.md)** - Guía completa para trabajar con IA en este proyecto
   - Contexto importante
   - Prompts efectivos
   - Patrones de código
@@ -26,16 +26,18 @@ Si usas herramientas de IA (Copilot, ChatGPT, Claude):
 ```
 docs/
 ├── INDEX.md (este archivo)
-├── ARCHITECTURE.md
-├── CODE_STANDARDS.md
-├── arquitectura/          # Diseño de sistemas
+├── general/               # Guías generales y estándares
+│   ├── ARCHITECTURE.md
+│   ├── CODE_STANDARDS.md
+│   ├── AI_GUIDE.md
+│   └── SETUP.md
+├── arquitectura/          # Diseño de sistemas e integraciones
 ├── componentes/           # Documentación de componentes
+├── funcionalidades/       # Specs de features y diseño
+├── refactorizaciones/     # Logs de refactoring
+├── guias/                 # Guías paso a paso (antes instrucciones)
 ├── api/                   # Endpoints y APIs
-├── database/              # Esquemas y migraciones SQL
-├── flujos/                # Diagramas de flujo
-├── integraciones/         # Mapbox, TileServer, etc.
-├── instrucciones/         # Guías paso a paso
-└── diseno/                # Diseño de features
+└── database/              # Esquemas y migraciones SQL
 ```
 
 ---
@@ -46,7 +48,7 @@ Documentos sobre el diseño y estructura del sistema.
 
 ### Documentos Principales
 
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Arquitectura completa del sistema
+- **[ARCHITECTURE.md](arquitectura/ARCHITECTURE.md)** - Arquitectura completa del sistema
   - Stack tecnológico
   - Estructura de carpetas
   - Patrones de diseño
@@ -70,7 +72,7 @@ Documentos sobre el diseño y estructura del sistema.
 
 Diagramas y descripciones de los flujos principales.
 
-- **[FLUJO_ESTADOS_NUEVO.md](flujos/FLUJO_ESTADOS_NUEVO.md)**
+- **[FLUJO_ESTADOS_NUEVO.md](arquitectura/flujos/FLUJO_ESTADOS_NUEVO.md)**
   - Estados de canchas
   - Transiciones permitidas
   - Acciones por rol
@@ -81,13 +83,13 @@ Diagramas y descripciones de los flujos principales.
 
 Integración con servicios externos.
 
-- **[MAPBOX_INTEGRATION.md](integraciones/MAPBOX_INTEGRATION.md)**
+- **[MAPBOX_INTEGRATION.md](arquitectura/integraciones/MAPBOX_INTEGRATION.md)**
   - Configuración de Mapbox GL JS
   - Manejo de tokens
   - Capas y estilos
   - Eventos y controles
 
-- **[TILESERVER_DEPLOY.md](integraciones/TILESERVER_DEPLOY.md)**
+- **[TILESERVER_DEPLOY.md](arquitectura/integraciones/TILESERVER_DEPLOY.md)**
   - Deploy de TileServer con Docker
   - Configuración WMTS
   - Generación de tiles
@@ -141,6 +143,7 @@ Documentación detallada de cada componente.
 
 - **AuthGuard.astro** - Protección de rutas
 - **MiningMap.astro** - Componente de mapas
+- **[CreateCanchaManager](componentes/dashboard/CREATE_CANCHA_MANAGER.md)** - Lógica de creación de canchas
 
 ### Utilidades
 
@@ -190,31 +193,34 @@ Documentación de endpoints.
 
 ---
 
-## 📋 Instrucciones
+## 📋 Guías
 
 Guías paso a paso para tareas específicas.
 
-- **[INSTRUCCIONES_REVANCHAS.md](instrucciones/INSTRUCCIONES_REVANCHAS.md)**
+- **[INSTRUCCIONES_REVANCHAS.md](guias/INSTRUCCIONES_REVANCHAS.md)**
   - Cómo manejar rechazos
   - Proceso de revanchas
   - Validaciones
 
 ---
 
-## 🎨 Diseño
+## 🎨 Diseño y Funcionalidades
 
 Documentos de diseño de features específicos.
 
-- **[PKS_GEORREFERENCIADOS_README.md](diseno/PKS_GEORREFERENCIADOS_README.md)**
+- **[PKS_GEORREFERENCIADOS_README.md](funcionalidades/diseno/PKS_GEORREFERENCIADOS_README.md)**
   - Sistema de postes kilométricos
   - Georreferenciación
   - Integración con mapas
 
-- **[PROMPT_DISEÑO_PKS.md](diseno/PROMPT_DISEÑO_PKS.md)**
+- **[FOTOS_VALIDACIONES.md](funcionalidades/FOTOS_VALIDACIONES.md)**
+  - Sistema de subida de fotos para validaciones
+
+- **[PROMPT_DISEÑO_PKS.md](funcionalidades/diseno/PROMPT_DISEÑO_PKS.md)**
   - Prompts originales de diseño
   - Decisiones de arquitectura
 
-- **[RESUMEN_DISEÑO_PKS.md](diseno/RESUMEN_DISEÑO_PKS.md)**
+- **[RESUMEN_DISEÑO_PKS.md](funcionalidades/diseno/RESUMEN_DISEÑO_PKS.md)**
   - Resumen ejecutivo del diseño
 
 ---
@@ -223,12 +229,17 @@ Documentos de diseño de features específicos.
 
 ### Estándares y Guías
 
-- **[CODE_STANDARDS.md](CODE_STANDARDS.md)**
+- **[CODE_STANDARDS.md](general/CODE_STANDARDS.md)**
   - Nomenclatura de archivos
   - Convenciones TypeScript/Astro
   - Estilos CSS (BEM)
   - Seguridad y validación
   - Manejo de errores
+
+- **[BITACORA_REFACTORIZACION.md](refactorizaciones/BITACORA_REFACTORIZACION.md)**
+  - Historial de cambios arquitectónicos
+  - Registro de fragmentaciones
+  - Evolución del código
 
 - **[CONTRIBUTING.md](../CONTRIBUTING.md)**
   - Workflow de Git
@@ -237,6 +248,9 @@ Documentos de diseño de features específicos.
   - Proponer features
 
 ### Setup del Proyecto
+
+- **[SETUP.md](general/SETUP.md)**
+  - Requisitos previos e instalación
 
 ```bash
 # Instalar dependencias
@@ -298,10 +312,10 @@ Datos Persistentes
 
 ### Por Tema
 
-- **Autenticación**: [CODE_STANDARDS.md](CODE_STANDARDS.md#-seguridad), [LOGIN_COMPLETO.md](componentes/LOGIN_COMPLETO.md), [API Auth](ARCHITECTURE.md#autenticación)
-- **Mapas**: [MAPBOX_INTEGRATION.md](integraciones/MAPBOX_INTEGRATION.md), [mapbox-utils.md](componentes/mapbox-utils.md), [mapbox-window.astro](componentes/paginas.md#-mapbox-windowastro)
-- **PKs**: [PKS_GEORREFERENCIADOS](diseno/PKS_GEORREFERENCIADOS_README.md), [SISTEMA_PKS](database/SISTEMA_PKS_GEORREFERENCIADOS.sql)
-- **Revanchas**: [SISTEMA_REVANCHAS](arquitectura/SISTEMA_REVANCHAS_COMPLETO.md), [INSTRUCCIONES](instrucciones/INSTRUCCIONES_REVANCHAS.md)
+- **Autenticación**: [CODE_STANDARDS.md](general/CODE_STANDARDS.md#-seguridad), [LOGIN_COMPLETO.md](componentes/LOGIN_COMPLETO.md), [API Auth](arquitectura/ARCHITECTURE.md#autenticación)
+- **Mapas**: [MAPBOX_INTEGRATION.md](arquitectura/integraciones/MAPBOX_INTEGRATION.md), [mapbox-utils.md](componentes/mapbox-utils.md), [mapbox-window.astro](componentes/paginas.md#-mapbox-windowastro)
+- **PKs**: [PKS_GEORREFERENCIADOS](funcionalidades/diseno/PKS_GEORREFERENCIADOS_README.md), [SISTEMA_PKS](database/SISTEMA_PKS_GEORREFERENCIADOS.sql)
+- **Revanchas**: [SISTEMA_REVANCHAS](arquitectura/SISTEMA_REVANCHAS_COMPLETO.md), [INSTRUCCIONES](guias/INSTRUCCIONES_REVANCHAS.md)
 - **Creación de Canchas**: [CREAR_CANCHA.md](funcionalidades/CREAR_CANCHA.md)
 - **Gestión de Usuarios**: [GESTION_USUARIOS.md](funcionalidades/GESTION_USUARIOS.md)
 - **Subir Revanchas (Linkapsis)**: [SUBIR_REVANCHAS.md](funcionalidades/SUBIR_REVANCHAS.md)
@@ -312,16 +326,16 @@ Datos Persistentes
 - [🗺️ Vista de Mapa y Georreferencia](./funcionalidades/VISTA_MAPA.md)
 - [🔐 Sistema de Autenticación](./funcionalidades/AUTENTICACION.md)
 - [🌍 Utilidades GIS y Mapbox](./funcionalidades/GIS_UTILS.md)
-- [🎨 Personalización Visual](./PERSONALIZACION_DASHBOARD.md)
-- **Base de Datos**: [database/](database/), [ARCHITECTURE.md](ARCHITECTURE.md#-base-de-datos)
-- **API**: [ARCHITECTURE.md](ARCHITECTURE.md#-apis-y-endpoints)
+- [🎨 Personalización Visual](./funcionalidades/PERSONALIZACION_DASHBOARD.md)
+- **Base de Datos**: [database/](database/), [ARCHITECTURE.md](arquitectura/ARCHITECTURE.md#-base-de-datos)
+- **API**: [ARCHITECTURE.md](arquitectura/ARCHITECTURE.md#-apis-y-endpoints)
 
 ### Por Rol
 
-- **Desarrollador**: [CODE_STANDARDS.md](CODE_STANDARDS.md), [ARCHITECTURE.md](ARCHITECTURE.md)
-- **DevOps**: [TILESERVER_DEPLOY.md](integraciones/TILESERVER_DEPLOY.md)
-- **Usuario Final**: [README.md](../README.md), Flujos en [flujos/](flujos/)
-- **Product Owner**: [ARCHITECTURE.md](ARCHITECTURE.md), Sistemas en [arquitectura/](arquitectura/)
+- **Desarrollador**: [CODE_STANDARDS.md](general/CODE_STANDARDS.md), [ARCHITECTURE.md](arquitectura/ARCHITECTURE.md)
+- **DevOps**: [TILESERVER_DEPLOY.md](arquitectura/integraciones/TILESERVER_DEPLOY.md)
+- **Usuario Final**: [README.md](../README.md), Flujos en [flujos/](arquitectura/flujos/)
+- **Product Owner**: [ARCHITECTURE.md](arquitectura/ARCHITECTURE.md), Sistemas en [arquitectura/](arquitectura/)
 
 ---
 
