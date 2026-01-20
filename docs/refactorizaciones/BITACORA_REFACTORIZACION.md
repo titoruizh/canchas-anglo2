@@ -4,6 +4,79 @@ Este documento mantiene un registro histórico de las "fragmentaciones" (refacto
 
 ---
 
+## 📅 20 de Enero, 2026 (PM): Refactorización de Tabla - Completada y Estabilizada
+
+**Responsable:** Agente / TITO  
+**Estado:** ✅ Completado y Funcional
+
+### 🎯 Objetivo
+Completar la refactorización de la tabla de canchas iniciada previamente, resolver regresiones introducidas durante el proceso, y eliminar declaraciones duplicadas que causaban errores de build.
+
+### 🛠️ Cambios Realizados
+
+#### 1. Implementación Completa de TableManager
+Se finalizó la migración de toda la lógica de tabla desde `index.astro` hacia el manager dedicado.
+
+- **Archivo:** `src/utils/TableManager.ts`
+- **Funcionalidades:**
+    - Renderizado dinámico de filas con `generateRows()`.
+    - Generación contextual de botones de acción según empresa y estado.
+    - Paginación completa (anterior, siguiente, ir a página).
+    - Selección múltiple con checkboxes.
+    - Event delegation para acciones y zoom.
+    - Callbacks customizables para acciones, zoom y cambios de selección.
+
+#### 2. Corrección de Regresiones Críticas
+Durante la refactorización se detectaron y corrigieron 5 regresiones:
+
+##### a) Botones de Acción Mostrando "Cargando..."
+- **Causa:** `TableManager` no recibía la información de `empresaLogueada`.
+- **Solución:** Agregada llamada `tableManager.setEmpresa(empresaLogueada)` en `cargarUsuarioAutenticado()`.
+
+##### b) Filtro por Defecto Incorrecto
+- **Causa:** La vista no se inicializaba en "Mis Acciones".
+- **Solución:** Agregado `cambiarVista('acciones')` en `initManagers()` con timeout de 100ms.
+
+##### c) Barra de Acciones Masivas Desaparecida
+- **Causa:** CSS eliminado y callback `onSelectionChange` no registrado correctamente.
+- **Solución:** Restaurado CSS de `.bulk-actions-bar` y corregido constructor de `TableManager` para incluir `containerId`.
+
+##### d) Error de Build: Declaración Duplicada
+- **Problema:** `The symbol "selectedCanchas" has already been declared`.
+- **Causa:** Doble declaración de `let selectedCanchas = new Set()` en líneas 5449 y 7359.
+- **Solución:** Eliminada declaración redundante en línea 7359.
+
+##### e) Importaciones con Rutas Incorrectas
+- **Causa:** Import de `FilterManager` usaba ruta absoluta `/src/utils/FilterManager.ts`.
+- **Solución:** Normalizado a ruta relativa `../utils/FilterManager`.
+
+#### 3. Integración con FilterManager
+Se estableció comunicación bidireccional entre ambos managers.
+
+- `FilterManager.onFilterUpdate` alimenta datos a `TableManager.setData()`.
+- `TableManager` notifica cambios de selección para bulk actions.
+- Widgets de estado actualizados vía eventos custom.
+
+### 📊 Archivos Afectados
+
+| Archivo | Tipo de Cambio | Descripción |
+|---------|---------------|-------------|
+| `src/utils/TableManager.ts` | ✨ Implementación Final | Manager completo y robusto. |
+| `src/components/dashboard/CanchasTable.astro` | ✨ Nuevo | Componente UI de tabla. |
+| `src/pages/index.astro` | 📉 Reducción | Eliminadas ~500 líneas de lógica legacy. |
+| `src/pages/index.astro` | 🐞 Bugfix | 5 correcciones críticas post-refactorización. |
+
+### ✅ Verificación Completada
+- ✅ Renderizado inicial con datos correctos.
+- ✅ Paginación funcional.
+- ✅ Filtros (widgets, fechas, búsqueda) actualizan tabla.
+- ✅ Botones de acción contextuales por empresa/rol.
+- ✅ Selección múltiple y bulk actions operativos.
+- ✅ Vista por defecto "Mis Acciones" al cargar.
+- ✅ Build exitoso sin errores de declaraciones duplicadas.
+
+---
+
 ## 📅 20 de Enero, 2026: Corrección y Ajuste de Widgets y Filtros
 
 **Responsable:** Agente / TITO

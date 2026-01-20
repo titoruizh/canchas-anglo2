@@ -1,0 +1,105 @@
+---
+
+---
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th style="width: 40px; text-align: center;">
+                    <input type="checkbox" id="select-all-canchas" />
+                </th>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th>Empresa Actual</th>
+                <th>Fecha</th>
+                <th>Mapa</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="canchas-tbody">
+            <!-- Las filas se renderizarán dinámicamente js -->
+        </tbody>
+    </table>
+
+    <div class="pagination-container">
+        <span class="pagination-info">
+            Mostrando <span id="pagination-start">0</span> - <span
+                id="pagination-end">0</span
+            > de <span id="pagination-total">0</span> canchas
+        </span>
+
+        <div class="pagination-controls">
+            <button
+                class="pagination-btn"
+                id="btn-primera-pagina"
+                title="Primera Página">«</button
+            >
+            <button
+                class="pagination-btn"
+                id="btn-pagina-anterior"
+                title="Anterior">‹</button
+            >
+            <span class="pagination-current"
+                >Página <span id="pagina-actual">1</span> de <span
+                    id="total-paginas">1</span
+                ></span
+            >
+            <button
+                class="pagination-btn"
+                id="btn-pagina-siguiente"
+                title="Siguiente">›</button
+            >
+            <button
+                class="pagination-btn"
+                id="btn-ultima-pagina"
+                title="Última Página">»</button
+            >
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-container {
+        background: white;
+        border-radius: 16px;
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        overflow: hidden;
+        margin-bottom: 2rem;
+        border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    th {
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 600;
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 2px solid #e2e8f0;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    /* Estilos para tbody y filas se manejan globalmente o via deep
+       porque son generados por JS. TableManager asigna clases.
+       Pero podemos poner estilos base para la tabla aquí. 
+    */
+</style>
+
+<!-- 
+    Nota: Los estilos específicos de las filas (.cancha-row, .estado-X, .btn-accion) 
+    seguirán siendo necesarios. Dado que TableManager inyecta HTML raw,
+    estos estilos deben estar disponibles globalmente o definirse aquí con :global().
+    Para facilitar la transición, mantendremos los estilos de celda en index.astro 
+    o los moveremos a global.css en el futuro. 
+    Por ahora, definimos los estructurales aquí.
+-->

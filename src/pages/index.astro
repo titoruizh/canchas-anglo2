@@ -2,6 +2,7 @@
 import AuthGuard from "../components/AuthGuard.astro";
 import CreateCanchaModal from "../components/dashboard/CreateCanchaModal.astro";
 import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
+import CanchasTable from "../components/dashboard/CanchasTable.astro";
 ---
 
 <AuthGuard />
@@ -3126,6 +3127,102 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
         text-decoration: line-through;
         color: #94a3b8;
       }
+
+      /* Bulk Actions Bar */
+      .bulk-actions-bar {
+        position: fixed;
+        bottom: 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        animation: slideUp 0.3s ease;
+        border: 1px solid #e5e7eb;
+      }
+
+      .bulk-actions-bar.hidden {
+        display: none !important;
+      }
+
+      .bulk-actions-content {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+      }
+
+      .selected-count {
+        font-weight: 700;
+        color: #334155;
+        font-size: 0.95rem;
+      }
+
+      .bulk-actions-buttons {
+        display: flex;
+        gap: 0.8rem;
+      }
+
+      .btn-bulk-action {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+
+      .btn-bulk-timeline {
+        background: #3b82f6;
+        color: white;
+      }
+
+      .btn-bulk-timeline:hover {
+        background: #2563eb;
+      }
+
+      .btn-bulk-delete {
+        background: #ef4444;
+        color: white;
+      }
+
+      .btn-bulk-delete:hover {
+        background: #dc2626;
+      }
+
+      .btn-clear-selection {
+        background: transparent;
+        border: 1px solid #cbd5e1;
+        color: #64748b;
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+
+      .btn-clear-selection:hover {
+        background: #f1f5f9;
+        color: #334155;
+      }
+
+      @keyframes slideUp {
+        from {
+          transform: translate(-50%, 100%);
+          opacity: 0;
+        }
+        to {
+          transform: translate(-50%, 0);
+          opacity: 1;
+        }
+      }
     </style>
     <style is:global>
       /* === TIMELINE ENTERPRISE REDESIGN (REFINED) === */
@@ -4000,66 +4097,8 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
         </div>
 
         <!-- Tabla de canchas -->
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th style="width: 50px;">
-                  <input
-                    type="checkbox"
-                    id="select-all-checkbox"
-                    title="Seleccionar todas"
-                  />
-                </th>
-                <th>Nombre de Cancha</th>
-                <th>Estado Actual</th>
-                <th>Empresa Actual</th>
-                <th>Fecha Creación</th>
-                <th>Mapa</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="canchas-tbody">
-              <!-- Las canchas se cargarán dinámicamente -->
-            </tbody>
-          </table>
-
-          <!-- Controles de paginación -->
-          <div class="pagination-container">
-            <div class="pagination-info">
-              Mostrando <span id="pagination-start">0</span> - <span
-                id="pagination-end">0</span
-              > de <span id="pagination-total">0</span> canchas
-            </div>
-            <div class="pagination-controls">
-              <button
-                id="btn-primera-pagina"
-                class="pagination-btn"
-                title="Primera página">&laquo;</button
-              >
-              <button
-                id="btn-pagina-anterior"
-                class="pagination-btn"
-                title="Página anterior">&lsaquo;</button
-              >
-              <span class="pagination-current">
-                Página <span id="pagina-actual">1</span> de <span
-                  id="total-paginas">1</span
-                >
-              </span>
-              <button
-                id="btn-pagina-siguiente"
-                class="pagination-btn"
-                title="Página siguiente">&rsaquo;</button
-              >
-              <button
-                id="btn-ultima-pagina"
-                class="pagination-btn"
-                title="Última página">&raquo;</button
-              >
-            </div>
-          </div>
-        </div>
+        <!-- Refactorizado a CanchasTable.astro -->
+        <CanchasTable />
       </div>
 
       <!-- === BOTÓN FLOTANTE DE ACCIONES MASIVAS === -->
@@ -5245,7 +5284,8 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
     </div>
 
     <script>
-      import { FilterManager } from "/src/utils/FilterManager.ts";
+      import { FilterManager } from "../utils/FilterManager";
+      import { TableManager } from "../utils/TableManager";
 
       // ========== ANIMACIÓN DE PARTÍCULAS EN HEADER ==========
       function initParticles() {
@@ -5400,10 +5440,13 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
       let empresaLogueada = null;
       let cargando = false;
       let vistaActual = "acciones"; // 'acciones' o 'historico'
-      let filtroFecha = "all";
+      let map;
+      let markers = [];
       let todasLasCanchas = [];
       let canchasFiltradas = [];
       let filterManager;
+      let tableManager;
+      let selectedCanchas = new Set(); // Set global para compatibilidad
 
       // Variables de paginación
       let paginaActual = 1;
@@ -5869,9 +5912,12 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
             nombre: usuario.empresa_nombre,
           };
 
-          // Actualizar empresa en FilterManager
+          // Actualizar empresa en FilterManager y TableManager
           if (filterManager) {
             filterManager.setEmpresa(empresaLogueada);
+          }
+          if (tableManager) {
+            tableManager.setEmpresa(empresaLogueada);
           }
 
           // Actualizar UI del header
@@ -6161,7 +6207,84 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
         }
       }
 
+      function handleTableAction(action, id) {
+        console.log(`Manejando acción de tabla: ${action} para ID ${id}`);
+        const canchaId = parseInt(id);
+
+        switch (action) {
+          case "enviar-besalco":
+            // Lógica para enviar a Besalco (asumiendo función existente o llamada directa)
+            if (confirm("¿Confirmar envío a Besalco?")) {
+              ejecutarAccion("enviar_besalco", canchaId).then(() =>
+                cargarCanchas(),
+              );
+            }
+            break;
+          case "abrir-modal-cierre":
+            abrirModalCierre(canchaId);
+            break;
+          case "exportar-pdf":
+            exportarPDF(canchaId);
+            break;
+          case "recepcionar-besalco":
+            abrirModalRecepcionBesalco(canchaId);
+            break;
+          case "validar-besalco":
+            abrirModalBesalco(canchaId);
+            break;
+          case "recepcionar-linkapsis":
+            abrirModalRecepcionLinkapsis(canchaId);
+            break;
+          case "validar-linkapsis":
+            abrirModalLinkapsis(canchaId);
+            break;
+          case "recepcionar-llayllay":
+            abrirModalRecepcionLlayLlay(canchaId);
+            break;
+          case "validar-llayllay":
+            abrirModalLlayLlay(canchaId);
+            break;
+          default:
+            console.warn(`Acción desconocida: ${action}`);
+        }
+      }
+
       function initManagers() {
+        // Inicializar TableManager
+        tableManager = new TableManager("table-container", {
+          onAction: (action, id) => {
+            handleTableAction(action, id);
+          },
+          onZoom: (id) => {
+            const cancha = tableManager.datos.find((c) => c.id == id);
+            if (cancha) {
+              abrirMapaModal(id, cancha.nombre);
+            }
+          },
+          onSelectionChange: (selectedIds) => {
+            // Actualizar barra de acciones masivas
+            const count = selectedIds.length;
+            const bulkActionsBar = document.getElementById("bulk-actions-bar");
+            const selectedCount = document.getElementById("selected-count");
+
+            if (bulkActionsBar && selectedCount) {
+              if (count > 0) {
+                bulkActionsBar.classList.remove("hidden");
+                selectedCount.textContent = `${count} cancha${count !== 1 ? "s" : ""} seleccionada${count !== 1 ? "s" : ""}`;
+              } else {
+                bulkActionsBar.classList.add("hidden");
+              }
+            }
+
+            // Actualizar variable global de selección para compatibilidad
+            if (selectedCanchas) {
+              selectedCanchas.clear();
+              selectedIds.forEach((id) => selectedCanchas.add(id));
+              // updateBulkActionsBar(); // Opcional, si queremos usar la función existente
+            }
+          },
+        });
+
         // Inicializar FilterManager con callbacks para actualizar UI
         filterManager = new FilterManager({
           onFilterUpdate: (canchas) => {
@@ -6170,8 +6293,11 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
               canchas.length,
               "canchas",
             );
-            // 1. Actualizar Tabla
-            renderizarCanchas(canchas);
+            // 1. Actualizar Tabla (Refactorizado)
+            if (tableManager) {
+              tableManager.setData(canchas);
+            }
+
             // 2. Actualizar Mapa
             actualizarMapaDashboard(canchas);
           },
@@ -6192,7 +6318,15 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
         // Configurar datos iniciales si ya existen
         if (empresaLogueada) {
           filterManager.setEmpresa(empresaLogueada);
+          if (tableManager) {
+            tableManager.setEmpresa(empresaLogueada);
+          }
         }
+
+        // Configurar vista inicial por defecto a "Mis Acciones"
+        setTimeout(() => {
+          cambiarVista("acciones");
+        }, 100);
       }
 
       function cambiarVista(nuevaVista) {
@@ -6371,6 +6505,7 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
       }
 
       // === FUNCIÓN DE CARGA DE CANCHAS ===
+      // === FUNCIÓN DE CARGA DE CANCHAS ===
       async function cargarCanchas() {
         try {
           const response = await fetch("/api/canchas");
@@ -6384,12 +6519,11 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
           // Actualizar FilterManager con los nuevos datos
           if (filterManager) {
             filterManager.setCanchas(todasLasCanchas);
-          } else {
-            console.warn("FilterManager no inicializado al cargar canchas");
-            // Fallback: Si initManagers aún no corrió, initManagers lo tomará de todasLasCanchas
-            // pero initManagers corre en DOMContentLoaded, y esto corre después de auth.
-            // Debería estar bien si auth es rápido, pero por si acaso, si no está init,
-            // initManagers se encargará al iniciar.
+          }
+
+          // Actualizar TableManager
+          if (tableManager) {
+            tableManager.setData(todasLasCanchas);
           }
         } catch (error) {
           console.error("Error al cargar canchas:", error);
@@ -6397,18 +6531,44 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
         }
       }
 
+      // Enviar mensaje al iframe del mapa para hacer zoom a una cancha
+      function hacerZoomEnMapaDashboard(canchaId) {
+        const mapContainer = document.getElementById("dashboard-map-container");
+        const iframe = mapContainer?.querySelector("iframe");
+
+        if (!iframe || !iframe.contentWindow) {
+          console.log("⚠️ Iframe del mapa no disponible");
+          return;
+        }
+
+        // Enviar mensaje al iframe
+        iframe.contentWindow.postMessage(
+          {
+            type: "zoom-to-cancha",
+            canchaId: canchaId, // Asegurar que es número o string según espera el mapa
+          },
+          "*",
+        );
+
+        console.log("📤 Mensaje de zoom enviado al mapa:", canchaId);
+      }
+
       // Mostrar canchas filtradas
       function mostrarCanchas(canchas) {
-        renderizarCanchas(canchas);
+        if (tableManager) {
+          tableManager.setData(canchas);
+        }
         actualizarMapaDashboard(canchas);
       }
 
+      /* FUNCIONES LEGACY COMENTADAS - REEMPLAZADAS POR TableManager
       // Renderizar tabla de canchas con paginación
       function renderizarCanchas(canchas) {
         canchasFiltradas = canchas;
         paginaActual = 1; // Resetear a la primera página cuando cambian los datos
         renderizarPaginaCanchas();
       }
+
 
       // Renderizar página específica de canchas
       function renderizarPaginaCanchas() {
@@ -6800,6 +6960,7 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
           cargando = false;
         }
       }
+      */
 
       // Mostrar mensajes
       function mostrarMensaje(mensaje, tipo) {
@@ -7200,7 +7361,7 @@ import WidgetsEstados from "../components/dashboard/WidgetsEstados.astro";
 
       // Event listeners para botones de cerrar y cancelar
       // === SISTEMA DE SELECCIÓN MÚLTIPLE ===
-      let selectedCanchas = new Set();
+      // let selectedCanchas = new Set(); // Declaración eliminada (ya existe globalmente)
 
       function initializeSelectionSystem() {
         const selectAllCheckbox = document.getElementById(
